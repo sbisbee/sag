@@ -1,25 +1,40 @@
 <?php
 class Sag
 {
+  public static $AUTH_BASIC = "AUTH_BASIC";
+
   private $db;
   private $host;
   private $port;
+
   private $user;
   private $pass;
+  private $authType;
 
   private $decodeResp = true;
 
-  public function Sag($host = "127.0.0.1", $port = "5984", $user = null, $pass = null)
+  public function Sag($host = "127.0.0.1", $port = "5984")
   {
     $this->host = $host;
     $this->port = $port;
-    $this->user = $user;
-    $this->pass = $pass; 
   }
 
   private static function err($msg)
   {
     return "Sag Error: $msg";
+  }
+
+  public function login($user, $pass, $type = null)
+  {
+    if(!isset($type))
+      $type = Sag::$AUTH_BASIC;
+
+    if($type != Sag::$AUTH_BASIC)
+      throw new Exception($this->err("Unknown auth type for login()"));
+
+    $this->user = $user;
+    $this->pass = $pass;
+    $this->authType = $type;
   }
 
   public function decode($decode)
@@ -222,16 +237,22 @@ class Sag
 
   private function procPacket($method, $url, $data = null, $headers = array())
   {
+    // Do some string replacing for HTTP sanity.
+    $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
+
     // Open the socket.
     $sock = @fsockopen($this->host, $this->port, $errno);
     if(!$sock)
       throw new Exception($this->err("couldn't connect to {$this->host} on port {$this->port} ($errno)."));
 
     // Build the request packet.
-    $buff = "$method $url HTTP/1.0\r\n"
-            ."Host: {$this->host}:{$this->port}\r\n"
-            ."User-Agent: Sag/.1\r\n";
+    $headers["Host"] = "{$this->host}:{$this->port}";
+    $headers["User-Agent"] = "Sag/.1";
+    
+    if(isset($this->user) || isset($this->pass))
+      $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}"); 
 
+    $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
       if($k != 'Host' || $k != 'User-Agent' || $k != 'Content-Length' || $k != 'Content-Type')
         $buff .= "$k: $v\r\n";
