@@ -89,6 +89,21 @@ class Sag
     return $this->procPacket('POST', "/{$this->db}", json_encode($data)); 
   }
 
+  public function bulk($docs, $allOrNothing = true)
+  {
+    if(!is_array($docs))
+      throw new Exception($this->err('bulk() expects an array for its first argument'));
+
+    if(!is_bool($allOrNothing))
+      throw new Exception($this->err('bulk() expects a boolean for its second argument'));
+
+    $data = new StdClass();
+    $data->all_or_nothing = $allOrNothing;
+    $data->docs = $docs;
+
+    return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
+  }
+
   public function copy($srcID, $dstID, $dstRev = null)
   {
     if(!$this->db)

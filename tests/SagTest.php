@@ -107,12 +107,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_array($result->body->rows));
   }
 
-  public function test_deleteDB()
-  {
-    $result = $this->couch->deleteDatabase('upholstery_tests');
-    $this->assertTrue($result->body->ok);
-  }
-
   public function test_genIDs()
   {
     $result = $this->couch->generateIDs();
@@ -123,13 +117,47 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->couch->generateIDs(-1);
+      $this->couch->generateIDs(-1); //should throw an Exception
       $this->assertTrue(false);
     }
     catch(Exception $e)
     {
       $this->assertTrue(true);
     }
+  }
+
+  public function test_basicAuth()
+  {
+    $this->couch->login("foo", "bar");
+    print_r($this->couch->get('1'));
+  }
+
+  public function test_bulk()
+  {
+    $docs = array();
+    
+    $a = new StdClass();
+    $a->foo = "bar";
+    $a->bwah = "hi";
+
+    $b = new StdClass();
+    $b->hi = "there";
+    $b->lo = "fi";
+
+    array_push($docs, $a, $b);
+
+    $result = $this->couch->bulk($docs);
+    $this->assertTrue(is_array($result->body));
+    
+    $doc = $this->couch->get('/'.$result->body[0]->id);
+    $this->assertTrue($doc->body->foo == $a->foo);
+    $this->assertTrue($doc->body->bwah == $a->bwah);
+  }
+
+  public function test_deleteDB()
+  {
+    $result = $this->couch->deleteDatabase('upholstery_tests');
+    $this->assertTrue($result->body->ok);
   }
 }
 ?>
