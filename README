@@ -1,0 +1,73 @@
+Sag
+===
+
+Version 0.1 (NOT RELEASED)
+
+Sag is a simple PHP library for working with CouchDB. It is designed to not
+force any particular programming method on its users: you just pass PHP objects
+to whatever function you want to use and get StdClass objects and Exceptions
+back. This makes it trivial to incorporate Sag into your application.
+
+Error Handling
+--------------
+
+Sag's paradigm of simplicity is carried into its error handling by allowing you
+to send data to CouchDB that will result in errors (ex., malformed JSON). The
+reason for this is simple: CouchDB knows when there's an error better than Sag,
+and it would be disingenuous for Sag to try and detect errors for CouchDB.
+Therefore, Sag will only look for interface problems and issues that are native
+to PHP (ex., passing an int instead of a StdClass).
+
+All errors are floated back to your application with the standard PHP
+Exception class. Sag does not catch any errors, allowing your application to
+care about them or not.
+
+Networking
+----------
+
+Sag uses sockets, so there is no dependency on other libraries such as cURL. If
+you want to monitor your application's activity on the server side (ex., if you
+are proxying requests to CouchDB through a web server), then look for the
+User-Agent header.
+
+Results
+-------
+
+Results from CouchDB are stored in an object, breaking out the HTTP header
+lines and data. For example, running `print_r($sag->get('/1'));` (where '/1' is
+the location of a document) would give you something like:
+
+``
+stdClass Object
+(
+    [headers] => stdClass Object
+        (
+            [_HTTP] => stdClass Object
+                (
+                    [raw] => HTTP/1.0 200 OK
+                    [version] => 1.0
+                    [status] => 200
+                )
+
+            [Server] =>  CouchDB/0.10.0 (Erlang OTP/R13B)
+            [Etag] =>  "1-4c6114c65e295552ab1019e2b046b10e"
+            [Date] =>  Mon, 12 Apr 2010 23:01:39 GMT
+            [Content-Type] =>  text/plain;charset=utf-8
+            [Content-Length] =>  68
+            [Cache-Control] =>  must-revalidate
+        )
+
+    [body] => stdClass Object
+        (
+            [_id] => 1
+            [_rev] => 1-4c6114c65e295552ab1019e2b046b10e
+            [foo] => bar
+        )
+
+)
+''
+
+This same basic structure is used for all responses: the data returned from
+CouchDB is in the $body property, and the HTTP header and protocol info is in
+the $headers property.
+
