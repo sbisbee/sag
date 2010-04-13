@@ -72,3 +72,61 @@ This same basic structure is used for all responses: the data returned from
 CouchDB is in the $body property, and the HTTP header and protocol info is in
 the $headers property.
 
+Functions
+---------
+
+FUNCTION                                        DESCRIPTION
+
+Sag($host = "127.0.0.1", $port = "5984")        Specify the address and port in
+                                                the constructor.
+
+login($user, $pass, $type = Sag::$AUTH_BASIC)   Set the username and password to
+                                                use for all subsequent 
+                                                transactions to the server
+                                                (null them out to "logout").
+
+decode($bool)                                   Whether or not to decode the 
+                                                JSON from CouchDB with PHP's
+                                                json_decode().
+
+get($url)                                       Get the specified URL. Ex.,
+                                                get("/1") gets a doc with an
+                                                _id of 1.
+
+delete($id, $rev)                               Delete a document.
+
+put($id, $data)                                 PUT's a document - $data will
+                                                need a $_rev property.
+
+post($data)                                     POST's a document.
+
+bulk($array)                                    Does a bulk transaction, using
+                                                the specified array.
+
+copy($srcID, $dstID, $dstRev = null)            Copy a document, optionally to
+                                                an existing document.
+
+createDatabase($name)                           Creates the database.
+
+deleteDatabase($name)                           Deletes the database.
+
+setDatabase($name)                              Specifies which database to
+                                                work with.
+
+getAllDocs($includeDocs = false,                Runs /_all_docs with the
+            $limit = null,                      provided parameters.
+            $startKey = null, 
+            $endKey = null
+          )
+
+getAllDocsBySeq($includeDocs = false,           Runs /_all_docs_by_seq.
+                $limit = null,
+                $startKey = null,
+                $endKey = null
+              )
+
+getAllDatabases()                               Runs /_all_dbs.
+
+generateIDs($num = 10)                          Generates a specified number of
+                                                IDs with /_uuids.
+
