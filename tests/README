@@ -18,5 +18,5 @@ this file) and that the Sag src directory is above it (../src/).
 
 `phpunit .` will simply run all the tests
 
-`phpunit --coverage-html .` will run all the tests and re-generate the coverage
-reports
+`phpunit --coverage-html=./coverage/ .` will run all the tests and re-generate
+the coverage reports
