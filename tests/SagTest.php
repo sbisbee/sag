@@ -129,6 +129,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $result = $this->couch->generateIDs();
     $this->assertTrue(is_array($result->body->uuids));
+    $this->assertEquals(sizeof($result->body->uuids), 10);
   }
 
   public function test_errorHandling()
@@ -152,8 +153,6 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_bulk()
   {
-    $docs = array();
-    
     $a = new StdClass();
     $a->foo = "bar";
     $a->bwah = "hi";
@@ -162,9 +161,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $b->hi = "there";
     $b->lo = "fi";
 
-    array_push($docs, $a, $b);
-
-    $result = $this->couch->bulk($docs);
+    $result = $this->couch->bulk(array($a, $b));
     $this->assertTrue(is_array($result->body));
     
     $doc = $this->couch->get('/'.$result->body[0]->id);
