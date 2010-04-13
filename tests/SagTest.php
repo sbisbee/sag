@@ -172,6 +172,16 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($doc->body->bwah == $a->bwah);
   }
 
+  public function test_replication()
+  {
+    $newDB = "upholstery_tests_replication";
+    
+    $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
+    $this->assertTrue($this->couch->createDatabase($newDB)->body->ok);
+    $this->assertTrue($this->couch->replicate('upholstery_tests', $newDB)->body->ok);
+    $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
+  }
+
   public function test_deleteDB()
   {
     $result = $this->couch->deleteDatabase('upholstery_tests');

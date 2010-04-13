@@ -266,6 +266,27 @@ class Sag
     return $this->procPacket('DELETE', "/$name");
   }
 
+  public function replicate($src, $target, $continuous = false)
+  {
+    if(empty($src))
+      throw new Exception($this->err('replicate() is missing a source to replicate from.'));
+
+    if(empty($target))
+      throw new Exception($this->err('replicate() is missing a target to replicate to.'));
+
+    if(!is_bool($continuous))
+      throw new Exception($this->err('replicate() expected a boolean for its third argument.'));
+
+    $data = new StdClass();
+    $data->source = $src;
+    $data->target = $target;
+
+    if($continuous)
+      $data->continuous = true; //only include if true, decreasing packet size
+
+    return $this->procPacket('POST', '/_replicate', json_encode($data));
+  }
+
   private function procPacket($method, $url, $data = null, $headers = array())
   {
     // Do some string replacing for HTTP sanity.

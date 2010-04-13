@@ -130,6 +130,10 @@ getAllDatabases()                               Runs /_all_dbs.
 generateIDs($num = 10)                          Generates a specified number of
                                                 IDs with /_uuids.
 
+replicate($src, $target, $continuous = false)   Replicate between two 
+                                                databases, optionally
+                                                continuously.
+
 License
 -------
 
