@@ -296,9 +296,11 @@ class Sag
     $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
     // Open the socket.
-    $sock = @fsockopen($this->host, $this->port, $errno);
+    $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
     if(!$sock)
-      throw new SagProgrammerException("couldn't connect to {$this->host} on port {$this->port} ($errno)."));
+      throw new SagProgrammerException(
+        "Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo)."
+      );
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
