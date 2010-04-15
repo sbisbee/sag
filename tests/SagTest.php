@@ -107,7 +107,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $doc = $this->couch->get('/1');
       $this->assertTrue(false); //previous line should have thrown an exception
     }
-    catch(Exception $e)
+    catch(SagCouchException $e)
     {
       $this->assertEquals($e->getCode(), '404');
     }
@@ -136,10 +136,10 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->couch->generateIDs(-1); //should throw an Exception
+      $this->couch->generateIDs(-1); //should throw a SagProgrammerException
       $this->assertTrue(false);
     }
-    catch(Exception $e)
+    catch(SagProgrammerException $e)
     {
       $this->assertTrue(true);
     }
@@ -203,6 +203,21 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $result = $this->couch->deleteDatabase('upholstery_tests');
     $this->assertTrue($result->body->ok);
+  }
+
+  public function test_connectionFailure()
+  {
+    $badCouch = new Sag('example.com');
+    try 
+    { 
+      $badCouch->setDatabase('bwah'); 
+      $badCouch->get('/asdf');
+      $this->assertTrue(false); //shouldn't reach this line
+    }
+    catch(SagProgrammerException $e) 
+    { 
+      $this->assertTrue(true);
+    }
   }
 }
 ?>

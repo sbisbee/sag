@@ -15,6 +15,9 @@
    limitations under the License.
 */
 
+require_once('SagProgrammerException.php');
+require_once('SagCouchException.php');
+
 class Sag
 {
   public static $AUTH_BASIC = "AUTH_BASIC";
@@ -35,18 +38,13 @@ class Sag
     $this->port = $port;
   }
 
-  private static function err($msg)
-  {
-    return "Sag Error: $msg";
-  }
-
   public function login($user, $pass, $type = null)
   {
     if(!isset($type))
       $type = Sag::$AUTH_BASIC;
 
     if($type != Sag::$AUTH_BASIC)
-      throw new Exception($this->err("Unknown auth type for login()"));
+      throw new SagProgrammerException("Unknown auth type for login()");
 
     $this->user = $user;
     $this->pass = $pass;
@@ -56,7 +54,7 @@ class Sag
   public function decode($decode)
   {
     if(!is_bool($decode))
-      throw new Exception($this->err('decode() expected a boolean'));
+      throw new SagProgrammerException('decode() expected a boolean');
 
     $this->decodeResp = $decode;
   }
@@ -64,7 +62,7 @@ class Sag
   public function get($url)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified'));
+      throw new SagProgrammerException('No database specified');
 
     return $this->procPacket('GET', "/{$this->db}$url");
   }
@@ -72,10 +70,10 @@ class Sag
   public function delete($id, $rev)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified'));
+      throw new SagProgrammerException('No database specified');
 
     if(!is_string($id) || !is_string($id))
-      throw new Exception($this->err('delete() expects two strings.'));
+      throw new SagProgrammerException('delete() expects two strings.');
 
     return $this->procPacket('DELETE', "/{$this->db}/$id?rev=$rev");
   }
@@ -83,13 +81,13 @@ class Sag
   public function put($id, $data)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified'));
+      throw new SagProgrammerException('No database specified');
 
     if(!is_string($id))
-      throw new Exception($this->err('put() expected a string for the doc id.'));
+      throw new SagProgrammerException('put() expected a string for the doc id.');
 
     if(!isset($data) || !is_object($data))
-      throw new Exception($this->err('put() needs an object for data - are you trying to use delete()?'));
+      throw new SagProgrammerException('put() needs an object for data - are you trying to use delete()?');
 
     return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data)); 
   }
@@ -97,10 +95,10 @@ class Sag
   public function post($data)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified'));
+      throw new SagProgrammerException('No database specified');
 
     if(!isset($data) || !is_object($data))
-      throw new Exception($this->err('post() needs an object for data.'));
+      throw new SagProgrammerException('post() needs an object for data.');
 
     return $this->procPacket('POST', "/{$this->db}", json_encode($data)); 
   }
@@ -108,10 +106,10 @@ class Sag
   public function bulk($docs, $allOrNothing = true)
   {
     if(!is_array($docs))
-      throw new Exception($this->err('bulk() expects an array for its first argument'));
+      throw new SagProgrammerException('bulk() expects an array for its first argument');
 
     if(!is_bool($allOrNothing))
-      throw new Exception($this->err('bulk() expects a boolean for its second argument'));
+      throw new SagProgrammerException('bulk() expects a boolean for its second argument');
 
     $data = new StdClass();
     $data->all_or_nothing = $allOrNothing;
@@ -123,16 +121,16 @@ class Sag
   public function copy($srcID, $dstID, $dstRev = null)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified'));
+      throw new SagProgrammerException('No database specified');
 
     if(empty($srcID) || !is_string($srcID))
-      throw new Exception($this->err('copy() got an invalid source ID'));
+      throw new SagProgrammerException('copy() got an invalid source ID');
 
     if(empty($dstID) || !is_string($dstID))
-      throw new Exception($this->err('copy() got an invalid destination ID'));
+      throw new SagProgrammerException('copy() got an invalid destination ID');
 
     if($dstRev != null && (empty($dstRev) || !is_string($dstRev)))
-      throw new Exception($this->err('copy() got an invalid source revision'));
+      throw new SagProgrammerException('copy() got an invalid source revision');
 
     $headers = array(
       "Destination" => "$dstID".(($dstRev) ? "?rev=$dstRev" : "")
@@ -144,7 +142,7 @@ class Sag
   public function setDatabase($db)
   {
     if(!is_string($db))
-      throw new Exception($this->err('setDatabase() expected a string.'));
+      throw new SagProgrammerException('setDatabase() expected a string.');
 
     $this->db = $db;
   }
@@ -152,14 +150,14 @@ class Sag
   public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified.'));
+      throw new SagProgrammerException('No database specified.');
 
     $qry = array();
 
     if(isset($incDocs))
     {
       if(!is_bool($incDocs))
-        throw new Exception($this->err('getAllDocs() expected a boolean for include_docs.'));
+        throw new SagProgrammerException('getAllDocs() expected a boolean for include_docs.');
 
       array_push($qry, "include_docs=true");
     }       
@@ -167,7 +165,7 @@ class Sag
     if(isset($startKey))
     {
       if(!is_string($startKey))
-        throw new Exception($this->err('getAllDocs() expected a string for startkey.'));
+        throw new SagProgrammerException('getAllDocs() expected a string for startkey.');
 
       array_push($qry, "startkey=$startKey");
     }
@@ -175,7 +173,7 @@ class Sag
     if(isset($endKey))
     {
       if(!is_string($endKey))
-        throw new Exception($this->err('getAllDocs() expected a string for endkey.'));
+        throw new SagProgrammerException('getAllDocs() expected a string for endkey.');
 
       array_push($qry, "endkey=$endKey");
     }
@@ -183,7 +181,7 @@ class Sag
     if(isset($limit))
     {
       if(!is_int($limit) || $limit < 0)
-        throw new Exception($this->err('getAllDocs() expected a positive integeter for limit.'));
+        throw new SagProgrammerException('getAllDocs() expected a positive integeter for limit.');
 
       array_push($qry, "limit=$limit");
     }
@@ -201,14 +199,14 @@ class Sag
   public function getAllDocsBySeq($incDocs = false, $limit = null, $startKey = null, $endKey = null)
   {
     if(!$this->db)
-      throw new Exception($this->err('No database specified.'));
+      throw new SagProgrammerException('No database specified.');
 
     $qry = array();
 
     if(isset($incDocs))
     {
       if(!is_bool($incDocs))
-        throw new Exception($this->err('getAllDocs() expected a boolean for include_docs.'));
+        throw new SagProgrammerException('getAllDocs() expected a boolean for include_docs.');
 
       array_push($qry, "include_docs=true");
     }       
@@ -216,7 +214,7 @@ class Sag
     if(isset($startKey))
     {
       if(!is_string($startKey))
-        throw new Exception($this->err('getAllDocs() expected a string for startkey.'));
+        throw new SagProgrammerException('getAllDocs() expected a string for startkey.');
 
       array_push($qry, "startkey=$startKey");
     }
@@ -224,7 +222,7 @@ class Sag
     if(isset($endKey))
     {
       if(!is_string($endKey))
-        throw new Exception($this->err('getAllDocs() expected a string for endkey.'));
+        throw new SagProgrammerException('getAllDocs() expected a string for endkey.');
 
       array_push($qry, "endkey=$endKey");
     }
@@ -232,7 +230,7 @@ class Sag
     if(isset($limit))
     {
       if(!is_int($limit) || $limit < 0)
-        throw new Exception($this->err('getAllDocs() expected a positive integeter for limit.'));
+        throw new SagProgrammerException('getAllDocs() expected a positive integeter for limit.');
 
       array_push($qry, "limit=$limit");
     }
@@ -245,7 +243,7 @@ class Sag
   public function generateIDs($num = 10)
   {
     if(!is_int($num) || $num < 0)
-      throw new Exception($this->err('generateIDs() expected an integer >= 0.'));
+      throw new SagProgrammerException('generateIDs() expected an integer >= 0.');
 
     return $this->procPacket('GET', "/_uuids?count=$num");
   }
@@ -253,7 +251,7 @@ class Sag
   public function createDatabase($name)
   {
     if(empty($name) || !is_string($name))
-      throw new Exception($this->err('createDatabase() expected a valid database name'));
+      throw new SagProgrammerException('createDatabase() expected a valid database name');
 
     return $this->procPacket('PUT', "/$name"); 
   }
@@ -261,7 +259,7 @@ class Sag
   public function deleteDatabase($name)
   {
     if(empty($name) || !is_string($name))
-      throw new Exception($this->err('deleteDatabase() expected a valid database name'));
+      throw new SagProgrammerException('deleteDatabase() expected a valid database name');
 
     return $this->procPacket('DELETE', "/$name");
   }
@@ -269,13 +267,13 @@ class Sag
   public function replicate($src, $target, $continuous = false)
   {
     if(empty($src))
-      throw new Exception($this->err('replicate() is missing a source to replicate from.'));
+      throw new SagProgrammerException('replicate() is missing a source to replicate from.');
 
     if(empty($target))
-      throw new Exception($this->err('replicate() is missing a target to replicate to.'));
+      throw new SagProgrammerException('replicate() is missing a target to replicate to.');
 
     if(!is_bool($continuous))
-      throw new Exception($this->err('replicate() expected a boolean for its third argument.'));
+      throw new SagProgrammerException('replicate() expected a boolean for its third argument.');
 
     $data = new StdClass();
     $data->source = $src;
@@ -300,7 +298,7 @@ class Sag
     // Open the socket.
     $sock = @fsockopen($this->host, $this->port, $errno);
     if(!$sock)
-      throw new Exception($this->err("couldn't connect to {$this->host} on port {$this->port} ($errno)."));
+      throw new SagProgrammerException("couldn't connect to {$this->host} on port {$this->port} ($errno)."));
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
@@ -368,7 +366,7 @@ class Sag
 
     $json = json_decode($response->body);
     if(!empty($json->error))
-      throw new Exception("CouchDB Error: {$json->error} ({$json->reason})", $response->headers->_HTTP->status);
+      throw new SagCouchException("{$json->error} ({$json->reason})", $response->headers->_HTTP->status);
 
     $response->body = ($this->decodeResp) ? $json : $response->body;
 
