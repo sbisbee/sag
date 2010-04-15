@@ -140,6 +140,10 @@ replicate($src, $target, $continuous = false)   Replicate between two
                                                 databases, optionally
                                                 continuously.
 
+compact($viewName = null)                       Compacts the currently selected
+                                                database without any arguments,
+                                                or its named view.
+
 License
 -------
 

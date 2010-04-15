@@ -179,6 +179,26 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
+  public function test_compactView()
+  {
+    $designID = "bwah";
+
+    $ddoc = new StdClass();
+    $ddoc->_id = "_design/$designID";
+    $ddoc->language = "javascript";
+    $ddoc->views = new StdClass();
+    $ddoc->views->all = new StdClass();
+    $ddoc->views->all->map = "function(doc) { emit(null, doc); }";
+
+    $this->assertTrue($this->couch->post($ddoc)->body->ok);
+    $this->assertTrue($this->couch->compact($designID)->body->ok);
+  }
+
+  public function test_compactDatabase()
+  {
+    $this->assertTrue($this->couch->compact()->body->ok);
+  }
+
   public function test_deleteDB()
   {
     $result = $this->couch->deleteDatabase('upholstery_tests');

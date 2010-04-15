@@ -287,6 +287,11 @@ class Sag
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }
 
+  public function compact($viewName = null)
+  {
+    return $this->procPacket('POST', "/{$this->db}/_compact".((empty($viewName)) ? '' : "/$viewName"));
+  }
+
   private function procPacket($method, $url, $data = null, $headers = array())
   {
     // Do some string replacing for HTTP sanity.
