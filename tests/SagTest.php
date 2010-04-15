@@ -136,10 +136,10 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->couch->generateIDs(-1); //should throw a SagProgrammerException
+      $this->couch->generateIDs(-1); //should throw a SagException
       $this->assertTrue(false);
     }
-    catch(SagProgrammerException $e)
+    catch(SagException $e)
     {
       $this->assertTrue(true);
     }
@@ -214,7 +214,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $badCouch->get('/asdf');
       $this->assertTrue(false); //shouldn't reach this line
     }
-    catch(SagProgrammerException $e) 
+    catch(SagException $e) 
     { 
       $this->assertTrue(true);
     }
