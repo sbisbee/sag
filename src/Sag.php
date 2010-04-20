@@ -72,7 +72,7 @@ class Sag
     if(!$this->db)
       throw new SagException('No database specified');
 
-    if(!is_string($id) || !is_string($id))
+    if(!is_string($id) || !is_string($rev) || empty($id) || empty($rev))
       throw new SagException('delete() expects two strings.');
 
     return $this->procPacket('DELETE', "/{$this->db}/$id?rev=$rev");
@@ -105,6 +105,9 @@ class Sag
 
   public function bulk($docs, $allOrNothing = true)
   {
+    if(!$this->db)
+      throw new SagException('No database specified');
+
     if(!is_array($docs))
       throw new SagException('bulk() expects an array for its first argument');
 
@@ -112,7 +115,10 @@ class Sag
       throw new SagException('bulk() expects a boolean for its second argument');
 
     $data = new StdClass();
-    $data->all_or_nothing = $allOrNothing;
+    //Only send all_or_nothing if it's non-default (true), saving bandwidth.
+    if($allOrNothing)
+      $data->all_or_nothing = $allOrNothing;
+
     $data->docs = $docs;
 
     return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
@@ -186,9 +192,7 @@ class Sag
       array_push($qry, "limit=$limit");
     }
 
-    $qry = implode('&', $qry);
-
-    return $this->procPacket('GET', "/{$this->db}/_all_docs?$qry");
+    return $this->procPacket('GET', "/{$this->db}/_all_docs?".implode('&', $qry));
   }
 
   public function getAllDatabases()
@@ -235,9 +239,7 @@ class Sag
       array_push($qry, "limit=$limit");
     }
 
-    $qry = implode('&', $qry);
-
-    return $this->procPacket('GET', "/{$this->db}/_all_docs_by_seq?$qry");
+    return $this->procPacket('GET', "/{$this->db}/_all_docs_by_seq?".implode('&', $qry));
   }
 
   public function generateIDs($num = 10)
@@ -266,10 +268,10 @@ class Sag
 
   public function replicate($src, $target, $continuous = false)
   {
-    if(empty($src))
+    if(empty($src) || !is_string($src))
       throw new SagException('replicate() is missing a source to replicate from.');
 
-    if(empty($target))
+    if(empty($target) || !is_string($target))
       throw new SagException('replicate() is missing a target to replicate to.');
 
     if(!is_bool($continuous))
@@ -306,8 +308,21 @@ class Sag
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/.1";
     
+    //usernames and passwords can be blank
     if(isset($this->user) || isset($this->pass))
-      $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}"); 
+    {
+      switch($this->authType)
+      {
+        case Sag::$AUTH_BASIC:
+          $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}"); 
+          break;
+
+        default:
+          //this should never happen with login()'s validation, but just in case
+          throw new SagException('Unknown auth type.');
+          break;
+      }
+    }
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
@@ -354,6 +369,8 @@ class Sag
               $response->headers->_HTTP->version = $match['version'];
               $response->headers->_HTTP->status = $match['status'];
             }
+            else
+              throw new SagException('There was a problem while handling the HTTP protocol.'); //whoops!
           }
           else
           {
