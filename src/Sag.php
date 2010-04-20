@@ -64,6 +64,10 @@ class Sag
     if(!$this->db)
       throw new SagException('No database specified');
 
+    //The first char of the URL should be a slash.
+    if(strpos($url, '/') != 1)
+      $url = "/$url";
+
     return $this->procPacket('GET', "/{$this->db}$url");
   }
 
@@ -282,7 +286,7 @@ class Sag
     $data->target = $target;
 
     if($continuous)
-      $data->continuous = true; //only include if true, decreasing packet size
+      $data->continuous = true; //only include if true (non-default), decreasing packet size
 
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }

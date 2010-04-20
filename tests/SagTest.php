@@ -56,6 +56,9 @@ class SagTest extends PHPUnit_Framework_TestCase
     $result = $this->couch->get('/1');
     $this->assertEquals($result->body->_id, '1');
     $this->assertEquals($result->body->foo, 'bar');
+
+    //make sure we're prepending slashes when they're not present
+    $this->assertEquals($result->body->_id, $this->couch->get('1')->body->_id);
   }
 
   public function test_copyToNew()
