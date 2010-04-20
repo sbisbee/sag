@@ -145,20 +145,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
-  public function test_basicAuth()
-  {
-    try
-    {
-      $this->couch->login("foo", "bar");
-      $this->couch->get('1'); //should throw a SagCouchException
-      $this->assertTrue(false);
-    }
-    catch(SagCouchException $e)
-    {
-      $this->assertTrue(true);
-    }
-  }
-
   public function test_bulk()
   {
     $a = new StdClass();
@@ -213,7 +199,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($result->body->ok);
   }
 
-/*
   public function test_connectionFailure()
   {
     $badCouch = new Sag('example.com');
@@ -228,6 +213,5 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(true);
     }
   }
-*/
 }
 ?>
