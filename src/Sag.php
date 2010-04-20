@@ -301,13 +301,6 @@ class Sag
     // Do some string replacing for HTTP sanity.
     $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
-    // Open the socket.
-    $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
-    if(!$sock)
-      throw new SagException(
-        "Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo)."
-      );
-
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/.1";
@@ -339,6 +332,13 @@ class Sag
               ."$data\r\n";
     else
       $buff .= "\r\n";
+
+    // Open the socket only once we know everything is ready and valid.
+    $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+    if(!$sock)
+      throw new SagException(
+        "Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo)."
+      );
 
     // Send the packet.
     fwrite($sock, $buff);
