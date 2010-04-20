@@ -27,19 +27,19 @@ class SagTest extends PHPUnit_Framework_TestCase
   public function setUp()
   {
     $this->couch = new Sag('192.168.1.5');
-    $this->couch->setDatabase('upholstery_tests');
+    $this->couch->setDatabase('sag_tests');
   }
 
   public function test_createDB()
   {
-    $result = $this->couch->createDatabase('upholstery_tests');
+    $result = $this->couch->createDatabase('sag_tests');
     $this->assertTrue($result->body->ok);
   }
 
   public function test_allDatabases()
   {
     $result = $this->couch->getAllDatabases();
-    $this->assertTrue(in_array('upholstery_tests', $result->body));
+    $this->assertTrue(in_array('sag_tests', $result->body));
   }
 
   public function test_newDoc()
@@ -165,11 +165,11 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_replication()
   {
-    $newDB = "upholstery_tests_replication";
+    $newDB = "sag_tests_replication";
     
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->createDatabase($newDB)->body->ok);
-    $this->assertTrue($this->couch->replicate('upholstery_tests', $newDB)->body->ok);
+    $this->assertTrue($this->couch->replicate('sag_tests', $newDB)->body->ok);
     $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
@@ -195,7 +195,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_deleteDB()
   {
-    $result = $this->couch->deleteDatabase('upholstery_tests');
+    $result = $this->couch->deleteDatabase('sag_tests');
     $this->assertTrue($result->body->ok);
   }
 
