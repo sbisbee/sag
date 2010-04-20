@@ -55,9 +55,10 @@ User-Agent header.
 Results
 -------
 
-Results from CouchDB are stored in an object, breaking out the HTTP header
-lines and data. For example, running `print_r($sag->get('/1'));` (where '/1' is
-the location of a document) would give you something like:
+When you've told Sag to decode CouchDB's responses, they are stored in an
+object, breaking out the HTTP header lines and data. For example, running
+`print_r($sag->get('/1'));` (where '/1' is the location of a document) would
+give you something like:
 
 ``
 stdClass Object
@@ -97,6 +98,10 @@ out into HTTP version number ($result->headers->_HTTP->version) and status code
 
 The $result->body property holds the raw data from CouchDB, which you can have
 Sag automatically decode into PHP objects with json_decode().
+
+If you've told Sag to not decode CouchDB's responses, then it'll only return
+the resulting JSON from CouchDB as a string (what would have been in the body
+property if you had set decode to true).
 
 Functions
 ---------
