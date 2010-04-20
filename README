@@ -10,6 +10,11 @@ objects, and get StdClass objects and Exceptions back. This makes it trivial to
 incorporate Sag into your application, build different functionality on top of
 it, and expand Sag to incorporate new CouchDB functionality.
 
+Compatability
+-------------
+
+Sag is tested against CouchDB 0.10.x and 0.11.x. 
+
 Error Handling
 --------------
 
@@ -156,12 +161,18 @@ replicate($src, $target, $continuous = false)   Replicate between two
                                                 continuously.
 
 compact($viewName = null)                       Compacts the currently selected
-                                                database without any arguments,
-                                                or its named view.
+                                                database (no argument), or the
+                                                provided view.
 
 License
 -------
 
 Sag is released under the Apache License, version 2.0. See the file named
 LICENSE for more information.
+
+More?
+-----
+
+See http://www.saggingcouch.com for more detailed information, bug reporting,
+planned features, etc.
 
