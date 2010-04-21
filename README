@@ -145,16 +145,11 @@ setDatabase($name)                              Specifies which database to
                                                 work with.
 
 getAllDocs($includeDocs = false,                Runs /_all_docs with the
-            $limit = null,                      provided parameters.
-            $startKey = null, 
-            $endKey = null
+            $limit = null,                      provided parameters. $keys is 
+            $startKey = null,                   an array of specific keys that
+            $endKey = null,                     you want returned.
+            $keys = null
           )
-
-getAllDocsBySeq($includeDocs = false,           Runs /_all_docs_by_seq.
-                $limit = null,
-                $startKey = null,
-                $endKey = null
-              )
 
 getAllDatabases()                               Runs /_all_dbs.
 

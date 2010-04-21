@@ -157,7 +157,7 @@ class Sag
     $this->db = $db;
   }
 
-  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null)
+  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null)
   {
     if(!$this->db)
       throw new SagException('No database specified.');
@@ -195,55 +195,26 @@ class Sag
 
       array_push($qry, "limit=$limit");
     }
+  
+    $qry = implode('&', $qry);
 
-    return $this->procPacket('GET', "/{$this->db}/_all_docs?".implode('&', $qry));
+    if(isset($keys))
+    {
+      if(!is_array($keys))
+        throw new SagException('gallAllDocs() expected an array for the keys.');
+
+      $data = new StdClass();
+      $data->keys = $keys;
+
+      return $this->procPacket('POST', "/{$this->db}/_all_docs?$qry", json_encode($data));
+    }
+
+    return $this->procPacket('GET', "/{$this->db}/_all_docs?$qry");
   }
 
   public function getAllDatabases()
   {
     return $this->procPacket('GET', '/_all_dbs');
-  }
-
-  public function getAllDocsBySeq($incDocs = false, $limit = null, $startKey = null, $endKey = null)
-  {
-    if(!$this->db)
-      throw new SagException('No database specified.');
-
-    $qry = array();
-
-    if(isset($incDocs))
-    {
-      if(!is_bool($incDocs))
-        throw new SagException('getAllDocs() expected a boolean for include_docs.');
-
-      array_push($qry, "include_docs=true");
-    }       
-
-    if(isset($startKey))
-    {
-      if(!is_string($startKey))
-        throw new SagException('getAllDocs() expected a string for startkey.');
-
-      array_push($qry, "startkey=$startKey");
-    }
-
-    if(isset($endKey))
-    {
-      if(!is_string($endKey))
-        throw new SagException('getAllDocs() expected a string for endkey.');
-
-      array_push($qry, "endkey=$endKey");
-    }
-
-    if(isset($limit))
-    {
-      if(!is_int($limit) || $limit < 0)
-        throw new SagException('getAllDocs() expected a positive integeter for limit.');
-
-      array_push($qry, "limit=$limit");
-    }
-
-    return $this->procPacket('GET', "/{$this->db}/_all_docs_by_seq?".implode('&', $qry));
   }
 
   public function generateIDs($num = 10)

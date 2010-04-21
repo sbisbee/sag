@@ -98,6 +98,17 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch->get('/1')->body->foo, 'foo');
   }
 
+  public function test_getAllDocs()
+  {
+    $this->assertTrue(is_array(
+      $this->couch->getAllDocs(true, 0, '""', '[]')->body->rows
+    ));
+
+    $this->assertEquals('1', 
+      $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
+    );
+  }
+
   public function test_deleteDoc()
   {
     $doc = $this->couch->get('/1')->body;
@@ -113,20 +124,6 @@ class SagTest extends PHPUnit_Framework_TestCase
       //make sure that we're setting codes correctly and catching the right exception
       $this->assertEquals($e->getCode(), '404');
     }
-  }
-
-  public function test_getAllDocs()
-  {
-    $this->assertTrue(is_array(
-      $this->couch->getAllDocs(true, 0, '""', '[]')->body->rows
-    ));
-  }
-
-  public function test_getAllDocsBySeq()
-  {
-    $this->assertTrue(is_array(
-      $this->couch->getAllDocsBySeq(true, 0, '""', '[]')->body->rows
-    ));
   }
 
   public function test_genIDs()
