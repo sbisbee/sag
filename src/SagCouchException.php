@@ -15,6 +15,16 @@
    limitations under the License.
 */
 
+/**
+ * This exception is thrown when CouchDB reports an error, such as sending
+ * malformed JSON, and not Sag.
+ * 
+ * The exception's code ($e->getCode()) is the HTTP status code. For example,
+ * if the requested document isn't found, then the code would be set to "404"
+ * (string).
+ *
+ * @version 0.1.0
+ */
 class SagCouchException extends Exception
 {
   public function SagCouchException($msg = "", $code = 0)

@@ -18,26 +18,53 @@
 require_once('SagException.php');
 require_once('SagCouchException.php');
 
+/**
+ * The Sag class provides the core functionality for talking to CouchDB. 
+ *
+ * @version 0.1.0
+ */
 class Sag
 {
+  /**
+   * @var string Used by login() to use HTTP Basic Authentication.
+   * @static
+   */
   public static $AUTH_BASIC = "AUTH_BASIC";
 
-  private $db;
-  private $host;
-  private $port;
+  private $db;                  //Database name to hit.
+  private $host;                //IP or address to connect to.
+  private $port;                //Port to connect to.
 
-  private $user;
-  private $pass;
-  private $authType;
+  private $user;                //Username to auth with.
+  private $pass;                //Password to auth with.
+  private $authType;            //One of the Sag::$AUTH_* variables
 
-  private $decodeResp = true;
+  private $decodeResp = true;   //Are we decoding CouchDB's JSON?
 
+  /**
+   * @param string $host The host's IP or address of the Couch we're connecting
+   * to.
+   * @param string $port The host's port that Couch is listening on.
+   */
   public function Sag($host = "127.0.0.1", $port = "5984")
   {
     $this->host = $host;
     $this->port = $port;
   }
 
+  /**
+   * Updates the login credentials in Sag that will be used for all further
+   * communications. Pass null to both $user and $pass to turn off
+   * authentication, as Sag does support blank usernames and passwords - only
+   * one of them has to be set for packets to be sent with authentication.
+   *
+   * @param string $user The username you want to login with. (null for none)
+   * @param string $pass The password you want to login with. (null for none)
+   * @param string $type The type of login system being used. Currently only
+   * accepts Sag::$AUTH_BASIC.
+   *
+   * @see $AUTH_BASIC
+   */
   public function login($user, $pass, $type = null)
   {
     if(!isset($type))
@@ -51,6 +78,12 @@ class Sag
     $this->authType = $type;
   }
 
+  /**
+   * Sets whether Sag will decode CouchDB's JSON responses with json_decode()
+   * or to simply return the JSON as a string. Defaults to true.
+   *
+   * @param bool $decode True to decode, false to not decode.
+   */
   public function decode($decode)
   {
     if(!is_bool($decode))
@@ -59,6 +92,14 @@ class Sag
     $this->decodeResp = $decode;
   }
 
+  /**
+   * Performs an HTTP GET operation for the supplied URL. The database name you
+   * provided is automatically prepended to the URL, so you only need to give
+   * the portion of the URL that comes after the database name.
+   *
+   * @param string $url The URL, with or without the leading slash.
+   * @return mixed
+   */
   public function get($url)
   {
     if(!$this->db)
@@ -71,6 +112,14 @@ class Sag
     return $this->procPacket('GET', "/{$this->db}$url");
   }
 
+  /**
+   * DELETE's the specified document.
+   *
+   * @param string $id The document's _id.
+   * @param string $rev The document's _rev. 
+   *
+   * @return mixed
+   */
   public function delete($id, $rev)
   {
     if(!$this->db)
@@ -82,6 +131,15 @@ class Sag
     return $this->procPacket('DELETE', "/{$this->db}/$id?rev=$rev");
   }
 
+  /**
+   * PUT's the data to the document.
+   *
+   * @param string $id The document's _id.
+   * @param object $data The document, which should have _id and _rev
+   * properties.
+   *
+   * @return mixed
+   */
   public function put($id, $data)
   {
     if(!$this->db)
@@ -96,6 +154,14 @@ class Sag
     return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data)); 
   }
 
+
+  /**
+   * POST's the provided document.
+   *
+   * @param object $data The document that you want created.
+   *
+   * @return mixed
+   */
   public function post($data)
   {
     if(!$this->db)
@@ -107,7 +173,17 @@ class Sag
     return $this->procPacket('POST', "/{$this->db}", json_encode($data)); 
   }
 
-  public function bulk($docs, $allOrNothing = true)
+  /**
+   * Bulk pushes documents to the database.
+   *
+   * @param array $docs An array of objects, which are the documents you want
+   * to push.
+   * @param bool $allOrNothing Whether to treat the transactions as "all or
+   * nothing" or not. Defaults to false.
+   * 
+   * @return mixed
+   */
+  public function bulk($docs, $allOrNothing = false)
   {
     if(!$this->db)
       throw new SagException('No database specified');
@@ -128,6 +204,16 @@ class Sag
     return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
   }
 
+  /**
+   * COPY's the document.
+   *
+   * @param string The _id of the document you're copying.
+   * @param string The _id of the document you're copying to.
+   * @param string THe _rev of the document you're copying to. Defaults to
+   * null.
+   * 
+   * @return mixed
+   */
   public function copy($srcID, $dstID, $dstRev = null)
   {
     if(!$this->db)
@@ -149,6 +235,12 @@ class Sag
     return $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
   }
 
+  /**
+   * Sets which database Sag is going to send all of its database related
+   * communications to (ex., dealing with documents).
+   * 
+   * @param string $db The database's name, as you'd put in the URL.
+   */
   public function setDatabase($db)
   {
     if(!is_string($db))
@@ -157,6 +249,21 @@ class Sag
     $this->db = $db;
   }
 
+  /**
+   * Gets all the documents in the database with _all_docs.
+   *
+   * @param bool $incDocs Whether to include the documents or not. Defaults to
+   * false.
+   * @param int $limit Limits the number of documents to return. Must be >= 0,
+   * or null for no limit. Defaults to null (no limit).
+   * @param string $startKey The startkey variable (valid JSON). Defaults to
+   * null.
+   * @param string $endKey The endkey variable (valid JSON). Defaults to null.
+   * @param array $keys An array of keys (strings) of the specific documents
+   * you're trying to get.
+   * 
+   * @return mixed
+   */
   public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null)
   {
     if(!$this->db)
@@ -212,11 +319,22 @@ class Sag
     return $this->procPacket('GET', "/{$this->db}/_all_docs?$qry");
   }
 
+  /**
+   * Gets all the databases on the server with _all_dbs.
+   *
+   * @return mixed
+   */
   public function getAllDatabases()
   {
     return $this->procPacket('GET', '/_all_dbs');
   }
 
+  /**
+   * Uses CouchDB to generate IDs.
+   * 
+   * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
+   * @returns mixed
+   */
   public function generateIDs($num = 10)
   {
     if(!is_int($num) || $num < 0)
@@ -225,6 +343,13 @@ class Sag
     return $this->procPacket('GET', "/_uuids?count=$num");
   }
 
+  /**
+   * Creates a database with the specified name.
+   *
+   * @param string $name The name of the database you want to create.
+   *
+   * @return mixed
+   */
   public function createDatabase($name)
   {
     if(empty($name) || !is_string($name))
@@ -233,6 +358,13 @@ class Sag
     return $this->procPacket('PUT', "/$name"); 
   }
 
+  /**
+   * Deletes the specified database.
+   *
+   * @param string $name The database's name.
+   *
+   * @return mixed
+   */ 
   public function deleteDatabase($name)
   {
     if(empty($name) || !is_string($name))
@@ -241,6 +373,18 @@ class Sag
     return $this->procPacket('DELETE', "/$name");
   }
 
+  /**
+   * Starts a replication job between two databases, independently of which
+   * database you set with Sag. 
+   * 
+   * @param string $src The name of the database that you are replicating from.
+   * @param string $target The name of the database that you are replicating
+   * to. 
+   * @param bool $continuous Whether to make this a continuous replication job
+   * or not. Defaults to false.
+   * 
+   * @return mixed
+   */
   public function replicate($src, $target, $continuous = false)
   {
     if(empty($src) || !is_string($src))
@@ -262,11 +406,21 @@ class Sag
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }
 
+  /**
+   * Starts a compaction job on the database you selected, or optionally one of
+   * its views.
+   *
+   * @param string $viewName The database's view that you want to compact,
+   * instead of the whole database.
+   * 
+   * @return mixed
+   */
   public function compact($viewName = null)
   {
     return $this->procPacket('POST', "/{$this->db}/_compact".((empty($viewName)) ? '' : "/$viewName"));
   }
 
+  // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
     // Do some string replacing for HTTP sanity.

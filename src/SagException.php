@@ -15,6 +15,12 @@
    limitations under the License.
 */
 
+/*
+ * This exception is thrown when Sag has an internal error, such as an invalid
+ * type being passed to a function.
+ *
+ * @version 0.1.0
+ */
 class SagException extends Exception
 {
   public function SagException($msg = "", $code = 0)
