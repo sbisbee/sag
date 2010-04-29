@@ -1,7 +1,7 @@
 Sag
 ===
 
-Version 0.1.0 (NOT RELEASED)
+Version 0.1.0
 http://www.saggingcouch.com
 
 Sag is a simple PHP library for working with CouchDB. It is designed to not
@@ -105,6 +105,9 @@ property if you had set decode to true).
 
 Functions
 ---------
+
+More complete function information is available at
+http://www.saggingcouch.com/documentation.php.
 
 FUNCTION                                        DESCRIPTION
 
