@@ -50,5 +50,13 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_object($this->cache->get('/bwah')));
     $this->assertNull($this->cache->get(rand(0,100)));
   }
+
+  public function test_clear()
+  {
+    $this->assertTrue($this->cache->clear());
+
+    $files = glob('/tmp/sag/*.sag');
+    $this->assertTrue(empty($files));
+  }
 }
 ?>

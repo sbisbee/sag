@@ -137,7 +137,25 @@ class SagFileCache extends SagCache
 
   public function clear()
   {
+    $part = false;
+    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
+    {
+      if(is_writable($file))
+      {
+        $oldSize = filesize($file);
+        if(@unlink($file))
+          $this->currentSize -= $oldSize;
+        else
+          $part = true;
+      }
+      else
+        $part = true;
+    } 
 
+    if($this->currentSize < 0)
+      $this->currentSize = 0; //shouldn't happen, but whatever
+
+    return !$part;
   }
 
   public function prune()

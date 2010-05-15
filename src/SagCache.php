@@ -98,6 +98,11 @@ abstract class SagCache
 
   /**
    * Clears the whole cache without applying any logic.
+   *
+   * Returns true if the entire cache was cleared, otherwise false if only part
+   * or none of it was cleared.
+   *
+   * @return bool
    */
   abstract public function clear();
 
