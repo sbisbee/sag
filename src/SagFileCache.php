@@ -72,24 +72,24 @@ class SagFileCache extends SagCache
     $toCache->v = $item; 
     $toCache = json_encode($toCache);
 
-    $file = self::makeFilename($url);
+    $target = self::makeFilename($url);
 
     //We don't allow symlinks, because when we recreate it won't be a symlink
     //any longer.
-    if(file_exists($file) && is_file($file))
+    if(file_exists($target) && is_file($target))
     {
-      if(!is_readable($file) || !is_writable($file))
+      if(!is_readable($target) || !is_writable($target))
         throw new Exception("Could not read the cache file for URL: $url - please check your file system privileges.");
 
-      $oldSize = filesize($file);
-      if($this->currentSize - $oldSize + strlen($toCache) > $this->defaultSize)
+      $oldSize = filesize($target);
+      if($this->currentSize - $oldSize + strlen($toCache) > $this->getSize())
         return false;
 
-      $fh = fopen($file, "r+");
+      $fh = fopen($target, "r+");
 
-      $oldCopy = json_decode(fread($fh));
+      $oldCopy = json_decode(fread($fh, $oldSize));
 
-      ftruncate($fh);
+      ftruncate($fh, 0);
       $this->currentSize -= $oldSize;
 
       unset($oldSize);
@@ -103,18 +103,18 @@ class SagFileCache extends SagCache
       if($estSize >= disk_free_space("/") * .95)
         throw new Exception("Trying to cache to a disk with low free space - refusing to cache.");
 
-      if($estSize > $this->defaultsize)
+      if($estSize > $this->getSize())
         return false;
 
-      $fh = fopen($file, "w");
+      $fh = fopen($target, "w");
     }
 
-    fwrite($fh, json_encode($toCache)); //don't throw up if we fail - we're not mission critical
+    fwrite($fh, $toCache, strlen($toCache)); //don't throw up if we fail - we're not mission critical
     $this->currentSize += filesize($file);
 
     fclose($fh);
 
-    return (is_object($oldCopy) && ($oldCopy->e == null || $oldCopy->e < time())) ? $oldCopy->v || true;
+    return (is_object($oldCopy) && ($oldCopy->e == null || $oldCopy->e < time())) ? $oldCopy->v : true;
   }
 
   public function get($url)

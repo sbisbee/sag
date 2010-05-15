@@ -36,9 +36,9 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $item->body->foo = "bar";
     $item->bwah = 123;
 
-    $expireOn = time() + 100;
+    $expireOn = time() + 10000000;
 
-    $this->cache->set($url, $item, $expireOn);
+    $this->assertTrue($this->cache->set($url, $item, $expireOn));
 
     $expectedCache = new StdClass();
     $expectedCache->e = $expireOn;
@@ -48,7 +48,6 @@ class SagFileTest extends PHPUnit_Framework_TestCase
       json_encode($expectedCache), 
       file_get_contents('/tmp/sag/'.$this->cache->makeKey($url).'.sag')
     );
-    echo(strlen(json_encode($expectedCache)));
   } 
 }
 ?>
