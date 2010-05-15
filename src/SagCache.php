@@ -52,9 +52,13 @@ abstract class SagCache
     $this->defaultExpiresOn = strtotime("+30 days");
   }
 
-  /** Returns the cached object, or null if nothing is cached.
+  /** 
+   * Returns the cached object, false if it expired, or null if nothing is
+   * cached. Ex., if false is returned, then you may want to call prune() to
+   * clear all expired items or remove().
    * 
-   * @param string $url The URL of the request we're caching.  @return object
+   * @param string $url The URL of the request we're caching.  
+   * @return object
    */
   abstract public function get($url);
 

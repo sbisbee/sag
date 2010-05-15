@@ -36,18 +36,19 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $item->body->foo = "bar";
     $item->bwah = 123;
 
-    $expireOn = time() + 10000000;
-
-    $this->assertTrue($this->cache->set($url, $item, $expireOn));
-
-    $expectedCache = new StdClass();
-    $expectedCache->e = $expireOn;
-    $expectedCache->v = $item;
+    $res = $this->cache->set($url, $item);
+    $this->assertTrue($res === true || is_object($res)); 
 
     $this->assertEquals(
-      json_encode($expectedCache), 
-      file_get_contents('/tmp/sag/'.$this->cache->makeKey($url).'.sag')
+      $item,
+      json_decode(file_get_contents('/tmp/sag/'.$this->cache->makeKey($url).'.sag'))->v
     );
   } 
+
+  public function test_get()
+  {
+    $this->assertTrue(is_object($this->cache->get('/bwah')));
+    $this->assertNull($this->cache->get(rand(0,100)));
+  }
 }
 ?>

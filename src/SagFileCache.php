@@ -32,6 +32,8 @@ class SagFileCache extends SagCache
     if(!is_readable($location) || !is_writable($location))
       throw new SagException("Insufficient privileges to the supplied cache directory.");
 
+    parent::SagCache();
+
     $this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
 
     /* 
@@ -59,8 +61,8 @@ class SagFileCache extends SagCache
   {
     if(
       empty($url) || 
-      !is_int($expiresOn) || 
       (
+        !is_int($expiresOn) &&
         $expiresOn <= time() &&
         $expiresOn != null
       ) 
@@ -68,15 +70,13 @@ class SagFileCache extends SagCache
       throw new SagException("Invalid parameters for caching.");
 
     $toCache = new StdClass();
-    $toCache->e = ($expiresOn == null) ? self::$defaultExpiresOn : $expiresOn;
+    $toCache->e = ($expiresOn == null) ? $this->defaultExpiresOn : $expiresOn;
     $toCache->v = $item; 
     $toCache = json_encode($toCache);
 
     $target = self::makeFilename($url);
 
-    //We don't allow symlinks, because when we recreate it won't be a symlink
-    //any longer.
-    if(file_exists($target) && is_file($target))
+    if(is_file($target))
     {
       if(!is_readable($target) || !is_writable($target))
         throw new Exception("Could not read the cache file for URL: $url - please check your file system privileges.");
@@ -119,7 +119,15 @@ class SagFileCache extends SagCache
 
   public function get($url)
   {
+    $target = $this->makeFilename($url);
+    if(!is_file($target))
+      return null;
 
+    if(!is_readable($target))
+      throw new SagException("Could not read the cache file at $target - please check its permissions.");
+
+    $item = json_decode(file_get_contents($target));
+    return ($item->e < time()) ? $item->v : false; 
   }
 
   public function remove($url)
