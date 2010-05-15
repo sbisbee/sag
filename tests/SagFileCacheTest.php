@@ -29,7 +29,7 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_createNew()
   {
-    $url = '/'.rand(100, 200);
+    $url = '/bwah';
 
     $item = new StdClass();
     $item->body = new StdClass();
@@ -48,6 +48,7 @@ class SagFileTest extends PHPUnit_Framework_TestCase
       json_encode($expectedCache), 
       file_get_contents('/tmp/sag/'.$this->cache->makeKey($url).'.sag')
     );
+    echo(strlen(json_encode($expectedCache)));
   } 
 }
 ?>
