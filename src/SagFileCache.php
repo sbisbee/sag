@@ -33,6 +33,14 @@ class SagFileCache extends SagCache
       throw new SagException("Insufficient privileges to the supplied cache directory.");
 
     $this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
+
+    /* 
+     * Just update - don't freak out if the size isn't right, as the user might
+     * update it to non-default, they might do anything with the cache, they
+     * might clean it themselves, etc. give them time.
+     */
+    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
+      $this->currentSize += filesize($file);
   }   
 
   /**
@@ -59,8 +67,12 @@ class SagFileCache extends SagCache
     )
       throw new SagException("Invalid parameters for caching.");
 
+    $toCache = new StdClass();
+    $toCache->e = ($expiresOn == null) ? self::$defaultExpiresOn : $expiresOn;
+    $toCache->v = $item; 
+    $toCache = json_encode($toCache);
+
     $file = self::makeFilename($url);
-    $oldCopy = null;
 
     //We don't allow symlinks, because when we recreate it won't be a symlink
     //any longer.
@@ -69,31 +81,40 @@ class SagFileCache extends SagCache
       if(!is_readable($file) || !is_writable($file))
         throw new Exception("Could not read the cache file for URL: $url - please check your file system privileges.");
 
+      $oldSize = filesize($file);
+      if($this->currentSize - $oldSize + strlen($toCache) > $this->defaultSize)
+        return false;
+
       $fh = fopen($file, "r+");
 
-      $oldCopy = fread($fh);
+      $oldCopy = json_decode(fread($fh));
 
       ftruncate($fh);
+      $this->currentSize -= $oldSize;
+
+      unset($oldSize);
+
       rewind($fh);
     }
     else
-      $fh = fopen($file, "w");
-
-    $cache = new StdClass();
-    $cache->e = ($expiresOn == null) ? self::$defaultExpiresOn : $expiresOn;
-    $cache->v = $item; 
-
-    fwrite($fh, json_encode($cache)); //don't throw up if we fail - we're not mission critical
-    fclose($fh);
-
-    //wait until we close the file to do this
-    if($oldCopy != null)
     {
-      $oldCopy = json_decode($oldCopy);
-      $oldCopy = ($oldCopy->e == null || $oldCopy->e < time()) ? $oldCopy->v : null;
+      $estSize = $this->currentSize + strlen($toCache);
+
+      if($estSize >= disk_free_space("/") * .95)
+        throw new Exception("Trying to cache to a disk with low free space - refusing to cache.");
+
+      if($estSize > $this->defaultsize)
+        return false;
+
+      $fh = fopen($file, "w");
     }
 
-    return $oldCopy;
+    fwrite($fh, json_encode($toCache)); //don't throw up if we fail - we're not mission critical
+    $this->currentSize += filesize($file);
+
+    fclose($fh);
+
+    return (is_object($oldCopy) && ($oldCopy->e == null || $oldCopy->e < time())) ? $oldCopy->v || true;
   }
 
   public function get($url)

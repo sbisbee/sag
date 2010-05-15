@@ -62,15 +62,24 @@ abstract class SagCache
    * Caches the item returned at the provided key, replacing any pre-existing
    * cached item. If the cache's size will be exceeded by caching the new item,
    * then it will remove items from the cache until there is sufficient room.
-   * 
-   * Returns the old cached item that's being replaced, or null if there was
-   * none.
+   *
+   * Returns false if adding the item would exceed the cache size.
+   *
+   * Returns true if we were able to add the item, and there was no previously
+   * cached item or the previously cached item is expired.
+   *
+   * Returns the previously cached item if there was one and we were able to
+   * add the new item to the cache.
+   *
+   * Sag will refuse to cache the object by throwing a SagException if adding
+   * the file to the cache would exceed 95% of the disk or partition's free
+   * space.
    *
    * @param string $url The URL of the request we're caching.
    * @param object $item The response we're caching.
    * @param int $expiresOn A Unix time stamp of when you want this item to
    * expire in the cache. Pass null or omit to use the default expiration time.
-   * @return object
+   * @return mixed
    */
   abstract public function set($url, $item, $expiresOn = null);
 
