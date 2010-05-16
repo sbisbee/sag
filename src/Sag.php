@@ -446,18 +446,25 @@ class Sag
           break;
       }
     }
+    else
+      unset($headers['Authorization']); //don't let things slip by
+
+    if($data)
+    {
+      $headers['Content-Length'] = strlen($data);
+      $headers['Content-Type'] = 'application/json';
+    }
+    else
+      unset($headers['Content-Length'], $headers['Content-Type']);
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
-      if($k != 'Host' || $k != 'User-Agent' || $k != 'Content-Length' || $k != 'Content-Type')
-        $buff .= "$k: $v\r\n";
+      $buff .= "$k: $v\r\n";
+
+    $buff .= "\r\n";
 
     if($data)
-      $buff .= "Content-Length: ".strlen($data)."\r\n"
-              ."Content-Type: application/json\r\n\r\n"
-              ."$data\r\n";
-    else
-      $buff .= "\r\n";
+      $buff .= "$data\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
     $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
