@@ -107,7 +107,8 @@ abstract class SagCache
   abstract public function clear();
 
   /**
-   * Removes all expired items from the cache.
+   * Removes all expired items from the cache. Returns the number of items that
+   * were deleted from the cache.
    */
   abstract public function prune();
 

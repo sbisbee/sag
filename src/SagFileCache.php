@@ -190,7 +190,30 @@ class SagFileCache extends SagCache
 
   public function prune()
   {
+    $numDel = 0;
 
+    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
+    {
+      if(is_readable($file))
+      {
+        $item = json_decode(file_get_contents($file));
+        if($item->e >= time())
+        {
+          $oldSize = filesize($file);
+          if(@unlink($file))
+          {
+            $this->currentSize -= $oldSize;
+            $numDel++;
+          }
+          else
+            throw new SagException("Unable to prune a cache file at $file.");
+        }
+      }
+      else
+        throw new SagException("Unable to read a cache file at $file."); 
+    }
+
+    return $numDel;
   }
 } 
 ?>
