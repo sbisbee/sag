@@ -53,6 +53,7 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_delete()
   {
+    $this->assertTrue(is_object($this->cache->get('/bwah')));
     $this->assertTrue($this->cache->remove('/bwah'));
     $this->assertNull($this->cache->get('/bwah'));
   }
