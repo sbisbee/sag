@@ -51,6 +51,12 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertNull($this->cache->get(rand(0,100)));
   }
 
+  public function test_delete()
+  {
+    $this->assertTrue($this->cache->remove('/bwah'));
+    $this->assertNull($this->cache->get('/bwah'));
+  }
+
   public function test_clear()
   {
     $this->assertTrue($this->cache->clear());

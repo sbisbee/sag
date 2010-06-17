@@ -54,8 +54,9 @@ class SagFileCache extends SagCache
 
     /* 
      * Just update - don't freak out if the size isn't right, as the user might
-     * update it to non-default, they might do anything with the cache, they
-     * might clean it themselves, etc. give them time.
+     * update it to non-default, they might not do anything with the cache,
+     * they might clean it themselves, etc. give them time. We'll freak when we
+     * add.
      */
     foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
       $this->currentSize += filesize($file);
@@ -148,7 +149,20 @@ class SagFileCache extends SagCache
 
   public function remove($url)
   {
+    $target = $this->makeFilename($url);
+    if(!is_file($target))
+      return true;
 
+    if(!is_writable($target))
+      throw new SagException("Not able to read the cache file at $target - please check its permissions.");
+
+    $oldSize = filesize($target);
+    $suc = @unlink($target);
+    if(!$suc)
+      return false;
+
+    $this->currentSize -= $oldSize;
+    return $suc;
   }
 
   public function clear()
