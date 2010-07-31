@@ -87,7 +87,7 @@ class SagFileCache extends SagCache
       throw new SagException("Invalid parameters for caching.");
 
     $toCache = new StdClass();
-    $toCache->e = ($expiresOn == null) ? $this->defaultExpiresOn : $expiresOn;
+    $toCache->e = ($expiresOn == null) ? self::getExpiresOn() : $expiresOn;
     $toCache->v = $item; 
     $toCache = json_encode($toCache);
 
