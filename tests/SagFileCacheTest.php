@@ -39,9 +39,17 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $res = $this->cache->set($url, $item);
     $this->assertTrue($res === true || is_object($res)); 
 
+    $file = '/tmp/sag/'.$this->cache->makeKey($url).'.sag';
+
+    $this->assertTrue(
+      is_file($file) &&
+      is_readable($file) &&
+      is_writable($file)
+    );
+
     $this->assertEquals(
       $item,
-      json_decode(file_get_contents('/tmp/sag/'.$this->cache->makeKey($url).'.sag'))->v
+      json_decode(file_get_contents($file))->v
     );
   } 
 
