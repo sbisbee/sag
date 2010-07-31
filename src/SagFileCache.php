@@ -76,18 +76,22 @@ class SagFileCache extends SagCache
 
   public function set($url, $item, $expiresOn = null)
   {
-    if(
-      empty($url) || 
-      (
-        !is_int($expiresOn) &&
-        $expiresOn <= time() &&
-        $expiresOn != null
-      ) 
-    )
-      throw new SagException("Invalid parameters for caching.");
+    if(empty($url))
+      throw new SagException('You need to provide a URL to cache.');
+
+    if(isset($expiresOn))
+    {
+      if(!is_int($expiresOn))
+        throw new SagException("Invalid parameters for caching.");
+
+      if($expiresOn < time())
+        throw new SagException("You cannot add an already expired item to the cache.");
+    }
+    else
+      $expiresOn = self::getExpiresOn();
 
     $toCache = new StdClass();
-    $toCache->e = ($expiresOn == null) ? self::getExpiresOn() : $expiresOn;
+    $toCache->e = $expiresOn;
     $toCache->v = $item; 
     $toCache = json_encode($toCache);
 
@@ -95,17 +99,23 @@ class SagFileCache extends SagCache
 
     if(is_file($target))
     {
-      if(!is_readable($target) || !is_writable($target))
+      if(!is_readable($target))
         throw new Exception("Could not read the cache file for URL: $url - please check your file system privileges.");
 
+      if(!is_writable($target))
+        throw new Exception("Could not write to the cache file for URL: $url - please check your file system privileges.");
+
+      //Make sure we don't exceed the cache size if we try to do this.
       $oldSize = filesize($target);
       if($this->currentSize - $oldSize + strlen($toCache) > $this->getSize())
-        return false;
+        throw new Exception("Caching $url would exceed the cache size.");
 
       $fh = fopen($target, "r+");
 
+      //Keep the old copy so that we can return it later.
       $oldCopy = json_decode(fread($fh, $oldSize));
 
+      //Blow away the cached item
       ftruncate($fh, 0);
       $this->currentSize -= $oldSize;
 
@@ -121,30 +131,31 @@ class SagFileCache extends SagCache
         throw new Exception("Trying to cache to a disk with low free space - refusing to cache.");
 
       if($estSize > $this->getSize())
-        return false;
+        throw new Exception("Caching $url would exceed the cache size.");
 
       $fh = fopen($target, "w");
     }
 
     fwrite($fh, $toCache, strlen($toCache)); //don't throw up if we fail - we're not mission critical
-    $this->currentSize += filesize($file);
+    $this->currentSize += filesize($target);
 
     fclose($fh);
 
+    // Only return the $oldCopy if it exists and wasn't expired.
     return (is_object($oldCopy) && ($oldCopy->e == null || $oldCopy->e < time())) ? $oldCopy->v : true;
   }
 
   public function get($url)
   {
-    $target = $this->makeFilename($url);
+    $target = self::makeFilename($url);
     if(!is_file($target))
       return null;
 
     if(!is_readable($target))
-      throw new SagException("Could not read the cache file at $target - please check its permissions.");
+      throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
 
     $item = json_decode(file_get_contents($target));
-    return ($item->e < time()) ? $item->v : false; 
+    return (!isset($item->e) || time() < $item->e) ? $item->v : false; 
   }
 
   public function remove($url)
