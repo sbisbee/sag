@@ -95,5 +95,46 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertFalse($this->cache->get($url));
     $this->assertFalse(is_file($file));
   }
+
+  public function test_setSize()
+  {
+    $size = 10;
+    $this->cache->setSize($size);
+    $this->assertEquals($size, $this->cache->getSize());
+  }
+
+  public function test_pruneOnExceedSet()
+  {
+    $firstURL = '/first';
+    $firstData = '123456789';
+    $secondURL = '/second';
+    $secondData = '123';
+
+    $this->cache->setSize(strlen($firstData)); //adding anything else should exceed
+  
+    $this->assertTrue($this->cache->set($firstURL, $firstData, strtotime('+1 second')));
+    sleep(1); //it's now expired, and would get pruned
+
+    //pruneOnExceed should be defaulted to false
+    try
+    {
+      $this->cache->set($secondURL, $secondData); 
+
+      $this->assertTrue(false); //...but apparently didn't
+    }
+    catch(SagException $e)
+    {
+      $this->assertTrue(true); //...and did
+    }
+    catch(Exception $e)
+    {
+      $this->assertTrue(false); //...and did, but wrong Exception type
+    }
+
+    //And again, with pruning.
+    $this->cache->pruneOnExceed(true);
+ 
+    $this->assertTrue($this->cache->set($secondURL, $secondData));
+  }
 }
 ?>

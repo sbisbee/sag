@@ -40,7 +40,7 @@ require_once("SagException.php");
 abstract class SagCache 
 {
   private $defaultExpiresOn;                            //Unix time stamp
-  private $defaultSize = 1000000;                       //in bytes
+  private $maxSize;                                     //in bytes
 
   private $currentSize = 0;                             //in bytes
 
@@ -49,7 +49,9 @@ abstract class SagCache
 
   public function SagCache()
   {
+    $this->currentSize = 0;
     $this->defaultExpiresOn = strtotime("+30 days");
+    $this->maxSize = 1000000; 
   }
 
   /** 
@@ -149,7 +151,7 @@ abstract class SagCache
   }
 
   /**
-   * Sets the size of the cache in bytes.
+   * Sets the max size of the cache in bytes.
    * 
    * @param int $bytes The size of the cache in bytes (>0).
    */
@@ -158,18 +160,18 @@ abstract class SagCache
     if(!is_int($bytes) || $bytes <= 0)
       throw new Exception("The cache size must be a positive integer (bytes).");
 
-    $this->defaultSize = $bytes;
+    $this->maxSize = $bytes;
   }
 
   /**
-   * Returns the size of the cache, irrespective of what is or isn't in the
+   * Returns the max size of the cache, irrespective of what is or isn't in the
    * cache.
    *
    * @return int
    */
   public function getSize()
   {
-    return $this->defaultSize;
+    return $this->maxSize;
   }
 
   /**

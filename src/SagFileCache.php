@@ -59,7 +59,7 @@ class SagFileCache extends SagCache
      * add.
      */
     foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
-      $this->currentSize += filesize($file);
+      self::addToSize(filesize($file));
   }   
 
   /**
@@ -97,47 +97,32 @@ class SagFileCache extends SagCache
 
     $target = self::makeFilename($url);
 
+    // If it already exists, then remove the old version but keep a copy
     if(is_file($target))
     {
-      if(!is_readable($target))
-        throw new Exception("Could not read the cache file for URL: $url - please check your file system privileges.");
-
-      if(!is_writable($target))
-        throw new Exception("Could not write to the cache file for URL: $url - please check your file system privileges.");
-
-      //Make sure we don't exceed the cache size if we try to do this.
-      $oldSize = filesize($target);
-      if($this->currentSize - $oldSize + strlen($toCache) > $this->getSize())
-        throw new Exception("Caching $url would exceed the cache size.");
-
-      $fh = fopen($target, "r+");
-
-      //Keep the old copy so that we can return it later.
-      $oldCopy = json_decode(fread($fh, $oldSize));
-
-      //Blow away the cached item
-      ftruncate($fh, 0);
-      $this->currentSize -= $oldSize;
-
-      unset($oldSize);
-
-      rewind($fh);
+      $oldCopy = self::get($url);
+      self::remove($url);
     }
-    else
+
+    for($i = 0; self::getUsage() + strlen($toCache) > self::getSize() && $i < 2; $i++)
     {
-      $estSize = $this->currentSize + strlen($toCache);
+      if($i == 0 && $this->pruneOnExceed)
+        self::prune(); //only try on the first run if we're supposed to
+      else
+      {
+        /*
+         * Either we weren't supposed to prune() on exceed, or we did and we're
+         * still exceeding.
+         */
 
-      if($estSize >= disk_free_space("/") * .95)
-        throw new Exception("Trying to cache to a disk with low free space - refusing to cache.");
-
-      if($estSize > $this->getSize())
-        throw new Exception("Caching $url would exceed the cache size.");
-
-      $fh = fopen($target, "w");
+        throw new SagException(sprintf('Caching %s would exceed the cache size%s.', $url, (($this->pruneOnExceed) ? " (prune was attempted)" : "")));
+      }
     }
+
+    $fh = fopen($target, "w"); //in case self::remove() didn't get it?
 
     fwrite($fh, $toCache, strlen($toCache)); //don't throw up if we fail - we're not mission critical
-    $this->currentSize += filesize($target);
+    self::addToSize(filesize($target));
 
     fclose($fh);
 
@@ -181,7 +166,7 @@ class SagFileCache extends SagCache
     if(!$suc)
       return false;
 
-    $this->currentSize -= $oldSize;
+    self::addToSize(-$oldSize);
     return $suc;
   }
 
@@ -194,16 +179,13 @@ class SagFileCache extends SagCache
       {
         $oldSize = filesize($file);
         if(@unlink($file))
-          $this->currentSize -= $oldSize;
+          self::addToSize(-$oldSize);
         else
           $part = true;
       }
       else
         $part = true;
     } 
-
-    if($this->currentSize < 0)
-      $this->currentSize = 0; //shouldn't happen, but whatever
 
     return !$part;
   }
@@ -222,7 +204,7 @@ class SagFileCache extends SagCache
           $oldSize = filesize($file);
           if(@unlink($file))
           {
-            $this->currentSize -= $oldSize;
+            self::addToSize(-$oldSize);
             $numDel++;
           }
           else
