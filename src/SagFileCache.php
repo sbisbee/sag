@@ -155,7 +155,16 @@ class SagFileCache extends SagCache
       throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
 
     $item = json_decode(file_get_contents($target));
-    return (!isset($item->e) || time() < $item->e) ? $item->v : false; 
+    
+    if(isset($item->e) && time() >= $item->e)
+    {
+      if($this->pruneOnGet)
+        self::remove($url); 
+
+      return false;
+    }
+
+    return $item->v;
   }
 
   public function remove($url)

@@ -73,5 +73,25 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $files = glob('/tmp/sag/*.sag');
     $this->assertTrue(empty($files));
   }
+
+  public function test_pruneOnGet()
+  {
+    $url = '/soonToDie';
+
+    $this->assertTrue($this->cache->set($url, array(), strtotime('+1 second')));
+    sleep(1); //should be expired now
+     
+    $file = '/tmp/sag/'.$this->cache->makeKey($url).'.sag';
+
+    //get without pruneOnGet set to true
+    $this->assertFalse($this->cache->get($url));
+    $this->assertTrue(is_file($file));
+
+    //now get with pruneOnGet set to true
+    $this->cache->pruneOnGet(true);
+
+    $this->assertFalse($this->cache->get($url));
+    $this->assertFalse(is_file($file));
+  }
 }
 ?>
