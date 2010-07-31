@@ -51,6 +51,8 @@ class SagFileTest extends PHPUnit_Framework_TestCase
       $item,
       json_decode(file_get_contents($file))->v
     );
+
+    $this->assertEquals(filesize($file), $this->cache->getUsage());
   } 
 
   public function test_get()

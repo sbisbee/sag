@@ -42,7 +42,7 @@ abstract class SagCache
   private $defaultExpiresOn;                            //Unix time stamp
   private $defaultSize = 1000000;                       //in bytes
 
-  protected $currentSize;                               //in bytes
+  private $currentSize = 0;                             //in bytes
 
   protected $pruneOnGet = false;
   protected $pruneOnExceed = false;
@@ -215,5 +215,13 @@ abstract class SagCache
   public function makeKey($url)
   {
     return sha1($url);
+  }
+
+  protected function addToSize($amt)
+  {
+    if(!is_int($amt) && !is_float($amt))
+      throw new SagException('Invalid cache size modifier.');
+
+    $this->currentSize += $amt;
   }
 }
