@@ -68,14 +68,6 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertNull($this->cache->get('/bwah'));
   }
 
-  public function test_clear()
-  {
-    $this->assertTrue($this->cache->clear());
-
-    $files = glob('/tmp/sag/*.sag');
-    $this->assertTrue(empty($files));
-  }
-
   public function test_pruneOnGet()
   {
     $url = '/soonToDie';
@@ -110,11 +102,11 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $secondURL = '/second';
     $secondData = '123';
 
-    $this->cache->setSize(strlen($firstData)); //adding anything else should exceed
-  
     $this->assertTrue($this->cache->set($firstURL, $firstData, strtotime('+1 second')));
     sleep(1); //it's now expired, and would get pruned
 
+    $this->cache->setSize(26); //adding anything else should exceed
+  
     //pruneOnExceed should be defaulted to false
     try
     {
@@ -135,6 +127,17 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->cache->pruneOnExceed(true);
  
     $this->assertTrue($this->cache->set($secondURL, $secondData));
+
+    $this->assertNull($this->cache->get($firstURL));
+    $this->assertEquals($this->cache->get($secondURL), $secondData);
+  }
+
+  public function test_clear()
+  {
+    $this->assertTrue($this->cache->clear());
+
+    $files = glob('/tmp/sag/*.sag');
+    $this->assertTrue(empty($files));
   }
 }
 ?>
