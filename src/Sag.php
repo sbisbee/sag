@@ -421,6 +421,42 @@ class Sag
     return $this->procPacket('POST', "/{$this->db}/_compact".((empty($viewName)) ? '' : "/$viewName"));
   }
 
+  /**
+   * Create or update attachments on documents by passing in a serialized
+   * version of your attachment (a string).
+   *
+   * @param string $name The attachment's name.
+   * @param string $data The attachment's data, in string representation. Ie.,
+   * you need to serialize your attachment.
+   * @param string $contentType The proper Content-Type for your attachment.
+   * @param string $docID The _id of the document that the attachment
+   * belongs to.
+   * @param string $rev optional The _rev of the document that the attachment
+   * belongs to. Leave blank if you are creating a new document. 
+   *
+   * @return mixed
+   */
+  public function setAttachment($name, $data, $contentType, $docID, $rev = null)
+  {
+    if(empty($docID))
+      throw new SagException('You need to provide a document ID.');
+
+    if(empty($name))
+      throw new SagException('You need to provide the attachment\'s name.');
+
+    if(empty($data))
+      throw new SagException('You need to provide the attachment\'s data.');
+
+    //TODO support type conversion, streams, etc.
+    if(!is_string($data))
+      throw new SagException('You need to provide the attachment\'s data as a string.');
+
+    if(empty($contentType))
+      throw new SagException('You need to provide the data\'s Content-Type.');
+
+    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
