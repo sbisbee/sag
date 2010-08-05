@@ -109,7 +109,7 @@ class Sag
       throw new SagException('No database specified');
 
     //The first char of the URL should be a slash.
-    if(strpos($url, '/') != 1)
+    if(strpos($url, '/') !== 0)
       $url = "/$url";
 
     $url = "/{$this->db}$url";
