@@ -451,8 +451,13 @@ class Sag
 
     if($data)
     {
+      $data .= "\r\n\r\n";
       $headers['Content-Length'] = strlen($data);
-      $headers['Content-Type'] = 'application/json';
+
+      // JSON is our default and most used Content-Type, but others need to be
+      // specified to allow attachments.
+      if(!isset($headers['Content-Type']))
+        $headers['Content-Type'] = 'application/json';
     }
     else
       unset($headers['Content-Length'], $headers['Content-Type']);
@@ -461,10 +466,7 @@ class Sag
     foreach($headers as $k => $v)
       $buff .= "$k: $v\r\n";
 
-    $buff .= "\r\n";
-
-    if($data)
-      $buff .= "$data\r\n\r\n";
+    $buff .= "\r\n$data"; //it's okay if $data isn't set
 
     // Open the socket only once we know everything is ready and valid.
     $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
