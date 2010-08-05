@@ -429,7 +429,7 @@ class Sag
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/.1";
+    $headers["User-Agent"] = "Sag/.2";
     
     //usernames and passwords can be blank
     if(isset($this->user) || isset($this->pass))
