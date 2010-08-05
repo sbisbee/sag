@@ -204,6 +204,33 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->compact()->body->ok);
   }
 
+  public function test_attachments()
+  {
+    $docID = 'howdy';
+    $name = 'lyrics';
+    $data = 'Somebody once told me';
+    $ct = 'text/plain';
+    
+    $res = $this->couch->setAttachment($name, $data, $ct, $docID);
+
+    // Make sure the new doc was created.
+    $this->assertEquals('201', $res->headers->_HTTP->status);
+
+    $res = $this->couch->get("/$docID");
+
+    // Same type?
+    $this->assertEquals($ct, $res->body->_attachments->{$name}->content_type);
+
+    // Don't get the whole attachment by default.
+    $this->assertTrue($res->body->_attachments->{$name}->stub);
+
+    // Get the attachment inline style
+    $res = $this->couch->get("/$docID?attachments=true");
+
+    // Check contents - text/plain gets base64 encoded
+    $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
+  }
+
   public function test_deleteDB()
   {
     $this->assertTrue($this->couch->deleteDatabase('sag_tests')->body->ok);
