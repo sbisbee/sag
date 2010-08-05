@@ -229,6 +229,9 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     // Check contents - text/plain gets base64 encoded
     $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
+
+    // Check contents, via stand alone
+    $this->assertEquals($data, $this->couch->get("/$docID/$name"));
   }
 
   public function test_deleteDB()
