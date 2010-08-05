@@ -487,7 +487,6 @@ class Sag
 
     if($data)
     {
-      $data .= "\r\n\r\n";
       $headers['Content-Length'] = strlen($data);
 
       // JSON is our default and most used Content-Type, but others need to be
@@ -503,6 +502,9 @@ class Sag
       $buff .= "$k: $v\r\n";
 
     $buff .= "\r\n$data"; //it's okay if $data isn't set
+
+    if($data && $method !== "PUT")
+      $buf .= "\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
     $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
