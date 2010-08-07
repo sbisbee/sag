@@ -114,18 +114,21 @@ class Sag
 
     $url = "/{$this->db}$url";
 
+    //Deal with cached items
     if($this->cache && ($prevResponse = $this->cache->get($url)))
     {
-      //Cache hit, so send the Etag
       $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
 
-      if($response->headers->_http->code == 304)
-        return $prevResponse;
-
-      $this->cache->set($url, $response);
+      if($response->headers->_HTTP->status == 304)
+        return $prevResponse; //cache hit
     }
-    else
-      $response = $this->procPacket('GET', $url); //cache miss
+
+    //Not caching, or are caching but there's nothing cached yet
+    if(!$response)
+      $response = $this->procPacket('GET', $url);
+
+    if($this->cache)
+      $this->cache->set($url, $response);
 
     return $response;
   }
