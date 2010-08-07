@@ -237,9 +237,12 @@ class Sag
   /**
    * COPY's the document.
    *
+   * If you are using a SagCache and are copying to an existing destination,
+   * then the result will be cached (ie., what's copied to the /$destID URL).
+   *
    * @param string The _id of the document you're copying.
    * @param string The _id of the document you're copying to.
-   * @param string THe _rev of the document you're copying to. Defaults to
+   * @param string The _rev of the document you're copying to. Defaults to
    * null.
    * 
    * @return mixed
@@ -262,7 +265,12 @@ class Sag
       "Destination" => "$dstID".(($dstRev) ? "?rev=$dstRev" : "")
     );
 
-    return $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
+    $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
+
+    if($this->cache && $response->headers->Etag)
+      $this->cache->set("/$dstID", $response);
+
+    return $response;
   }
 
   /**
