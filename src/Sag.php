@@ -505,7 +505,7 @@ class Sag
           else
           {
             $line = explode(':', $line, 2);
-            $response->headers->$line[0] = $line[1];
+            $response->headers->$line[0] = trim($line[1]);
           }
         }
       }
