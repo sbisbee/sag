@@ -61,6 +61,20 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertNull($this->cache->get(rand(0,100)));
   }
 
+  public function test_newVersion()
+  {
+    $new = new StdClass();
+    $new->titFor = "tat";
+
+    $file = $this->cache->makeFilename('/bwah');
+
+    $oldContents = file_get_contents($file);
+    
+    $oldCopy = $this->cache->set('/bwah', $new);
+    $this->assertEquals(json_encode($oldCopy), $oldContents); 
+    $this->assertEquals($new, json_decode(file_get_contents($file)));
+  }
+
   public function test_delete()
   {
     $this->assertNotNull($this->cache->get('/bwah'));
