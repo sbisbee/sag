@@ -75,6 +75,19 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($new, json_decode(file_get_contents($file)));
   }
 
+  public function test_partialClear()
+  {
+    $file = array_shift(glob('/tmp/sag/*.sag'));
+    $this->assertTrue(is_file($file));
+    
+    //block ourselves so we do a partial clear
+    $this->assertTrue(chmod($file, 0111));
+    $this->assertFalse($this->cache->clear());
+
+    //reset for future operations
+    $this->assertTrue(chmod($file, 0777));
+  }
+
   public function test_delete()
   {
     $this->assertNotNull($this->cache->get('/bwah'));
