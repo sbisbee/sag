@@ -42,6 +42,8 @@ class Sag
 
   private $decodeResp = true;   //Are we decoding CouchDB's JSON?
 
+  private $cache;
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -419,6 +421,30 @@ class Sag
   public function compact($viewName = null)
   {
     return $this->procPacket('POST', "/{$this->db}/_compact".((empty($viewName)) ? '' : "/$viewName"));
+  }
+
+  /**
+   * Pass an implementation of the SagCache, such as SagFileCache, that will be
+   * used when retrieving objects. It is taken and stored as a reference. 
+   *
+   * @param SagCache An implementation of SagCache (ex., SagFileCache).
+   */
+  public function setCache(&$cacheImpl)
+  {
+    if(!($cacheImpl instanceof SagCache))
+      throw new SagException('That is not a valid cache.');
+
+    $this->cache = $cacheImpl;
+  }
+
+  /**
+   * Returns the cache object that's currently being used. 
+   *
+   * @return SagCache
+   */
+  public function getCache()
+  {
+    return $this->cache;
   }
 
   // The main driver - does all the socket and protocol work.
