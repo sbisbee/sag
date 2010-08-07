@@ -146,6 +146,9 @@ class Sag
     if(!is_string($id) || !is_string($rev) || empty($id) || empty($rev))
       throw new SagException('delete() expects two strings.');
 
+    if($this->cache)
+      $this->cache->remove("/{$this->db}/{$id}");
+
     return $this->procPacket('DELETE', "/{$this->db}/$id?rev=$rev");
   }
 
