@@ -112,7 +112,22 @@ class Sag
     if(strpos($url, '/') != 1)
       $url = "/$url";
 
-    return $this->procPacket('GET', "/{$this->db}$url");
+    $url = "/{$this->db}$url";
+
+    if($this->cache && ($prevResponse = $this->cache->get($url)))
+    {
+      //Cache hit, so send the Etag
+      $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+
+      if($response->headers->_http->code == 304)
+        return $prevResponse;
+
+      $this->cache->set($url, $response);
+    }
+    else
+      $response = $this->procPacket('GET', $url); //cache miss
+
+    return $response;
   }
 
   /**
