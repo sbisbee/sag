@@ -483,6 +483,17 @@ class Sag
     return $this->cache;
   }
 
+  /**
+   * Returns the name of the database Sag is currently working with, or null if
+   * setDatabase() hasn't been called yet.
+   *
+   * @return String
+   */
+  public function currentDatabase()
+  {
+    return $this->db;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
