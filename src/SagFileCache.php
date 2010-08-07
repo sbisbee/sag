@@ -69,7 +69,7 @@ class SagFileCache extends SagCache
    * @param string $url The URL for the cached item.
    * @return string
    */
-  private function makeFilename($url)
+  public function makeFilename($url)
   {
     return "$this->fsLocation/".self::makeKey($url).self::$fileExt;
   }
