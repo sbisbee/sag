@@ -49,7 +49,7 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals(
       $item,
-      json_decode(file_get_contents($file))->v
+      json_decode(file_get_contents($file))
     );
 
     $this->assertEquals(filesize($file), $this->cache->getUsage());
@@ -57,35 +57,15 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_get()
   {
-    $this->assertTrue(is_object($this->cache->get('/bwah')));
+    $this->assertNotNull($this->cache->get('/bwah'));
     $this->assertNull($this->cache->get(rand(0,100)));
   }
 
   public function test_delete()
   {
-    $this->assertTrue(is_object($this->cache->get('/bwah')));
+    $this->assertNotNull($this->cache->get('/bwah'));
     $this->assertTrue($this->cache->remove('/bwah'));
     $this->assertNull($this->cache->get('/bwah'));
-  }
-
-  public function test_pruneOnGet()
-  {
-    $url = '/soonToDie';
-
-    $this->assertTrue($this->cache->set($url, array(), strtotime('+1 second')));
-    sleep(1); //should be expired now
-     
-    $file = '/tmp/sag/'.$this->cache->makeKey($url).'.sag';
-
-    //get without pruneOnGet set to true
-    $this->assertFalse($this->cache->get($url));
-    $this->assertTrue(is_file($file));
-
-    //now get with pruneOnGet set to true
-    $this->cache->pruneOnGet(true);
-
-    $this->assertFalse($this->cache->get($url));
-    $this->assertFalse(is_file($file));
   }
 
   public function test_setSize()
@@ -93,43 +73,6 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $size = 10;
     $this->cache->setSize($size);
     $this->assertEquals($size, $this->cache->getSize());
-  }
-
-  public function test_pruneOnExceedSet()
-  {
-    $firstURL = '/first';
-    $firstData = '123456789';
-    $secondURL = '/second';
-    $secondData = '123';
-
-    $this->assertTrue($this->cache->set($firstURL, $firstData, strtotime('+1 second')));
-    sleep(1); //it's now expired, and would get pruned
-
-    $this->cache->setSize(26); //adding anything else should exceed
-  
-    //pruneOnExceed should be defaulted to false
-    try
-    {
-      $this->cache->set($secondURL, $secondData); 
-
-      $this->assertTrue(false); //...but apparently didn't
-    }
-    catch(SagException $e)
-    {
-      $this->assertTrue(true); //...and did
-    }
-    catch(Exception $e)
-    {
-      $this->assertTrue(false); //...and did, but wrong Exception type
-    }
-
-    //And again, with pruning.
-    $this->cache->pruneOnExceed(true);
- 
-    $this->assertTrue($this->cache->set($secondURL, $secondData));
-
-    $this->assertNull($this->cache->get($firstURL));
-    $this->assertEquals($this->cache->get($secondURL), $secondData);
   }
 
   public function test_clear()

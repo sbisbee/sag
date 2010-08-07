@@ -74,27 +74,12 @@ class SagFileCache extends SagCache
     return "$this->fsLocation/".self::makeKey($url).self::$fileExt;
   }
 
-  public function set($url, $item, $expiresOn = null)
+  public function set($url, $item)
   {
     if(empty($url))
       throw new SagException('You need to provide a URL to cache.');
 
-    if(isset($expiresOn))
-    {
-      if(!is_int($expiresOn))
-        throw new SagException("Invalid parameters for caching.");
-
-      if($expiresOn < time())
-        throw new SagException("You cannot add an already expired item to the cache.");
-    }
-    else
-      $expiresOn = self::getExpiresOn();
-
-    $toCache = new StdClass();
-    $toCache->e = $expiresOn;
-    $toCache->v = $item; 
-    $toCache = json_encode($toCache);
-
+    $item = json_encode($item);
     $target = self::makeFilename($url);
 
     // If it already exists, then remove the old version but keep a copy
@@ -104,30 +89,15 @@ class SagFileCache extends SagCache
       self::remove($url);
     }
 
-    for($i = 0; self::getUsage() + strlen($toCache) > self::getSize() && $i < 2; $i++)
-    {
-      if($i == 0 && $this->pruneOnExceed)
-        self::prune(); //only try on the first run if we're supposed to
-      else
-      {
-        /*
-         * Either we weren't supposed to prune() on exceed, or we did and we're
-         * still exceeding.
-         */
-
-        throw new SagException(sprintf('Caching %s would exceed the cache size%s.', $url, (($this->pruneOnExceed) ? " (prune was attempted)" : "")));
-      }
-    }
-
     $fh = fopen($target, "w"); //in case self::remove() didn't get it?
 
-    fwrite($fh, $toCache, strlen($toCache)); //don't throw up if we fail - we're not mission critical
+    fwrite($fh, $item, strlen($item)); //don't throw up if we fail - we're not mission critical
     self::addToSize(filesize($target));
 
     fclose($fh);
 
-    // Only return the $oldCopy if it exists and wasn't expired.
-    return (is_object($oldCopy) && ($oldCopy->e == null || $oldCopy->e < time())) ? $oldCopy->v : true;
+    // Only return the $oldCopy if it exists
+    return (is_object($oldCopy)) ? $oldCopy : true;
   }
 
   public function get($url)
@@ -139,17 +109,7 @@ class SagFileCache extends SagCache
     if(!is_readable($target))
       throw new SagException("Could not read the cache file for $url at $target - please check its permissions.");
 
-    $item = json_decode(file_get_contents($target));
-    
-    if(isset($item->e) && time() >= $item->e)
-    {
-      if($this->pruneOnGet)
-        self::remove($url); 
-
-      return false;
-    }
-
-    return $item->v;
+    return json_decode(file_get_contents($target));
   }
 
   public function remove($url)
@@ -188,34 +148,6 @@ class SagFileCache extends SagCache
     } 
 
     return !$part;
-  }
-
-  public function prune()
-  {
-    $numDel = 0;
-
-    foreach(glob($this->fsLocation."/*".self::$fileExt) as $file)
-    {
-      if(is_readable($file))
-      {
-        $item = json_decode(file_get_contents($file));
-        if($item->e >= time())
-        {
-          $oldSize = filesize($file);
-          if(@unlink($file))
-          {
-            self::addToSize(-$oldSize);
-            $numDel++;
-          }
-          else
-            throw new SagException("Unable to prune a cache file at $file.");
-        }
-      }
-      else
-        throw new SagException("Unable to read a cache file at $file."); 
-    }
-
-    return $numDel;
   }
 } 
 ?>
