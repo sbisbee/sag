@@ -19,6 +19,7 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('../src/Sag.php');
+require_once('../src/SagFileCache.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
@@ -204,11 +205,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->compact()->body->ok);
   }
 
+  public function test_setCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+    $this->assertEquals($cache, $this->couch->getCache()); 
+  }
+
   public function test_deleteDB()
   {
     $this->assertTrue($this->couch->deleteDatabase('sag_tests')->body->ok);
   }
 
+/*
   public function test_connectionFailure()
   {
     $badCouch = new Sag('example.com');
@@ -223,5 +232,6 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(true);
     }
   }
+*/
 }
 ?>
