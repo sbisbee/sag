@@ -175,7 +175,13 @@ class Sag
     if(!isset($data) || !is_object($data))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
-    return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data)); 
+    $url = "/{$this->db}/$id";
+    $response = $this->procPacket('PUT', $url, json_encode($data)); 
+
+    if($this->cache)
+      $this->cache->set($url, json_encode($data));
+
+    return $response;
   }
 
 
