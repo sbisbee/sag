@@ -280,7 +280,8 @@ class Sag
   }
 
   /**
-   * Gets all the documents in the database with _all_docs.
+   * Gets all the documents in the database with _all_docs. Its results will
+   * not be cached by SagCache.
    *
    * @param bool $incDocs Whether to include the documents or not. Defaults to
    * false.
