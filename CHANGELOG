@@ -1,0 +1,13 @@
+Sag Changes
+===========
+
+Version 0.2
+-----------
+
+New Features
+  * Native support for attachments.
+  * Internal support for different Content-Type values.
+
+Fixed Bugs
+  * Removed leading white space in header values.
+  * Fixed ending line breaks when sending data via a PUT. 
