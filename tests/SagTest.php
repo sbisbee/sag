@@ -231,7 +231,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
 
     // Check contents, via stand alone
-    $this->assertEquals($data, $this->couch->get("/$docID/$name"));
+    $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
   }
 
   public function test_deleteDB()
