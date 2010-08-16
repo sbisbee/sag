@@ -255,5 +255,32 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(true);
     }
   }
+
+  public function test_timeoutRWValues()
+  {
+    //should NOT throw on positive seconds
+    try { $this->couch->setRWTimeout(1); $this->assertTrue(true); }
+    catch(Exception $e) { $this->assertFalse(true); }
+  
+    //should NOT throw on positive seconds && microseconds
+    try { $this->couch->setRWTimeout(1, 1); $this->assertTrue(true); }
+    catch(Exception $e) { $this->assertFalse(true); }
+  
+    //should NOT throw on 0 seconds && positive microseconds
+    try { $this->couch->setRWTimeout(0, 1); $this->assertTrue(true); }
+    catch(Exception $e) { $this->assertFalse(true); }
+  
+    //should throw on 0 timeout
+    try { $this->couch->setRWTimeout(0, 0); $this->assertFalse(true); }
+    catch(Exception $e) { $this->assertTrue(true); }
+
+    //should throw on negative timeout
+    try { $this->couch->setRWTimeout(-1); $this->assertFalse(true); }
+    catch(Exception $e) { $this->assertTrue(true); }
+
+    //should throw on negative seconds and positive microseconds
+    try { $this->couch->setRWTimeout(-1, 1); $this->assertFalse(true); }
+    catch(Exception $e) { $this->assertTrue(true); }
+  }
 }
 ?>
