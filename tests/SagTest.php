@@ -242,6 +242,8 @@ class SagTest extends PHPUnit_Framework_TestCase
   public function test_connectionFailure()
   {
     $badCouch = new Sag('example.com');
+    $badCouch->setOpenTimeout(1);
+
     try 
     { 
       $badCouch->setDatabase('bwah'); 

@@ -7,6 +7,8 @@ Version 0.2
 New Features
   * Native support for attachments.
   * Internal support for different Content-Type values.
+  * Can set timeout on socket connection.
+  * Can set timeout on socket read/write.
 
 Fixed Bugs
   * Removed leading white space in header values.

@@ -32,15 +32,19 @@ class Sag
    */
   public static $AUTH_BASIC = "AUTH_BASIC";
 
-  private $db;                  //Database name to hit.
-  private $host;                //IP or address to connect to.
-  private $port;                //Port to connect to.
+  private $db;                          //Database name to hit.
+  private $host;                        //IP or address to connect to.
+  private $port;                        //Port to connect to.
 
-  private $user;                //Username to auth with.
-  private $pass;                //Password to auth with.
-  private $authType;            //One of the Sag::$AUTH_* variables
+  private $user;                        //Username to auth with.
+  private $pass;                        //Password to auth with.
+  private $authType;                    //One of the Sag::$AUTH_* variables
 
-  private $decodeResp = true;   //Are we decoding CouchDB's JSON?
+  private $decodeResp = true;           //Are we decoding CouchDB's JSON?
+
+  private $socketOpenTimeout;           //The seconds until socket connection timeout
+  private $socketRWTimeoutSeconds;      //The seconds for socket I/O timeout
+  private $socketRWTimeoutMicroseconds; //The microseconds for socket I/O timeout
 
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
@@ -457,6 +461,42 @@ class Sag
     return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
   }
 
+  /**
+   * Sets the connection timeout on the socket. See setOpenTimeout() for
+   * settings the read/write timeout.
+   *
+   * @param int $seconds
+   */
+  public function setOpenTimeout($seconds)
+  {
+    if(!is_int($seconds) || $seconds < 1)
+      throw new Exception('setOpenTimeout() expects a positive integer.');
+
+    $this->socketOpenTimeout = $seconds;
+  }
+
+  /**
+   * Sets the read/write timeout period on the socket to the sum of seconds and
+   * microseconds. If not set, then the default_socket_timeout setting is used
+   * from your php.ini config.
+   *
+   * Use setOpenTimeout() to set the timeout on opening the socket.
+   *
+   * @param int $seconds The seconds part of the timeout.
+   * @param int $microseconds optional The microseconds part of the timeout.
+   */
+  public function setRWTimeout($seconds, $microseconds = 0)
+  {
+    if(!is_int($seconds) || $seconds < 1)
+      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
+
+    if(!is_int($microseconds) || $microseconds < 0)
+      throw new SagException('setRWTimeout() expects $microseconds to be an integer >= 0.');
+
+    $this->socketRWTimeoutSeconds = $seconds;
+    $this->socketRWTimeoutMicroseconds = $microseconds;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
@@ -507,14 +547,20 @@ class Sag
       $buf .= "\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
-    $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+    if($this->socketOpenTimeout)
+      $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+    else
+      $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+
     if(!$sock)
-      throw new SagException(
-        "Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo)."
-      );
+      throw new SagException("Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo).");
 
     // Send the packet.
     fwrite($sock, $buff);
+
+    // Set the timeout.
+    if(isset($this->socketRWTimeoutSeconds))
+      stream_set_timeout($sock, $this->socketRWTimeoutSeconds, $this->socketRWTimeoutMicroseconds);
 
     // Prepare the data structure to store the response.
     $response = new StdClass();
@@ -524,8 +570,13 @@ class Sag
     // Read in the response.
     $isHeader = true; //whether or not we're reading the HTTP headers or data
 
+    $sockInfo = stream_get_meta_data($sock);
+
     while(!feof($sock))
     {
+      if($sockInfo['timed_out'])
+        throw new SagException('Connection timed out while reading.'); 
+
       $line = fgets($sock);
 
       if($isHeader)
