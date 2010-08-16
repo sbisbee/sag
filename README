@@ -13,7 +13,8 @@ it, and expand Sag to incorporate new CouchDB functionality.
 Compatability
 -------------
 
-Sag is tested against CouchDB 0.10.x and 0.11.x. 
+Each Sag release is tested against CouchDB 0.11.x and 1.0.x. It is most likely
+still compatible with 0.10.x, but it's no longer tested.
 
 Error Handling
 --------------
@@ -106,66 +107,8 @@ property if you had set decode to true).
 Functions
 ---------
 
-More complete function information is available at
+Detailed documentation of the functions and API are available at 
 http://www.saggingcouch.com/documentation.php.
-
-FUNCTION                                        DESCRIPTION
-
-Sag($host = "127.0.0.1", $port = "5984")        Specify the address and port in
-                                                the constructor.
-
-login($user, $pass, $type = Sag::$AUTH_BASIC)   Set the username and password to
-                                                use for all subsequent 
-                                                transactions to the server
-                                                (null them out to "logout").
-
-decode($bool)                                   Whether or not to decode the 
-                                                JSON from CouchDB with PHP's
-                                                json_decode().
-
-get($url)                                       Get the specified URL. Ex.,
-                                                get("/1") gets a doc with an
-                                                _id of 1.
-
-delete($id, $rev)                               Delete a document.
-
-put($id, $data)                                 PUT's a document - $data will
-                                                need a $_rev property.
-
-post($data)                                     POST's a document.
-
-bulk($array)                                    Does a bulk transaction, using
-                                                the specified array.
-
-copy($srcID, $dstID, $dstRev = null)            Copy a document, optionally to
-                                                an existing document.
-
-createDatabase($name)                           Creates the database.
-
-deleteDatabase($name)                           Deletes the database.
-
-setDatabase($name)                              Specifies which database to
-                                                work with.
-
-getAllDocs($includeDocs = false,                Runs /_all_docs with the
-            $limit = null,                      provided parameters. $keys is 
-            $startKey = null,                   an array of specific keys that
-            $endKey = null,                     you want returned.
-            $keys = null
-          )
-
-getAllDatabases()                               Runs /_all_dbs.
-
-generateIDs($num = 10)                          Generates a specified number of
-                                                IDs with /_uuids.
-
-replicate($src, $target, $continuous = false)   Replicate between two 
-                                                databases, optionally
-                                                continuously.
-
-compact($viewName = null)                       Compacts the currently selected
-                                                database (no argument), or the
-                                                provided view.
 
 License
 -------
@@ -178,4 +121,3 @@ More?
 
 See http://www.saggingcouch.com for more detailed information, bug reporting,
 planned features, etc.
-
