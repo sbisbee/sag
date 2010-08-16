@@ -487,11 +487,18 @@ class Sag
    */
   public function setRWTimeout($seconds, $microseconds = 0)
   {
-    if(!is_int($seconds) || $seconds < 1)
-      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
-
     if(!is_int($microseconds) || $microseconds < 0)
       throw new SagException('setRWTimeout() expects $microseconds to be an integer >= 0.');
+
+    //$seconds can be 0 if $microseconds > 0
+    if(
+      !is_int($seconds) || 
+      (
+        (!$microseconds && $seconds < 1) ||
+        ($microseconds && $seconds < 0)
+      )
+    )
+      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
 
     $this->socketRWTimeoutSeconds = $seconds;
     $this->socketRWTimeoutMicroseconds = $microseconds;
