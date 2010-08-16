@@ -4,12 +4,16 @@ Sag Changes
 Version 0.2
 -----------
 
+  * Officially adding support for 1.0.x and dropping support for 0.10.x.
+
 New Features
+
   * Native support for attachments.
   * Internal support for different Content-Type values.
   * Can set timeout on socket connection.
   * Can set timeout on socket read/write.
 
 Fixed Bugs
+
   * Removed leading white space in header values.
   * Fixed ending line breaks when sending data via a PUT. 
