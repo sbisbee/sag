@@ -16,6 +16,31 @@ Compatability
 Each Sag release is tested against CouchDB 0.11.x and 1.0.x. It is most likely
 still compatible with 0.10.x, but it's no longer tested.
 
+Contents
+--------
+
+CHANGELOG                       A detailed list of all changes between releases.
+
+LICENSE                         A copy of the license that Sag is released under.
+
+README                          This file.
+
+src/                            This is the code that you will want to include
+                                in your application.
+
+src/Sag.php                     This is the core file that you will include()
+                                or require() in your code.
+
+src/SagException.php            The SagException class. You don't need to
+                                include it.
+
+src/SagCouchException.php       The SagCouchException class. You don't need to
+                                include it.
+
+tests/                          The unit tests for Sag. You can ignore these
+                                files, though SagTests.php may be interesting
+                                for examples.
+
 Error Handling
 --------------
 
@@ -52,6 +77,8 @@ Sag uses sockets, so there is no dependency on other libraries such as cURL. If
 you want to monitor your application's activity on the server side (ex., if you
 are proxying requests to CouchDB through a web server), then examine the HTTP
 User-Agent header.
+
+HTTPS is currently not supported.
 
 Results
 -------
@@ -102,7 +129,7 @@ Sag automatically decode into PHP objects with json_decode().
 
 If you've told Sag to not decode CouchDB's responses, then it'll only return
 the resulting JSON from CouchDB as a string (what would have been in the body
-property if you had set decode to true).
+property if you had set decode to true). None of the HTTP info is included.
 
 Functions
 ---------
