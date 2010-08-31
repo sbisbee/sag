@@ -282,5 +282,24 @@ class SagTest extends PHPUnit_Framework_TestCase
     try { $this->couch->setRWTimeout(-1, 1); $this->assertFalse(true); }
     catch(Exception $e) { $this->assertTrue(true); }
   }
+
+  public function test_loginBadType()
+  {
+    try
+    {
+      $this->couch->login('a', 'b', "aasdfsadfasf");
+      $this->assertTrue(false);
+    }
+    catch(SagException $e)
+    {
+      //We want this exception
+      $this->assertTrue(true);
+    }
+    catch(Exception $e)
+    {
+      //wrong type of exception
+      $this->assertTrue(false); 
+    }
+  }
 }
 ?>
