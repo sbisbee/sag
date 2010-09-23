@@ -26,7 +26,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->couch = new Sag('192.168.1.5');
+    $this->couch = new Sag('127.0.0.1');
     $this->couch->setDatabase('sag_tests');
   }
 

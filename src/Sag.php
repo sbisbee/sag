@@ -532,17 +532,17 @@ class Sag
     else
       unset($headers['Authorization']); //don't let things slip by
 
+    // JSON is our default and most used Content-Type, but others need to be
+    // specified to allow attachments.
+    if(!isset($headers['Content-Type']))
+      $headers['Content-Type'] = 'application/json';
+
     if($data)
     {
       $headers['Content-Length'] = strlen($data);
-
-      // JSON is our default and most used Content-Type, but others need to be
-      // specified to allow attachments.
-      if(!isset($headers['Content-Type']))
-        $headers['Content-Type'] = 'application/json';
     }
     else
-      unset($headers['Content-Length'], $headers['Content-Type']);
+      unset($headers['Content-Length']);
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
@@ -551,7 +551,7 @@ class Sag
     $buff .= "\r\n$data"; //it's okay if $data isn't set
 
     if($data && $method !== "PUT")
-      $buf .= "\r\n\r\n";
+      $buff .= "\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
     if($this->socketOpenTimeout)
