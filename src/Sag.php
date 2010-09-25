@@ -1,6 +1,6 @@
 <?php
 /*
-  Copyright 2010 Sam Bisbee 
+  Copyright 2010 Sam Bisbee
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ require_once('SagException.php');
 require_once('SagCouchException.php');
 
 /**
- * The Sag class provides the core functionality for talking to CouchDB. 
+ * The Sag class provides the core functionality for talking to CouchDB.
  *
  * @version 0.2.0
  * @package Core
@@ -31,6 +31,7 @@ class Sag
    * @static
    */
   public static $AUTH_BASIC = "AUTH_BASIC";
+  public static $AUTH_COOKIE = "AUTH_COOKIE";
 
   private $db;                          //Database name to hit.
   private $host;                        //IP or address to connect to.
@@ -39,6 +40,7 @@ class Sag
   private $user;                        //Username to auth with.
   private $pass;                        //Password to auth with.
   private $authType;                    //One of the Sag::$AUTH_* variables
+  public $authSession;                  //AuthSession cookie value from/for CouchDB
 
   private $decodeResp = true;           //Are we decoding CouchDB's JSON?
 
@@ -72,15 +74,43 @@ class Sag
    */
   public function login($user, $pass, $type = null)
   {
-    if(!isset($type))
+    if($type == null)
       $type = Sag::$AUTH_BASIC;
 
-    if($type != Sag::$AUTH_BASIC)
+    if($type != Sag::$AUTH_BASIC && $type != Sag::$AUTH_COOKIE)
       throw new SagException("Unknown auth type for login()");
 
-    $this->user = $user;
-    $this->pass = $pass;
     $this->authType = $type;
+
+    if($type == Sag::$AUTH_BASIC) {
+      $this->user = $user;
+      $this->pass = $pass;
+      // TODO: should we turn something else?
+      return true;
+    } elseif($type == Sag::$AUTH_COOKIE) {
+      // TODO: url encode user data
+      $headers = array('Content-Type'=>'application/x-www-form-urlencoded');
+      $res = $this->procPacket('POST', "/_session", "name={$user}&password={$pass}", $headers);
+      $this->authSession = $res->cookies->AuthSession;
+      return $res;
+    }
+  }
+
+  public function setAuthType($type)
+  {
+    if($type != Sag::$AUTH_BASIC && $type != Sag::$AUTH_COOKIE)
+      throw new SagException("Unknown auth type for login()");
+
+    $this->authType = $type;
+    return $this;
+  }
+
+  public function setAuthSession($session_id)
+  {
+    // switching to cookie auth since we've got a session id now
+    $this->authType = Sag::$AUTH_COOKIE;
+    $this->authSession = $session_id;
+    return $this;
   }
 
   /**
@@ -121,7 +151,7 @@ class Sag
    * DELETE's the specified document.
    *
    * @param string $id The document's _id.
-   * @param string $rev The document's _rev. 
+   * @param string $rev The document's _rev.
    *
    * @return mixed
    */
@@ -156,7 +186,7 @@ class Sag
     if(!isset($data) || !is_object($data))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
-    return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data)); 
+    return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data));
   }
 
 
@@ -175,7 +205,7 @@ class Sag
     if(!isset($data) || !is_object($data))
       throw new SagException('post() needs an object for data.');
 
-    return $this->procPacket('POST', "/{$this->db}", json_encode($data)); 
+    return $this->procPacket('POST', "/{$this->db}", json_encode($data));
   }
 
   /**
@@ -185,7 +215,7 @@ class Sag
    * to push.
    * @param bool $allOrNothing Whether to treat the transactions as "all or
    * nothing" or not. Defaults to false.
-   * 
+   *
    * @return mixed
    */
   public function bulk($docs, $allOrNothing = false)
@@ -216,7 +246,7 @@ class Sag
    * @param string The _id of the document you're copying to.
    * @param string THe _rev of the document you're copying to. Defaults to
    * null.
-   * 
+   *
    * @return mixed
    */
   public function copy($srcID, $dstID, $dstRev = null)
@@ -237,13 +267,13 @@ class Sag
       "Destination" => "$dstID".(($dstRev) ? "?rev=$dstRev" : "")
     );
 
-    return $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
+    return $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers);
   }
 
   /**
    * Sets which database Sag is going to send all of its database related
    * communications to (ex., dealing with documents).
-   * 
+   *
    * @param string $db The database's name, as you'd put in the URL.
    */
   public function setDatabase($db)
@@ -266,7 +296,7 @@ class Sag
    * @param string $endKey The endkey variable (valid JSON). Defaults to null.
    * @param array $keys An array of keys (strings) of the specific documents
    * you're trying to get.
-   * 
+   *
    * @return mixed
    */
   public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null)
@@ -282,7 +312,7 @@ class Sag
         throw new SagException('getAllDocs() expected a boolean for include_docs.');
 
       array_push($qry, "include_docs=true");
-    }       
+    }
 
     if(isset($startKey))
     {
@@ -307,7 +337,7 @@ class Sag
 
       array_push($qry, "limit=$limit");
     }
-  
+
     $qry = implode('&', $qry);
 
     if(isset($keys))
@@ -336,7 +366,7 @@ class Sag
 
   /**
    * Uses CouchDB to generate IDs.
-   * 
+   *
    * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
    * @returns mixed
    */
@@ -360,7 +390,7 @@ class Sag
     if(empty($name) || !is_string($name))
       throw new SagException('createDatabase() expected a valid database name');
 
-    return $this->procPacket('PUT', "/$name"); 
+    return $this->procPacket('PUT', "/$name");
   }
 
   /**
@@ -369,7 +399,7 @@ class Sag
    * @param string $name The database's name.
    *
    * @return mixed
-   */ 
+   */
   public function deleteDatabase($name)
   {
     if(empty($name) || !is_string($name))
@@ -380,14 +410,14 @@ class Sag
 
   /**
    * Starts a replication job between two databases, independently of which
-   * database you set with Sag. 
-   * 
+   * database you set with Sag.
+   *
    * @param string $src The name of the database that you are replicating from.
    * @param string $target The name of the database that you are replicating
-   * to. 
+   * to.
    * @param bool $continuous Whether to make this a continuous replication job
    * or not. Defaults to false.
-   * 
+   *
    * @return mixed
    */
   public function replicate($src, $target, $continuous = false)
@@ -417,7 +447,7 @@ class Sag
    *
    * @param string $viewName The database's view that you want to compact,
    * instead of the whole database.
-   * 
+   *
    * @return mixed
    */
   public function compact($viewName = null)
@@ -436,7 +466,7 @@ class Sag
    * @param string $docID The _id of the document that the attachment
    * belongs to.
    * @param string $rev optional The _rev of the document that the attachment
-   * belongs to. Leave blank if you are creating a new document. 
+   * belongs to. Leave blank if you are creating a new document.
    *
    * @return mixed
    */
@@ -492,7 +522,7 @@ class Sag
 
     //$seconds can be 0 if $microseconds > 0
     if(
-      !is_int($seconds) || 
+      !is_int($seconds) ||
       (
         (!$microseconds && $seconds < 1) ||
         ($microseconds && $seconds < 0)
@@ -513,14 +543,19 @@ class Sag
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/.2";
-    
+
     //usernames and passwords can be blank
-    if(isset($this->user) || isset($this->pass))
+    if(isset($this->user) || isset($this->pass) || $this->authSession)
     {
       switch($this->authType)
       {
         case Sag::$AUTH_BASIC:
-          $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}"); 
+          $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}");
+          break;
+
+        case Sag::$AUTH_COOKIE:
+          $headers['Cookie'] = 'AuthSession='.$this->authSession;
+          $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
           break;
 
         default:
@@ -577,7 +612,7 @@ class Sag
     while(!feof($sock))
     {
       if($sockInfo['timed_out'])
-        throw new SagException('Connection timed out while reading.'); 
+        throw new SagException('Connection timed out while reading.');
 
       $line = fgets($sock);
 
@@ -590,7 +625,7 @@ class Sag
         else
         {
           if(!isset($response->headers->_HTTP))
-          { 
+          {
             //the first header line is always the HTTP info
             $response->headers->_HTTP->raw = $line;
 
@@ -598,6 +633,7 @@ class Sag
             {
               $response->headers->_HTTP->version = $match['version'];
               $response->headers->_HTTP->status = $match['status'];
+              $response->status = $match['status'];
             }
             else
               throw new SagException('There was a problem while handling the HTTP protocol.'); //whoops!
@@ -606,6 +642,10 @@ class Sag
           {
             $line = explode(':', $line, 2);
             $response->headers->$line[0] = ltrim($line[1]);
+            if ($line[0] == 'Set-Cookie')
+            {
+              $response->cookies = $this->parseCookie($line[1]);
+            }
           }
         }
       }
@@ -634,5 +674,15 @@ class Sag
 
     return $response;
   }
+
+  private function parseCookie($cookie)
+  {
+    $bits = explode('; ', $cookie);
+    $cookies = new stdClass();
+    foreach ($bits as $bit) {
+      $v = explode('=', $bit);
+      $cookies->{trim($v[0])} = @$v[1];
+    }
+    return $cookies;
+  }
 }
-?>
