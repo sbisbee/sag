@@ -1,6 +1,6 @@
 <?php
 /*
-  Copyright 2010 Sam Bisbee 
+  Copyright 2010 Sam Bisbee
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,11 +23,20 @@ require_once('../src/Sag.php');
 class SagTest extends PHPUnit_Framework_TestCase
 {
   protected $couch;
+  protected $session_couch;
+  protected $other_session_couch;
 
   public function setUp()
   {
-    $this->couch = new Sag('127.0.0.1');
+    $ip = '127.0.0.1';
+    $this->couch = new Sag($ip);
+    $this->session_couch = new Sag($ip);
+    $this->other_session_couch = new Sag($ip);
+
+    $this->couch->login('admin', 'passwd');
     $this->couch->setDatabase('sag_tests');
+
+    $this->session_couch->setDatabase('sag_tests');
   }
 
   public function test_createDB()
@@ -46,7 +55,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $doc = new StdClass();
     $doc->foo = 'bar';
 
-    $result = $this->couch->put('1', $doc); 
+    $result = $this->couch->put('1', $doc);
     $this->assertTrue($result->body->ok);
     $this->assertEquals($result->body->id, '1');
   }
@@ -79,7 +88,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couch->decode(false);
 
     $json = $this->couch->get('/1')->body;
-    $this->assertTrue(is_string($json));    
+    $this->assertTrue(is_string($json));
 
     $this->couch->decode(true); //for the benefit of future tests
     $this->assertEquals(json_decode($json)->_id, '1');
@@ -104,7 +113,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->couch->getAllDocs(true, 0, '""', '[]')->body->rows
     ));
 
-    $this->assertEquals('1', 
+    $this->assertEquals('1',
       $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
     );
   }
@@ -168,7 +177,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $result = $this->couch->bulk(array($a, $b));
     $this->assertTrue(is_array($result->body));
-    
+
     $doc = $this->couch->get('/'.$result->body[0]->id);
     $this->assertEquals($doc->body->foo, $a->foo);
     $this->assertEquals($doc->body->bwah, $a->bwah);
@@ -177,7 +186,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   public function test_replication()
   {
     $newDB = "sag_tests_replication";
-    
+
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->createDatabase($newDB)->body->ok);
     $this->assertTrue($this->couch->replicate('sag_tests', $newDB)->body->ok);
@@ -210,7 +219,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $name = 'lyrics';
     $data = 'Somebody once told me';
     $ct = 'text/plain';
-    
+
     $res = $this->couch->setAttachment($name, $data, $ct, $docID);
 
     // Make sure the new doc was created.
@@ -234,6 +243,26 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
   }
 
+  public function test_createSession()
+  {
+    $res = $this->session_couch->login('admin', 'passwd', Sag::$AUTH_COOKIE);
+    $this->assertTrue($res->body->ok);
+  }
+
+  public function test_createDocWithSession()
+  {
+    $this->other_session_couch->setAuthSession($this->session_couch->authSession);
+    $this->other_session_couch->setDatabase('sag_tests');
+    $doc = new stdClass();
+    $doc->sag = 'for couchdb';
+    $res = $this->other_session_couch->put('sag', $doc);
+    $this->assertTrue($res->body->ok);
+    if ($res->body->ok) {
+      $del_res = $this->other_session_couch->delete('sag', $res->body->rev);
+      $this->assertTrue($del_res->body->ok);
+    }
+  }
+
   public function test_deleteDB()
   {
     $this->assertTrue($this->couch->deleteDatabase('sag_tests')->body->ok);
@@ -244,14 +273,14 @@ class SagTest extends PHPUnit_Framework_TestCase
     $badCouch = new Sag('example.com');
     $badCouch->setOpenTimeout(1);
 
-    try 
-    { 
-      $badCouch->setDatabase('bwah'); 
+    try
+    {
+      $badCouch->setDatabase('bwah');
       $badCouch->get('/asdf');
       $this->assertTrue(false); //shouldn't reach this line
     }
-    catch(SagException $e) 
-    { 
+    catch(SagException $e)
+    {
       $this->assertTrue(true);
     }
   }
@@ -261,15 +290,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     //should NOT throw on positive seconds
     try { $this->couch->setRWTimeout(1); $this->assertTrue(true); }
     catch(Exception $e) { $this->assertFalse(true); }
-  
+
     //should NOT throw on positive seconds && microseconds
     try { $this->couch->setRWTimeout(1, 1); $this->assertTrue(true); }
     catch(Exception $e) { $this->assertFalse(true); }
-  
+
     //should NOT throw on 0 seconds && positive microseconds
     try { $this->couch->setRWTimeout(0, 1); $this->assertTrue(true); }
     catch(Exception $e) { $this->assertFalse(true); }
-  
+
     //should throw on 0 timeout
     try { $this->couch->setRWTimeout(0, 0); $this->assertFalse(true); }
     catch(Exception $e) { $this->assertTrue(true); }
@@ -298,8 +327,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     catch(Exception $e)
     {
       //wrong type of exception
-      $this->assertTrue(false); 
+      $this->assertTrue(false);
     }
   }
 }
-?>
