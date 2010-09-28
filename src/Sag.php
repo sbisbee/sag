@@ -31,6 +31,10 @@ class Sag
    * @static
    */
   public static $AUTH_BASIC = "AUTH_BASIC";
+  /**
+   * @var string Used by login() to use HTTP Cookie Authentication.
+   * @static
+   */
   public static $AUTH_COOKIE = "AUTH_COOKIE";
 
   private $db;                          //Database name to hit.
@@ -40,7 +44,7 @@ class Sag
   private $user;                        //Username to auth with.
   private $pass;                        //Password to auth with.
   private $authType;                    //One of the Sag::$AUTH_* variables
-  public $authSession;                  //AuthSession cookie value from/for CouchDB
+  private $authSession;                 //AuthSession cookie value from/for CouchDB
 
   private $decodeResp = true;           //Are we decoding CouchDB's JSON?
 
@@ -77,22 +81,27 @@ class Sag
     if($type == null)
       $type = Sag::$AUTH_BASIC;
 
-    if($type != Sag::$AUTH_BASIC && $type != Sag::$AUTH_COOKIE)
-      throw new SagException("Unknown auth type for login()");
-
     $this->authType = $type;
 
-    if($type == Sag::$AUTH_BASIC) {
-      $this->user = $user;
-      $this->pass = $pass;
-      // TODO: should we turn something else?
-      return true;
-    } elseif($type == Sag::$AUTH_COOKIE) {
-      // TODO: url encode user data
-      $headers = array('Content-Type'=>'application/x-www-form-urlencoded');
-      $res = $this->procPacket('POST', "/_session", "name={$user}&password={$pass}", $headers);
-      $this->authSession = $res->cookies->AuthSession;
-      return $res;
+    switch($type)
+    {
+      case Sag::$AUTH_BASIC:
+        $this->user = $user;
+        $this->pass = $pass;
+
+        return true;
+        break;
+
+      case Sag::$AUTH_COOKIE:
+        // TODO: url encode user data
+        $res = $this->procPacket('POST', '/_session', "name=$user&password=$pass", array('Content-Type' => 'application/x-www-form-urlencoded'));
+        $this->authSession = $res->cookies->AuthSession;
+        return $this->authSession;
+        break;
+
+      default:
+        throw new SagException("Unknown auth type for login().");
+        break;
     }
   }
 
@@ -528,27 +537,15 @@ class Sag
     $headers["User-Agent"] = "Sag/.2";
 
     //usernames and passwords can be blank
-    if(isset($this->user) || isset($this->pass) || $this->authSession)
+    if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
+      $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}");
+    elseif($this->authType == Sag::$AUTH_COOKIE && isset($this->authSession))
     {
-      switch($this->authType)
-      {
-        case Sag::$AUTH_BASIC:
-          $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}");
-          break;
-
-        case Sag::$AUTH_COOKIE:
-          $headers['Cookie'] = 'AuthSession='.$this->authSession;
-          $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
-          break;
-
-        default:
-          //this should never happen with login()'s validation, but just in case
-          throw new SagException('Unknown auth type.');
-          break;
-      }
+      $headers['Cookie'] = 'AuthSession='.$this->authSession;
+      $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
     }
     else
-      unset($headers['Authorization']); //don't let things slip by
+      unset($headers['Authorization'], $headers['Cookie'], $headers['X-CouchDB-WWW-Authenticate']);
 
     // JSON is our default and most used Content-Type, but others need to be
     // specified to allow attachments.
@@ -625,9 +622,15 @@ class Sag
           {
             $line = explode(':', $line, 2);
             $response->headers->$line[0] = ltrim($line[1]);
-            if ($line[0] == 'Set-Cookie')
+
+            if($line[0] == 'Set-Cookie')
             {
-              $response->cookies = $this->parseCookie($line[1]);
+              $response->cookies = new StdClass();
+              foreach(explode('; ', $line[1]) as $cookie)
+              {
+                $crumbs = explode('=', $cookie);
+                $response->cookies{trim($crumbs[0])} = trim($crumbs[1]);
+              } 
             }
           }
         }
@@ -656,16 +659,5 @@ class Sag
     }
 
     return $response;
-  }
-
-  private function parseCookie($cookie)
-  {
-    $bits = explode('; ', $cookie);
-    $cookies = new stdClass();
-    foreach ($bits as $bit) {
-      $v = explode('=', $bit);
-      $cookies->{trim($v[0])} = @$v[1];
-    }
-    return $cookies;
   }
 }
