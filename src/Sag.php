@@ -629,7 +629,7 @@ class Sag
               foreach(explode('; ', $line[1]) as $cookie)
               {
                 $crumbs = explode('=', $cookie);
-                $response->cookies{trim($crumbs[0])} = trim($crumbs[1]);
+                $response->cookies->{trim($crumbs[0])} = trim($crumbs[1]);
               } 
             }
           }

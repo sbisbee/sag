@@ -30,7 +30,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->couchIP = '192.168.1.5';
+    $this->couchIP = '127.0.0.1';
     $this->couchDBName = 'sag_tests';
 
     $this->couch = new Sag($this->couchIP);
@@ -247,8 +247,15 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_createSession()
   {
-    $res = $this->session_couch->login('admin', 'passwd', Sag::$AUTH_COOKIE);
-    $this->assertTrue($res->body->ok);
+    try
+    {
+      $this->assertTrue(is_string($this->session_couch->login('admin', 'passwd', Sag::$AUTH_COOKIE)));
+    }
+    catch(Exception $e)
+    {
+      //should not happen - FAIL
+      $this->assertTrue(false);
+    }
   }
 
   public function test_createDocWithSession()
