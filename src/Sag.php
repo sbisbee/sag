@@ -572,12 +572,7 @@ class Sag
     if(!isset($headers['Content-Type']))
       $headers['Content-Type'] = 'application/json';
 
-    if($data)
-    {
-      $headers['Content-Length'] = strlen($data);
-    }
-    else
-      unset($headers['Content-Length']);
+    $headers['Content-Length'] = ($data) ? strlen($data) : null;
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
