@@ -22,20 +22,20 @@ require_once('../src/Sag.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
+  protected $couchIP;
+
   protected $couch;
   protected $session_couch;
-  protected $other_session_couch;
 
   public function setUp()
   {
-    $ip = '127.0.0.1';
-    $this->couch = new Sag($ip);
-    $this->session_couch = new Sag($ip);
-    $this->other_session_couch = new Sag($ip);
+    $this->couchIP = '127.0.0.1';
 
+    $this->couch = new Sag($this->couchIP);
     $this->couch->login('admin', 'passwd');
     $this->couch->setDatabase('sag_tests');
 
+    $this->session_couch = new Sag($this->couchIP);
     $this->session_couch->setDatabase('sag_tests');
   }
 
