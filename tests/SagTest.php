@@ -23,31 +23,33 @@ require_once('../src/Sag.php');
 class SagTest extends PHPUnit_Framework_TestCase
 {
   protected $couchIP;
+  protected $couchDBName;
 
   protected $couch;
   protected $session_couch;
 
   public function setUp()
   {
-    $this->couchIP = '127.0.0.1';
+    $this->couchIP = '192.168.1.5';
+    $this->couchDBName = 'sag_tests';
 
     $this->couch = new Sag($this->couchIP);
     $this->couch->login('admin', 'passwd');
-    $this->couch->setDatabase('sag_tests');
+    $this->couch->setDatabase($this->couchDBName);
 
     $this->session_couch = new Sag($this->couchIP);
-    $this->session_couch->setDatabase('sag_tests');
+    $this->session_couch->setDatabase($this->couchDBName);
   }
 
   public function test_createDB()
   {
-    $result = $this->couch->createDatabase('sag_tests');
+    $result = $this->couch->createDatabase($this->couchDBName);
     $this->assertTrue($result->body->ok);
   }
 
   public function test_allDatabases()
   {
-    $this->assertTrue(in_array('sag_tests', $this->couch->getAllDatabases()->body));
+    $this->assertTrue(in_array($this->couchDBName, $this->couch->getAllDatabases()->body));
   }
 
   public function test_newDoc()
@@ -189,7 +191,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->createDatabase($newDB)->body->ok);
-    $this->assertTrue($this->couch->replicate('sag_tests', $newDB)->body->ok);
+    $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB)->body->ok);
     $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
@@ -265,7 +267,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_deleteDB()
   {
-    $this->assertTrue($this->couch->deleteDatabase('sag_tests')->body->ok);
+    $this->assertTrue($this->couch->deleteDatabase($this->couchDBName)->body->ok);
   }
 
   public function test_connectionFailure()
