@@ -298,7 +298,7 @@ class Sag
 
     $qry = array();
 
-    if(isset($incDocs))
+    if($incDocs !== false)
     {
       if(!is_bool($incDocs))
         throw new SagException('getAllDocs() expected a boolean for include_docs.');
