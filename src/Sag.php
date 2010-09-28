@@ -96,23 +96,6 @@ class Sag
     }
   }
 
-  public function setAuthType($type)
-  {
-    if($type != Sag::$AUTH_BASIC && $type != Sag::$AUTH_COOKIE)
-      throw new SagException("Unknown auth type for login()");
-
-    $this->authType = $type;
-    return $this;
-  }
-
-  public function setAuthSession($session_id)
-  {
-    // switching to cookie auth since we've got a session id now
-    $this->authType = Sag::$AUTH_COOKIE;
-    $this->authSession = $session_id;
-    return $this;
-  }
-
   /**
    * Sets whether Sag will decode CouchDB's JSON responses with json_decode()
    * or to simply return the JSON as a string. Defaults to true.
