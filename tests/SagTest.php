@@ -274,13 +274,17 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_createDocWithSession()
   {
+    $db = new Sag($this->couchIP);
+    $db->setDatabase($this->couchDBName);
+    $db->login('admin', 'passwd', Sag::$AUTH_COOKIE);
+
     $doc = new StdClass();
     $doc->sag = 'for couchdb';
 
-    $res = $this->session_couch->put('sag', $doc);
+    $res = $db->put('sag', $doc);
     $this->assertTrue($res->body->ok);
 
-    $del_res = $this->session_couch->delete('sag', $res->body->rev);
+    $del_res = $db->delete('sag', $res->body->rev);
     $this->assertTrue($del_res->body->ok);
   }
 
