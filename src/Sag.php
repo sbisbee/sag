@@ -69,12 +69,16 @@ class Sag
    * authentication, as Sag does support blank usernames and passwords - only
    * one of them has to be set for packets to be sent with authentication.
    *
+   * Cookie authentication will cause a call to the server to establish the
+   * session, and will throw an exception if the credentials weren't valid.
+   *
    * @param string $user The username you want to login with. (null for none)
    * @param string $pass The password you want to login with. (null for none)
-   * @param string $type The type of login system being used. Currently only
-   * accepts Sag::$AUTH_BASIC.
+   * @param string $type The type of login system being used. Defaults to
+   * Sag::$AUTH_BASIC.
    *
    * @see $AUTH_BASIC
+   * @see $AUTH_COOKIE
    */
   public function login($user, $pass, $type = null)
   {
