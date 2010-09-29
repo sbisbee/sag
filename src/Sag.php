@@ -102,11 +102,9 @@ class Sag
         $this->authSession = $res->cookies->AuthSession;
         return $this->authSession;
         break;
-
-      default:
-        throw new SagException("Unknown auth type for login().");
-        break;
     }
+
+    throw new SagException("Unknown auth type for login().");
   }
 
   /**
@@ -548,8 +546,6 @@ class Sag
       $headers['Cookie'] = 'AuthSession='.$this->authSession;
       $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
     }
-    else
-      unset($headers['Authorization'], $headers['Cookie'], $headers['X-CouchDB-WWW-Authenticate']);
 
     // JSON is our default and most used Content-Type, but others need to be
     // specified to allow attachments.
