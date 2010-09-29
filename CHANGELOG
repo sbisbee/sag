@@ -1,6 +1,18 @@
 Sag Changes
 ===========
 
+Version 0.3
+-----------
+
+New Features
+
+  * Cookie based authentication. Thanks to Benjamin Young. (closes #1)
+
+Fixed Bugs
+
+  * getAllDocs() no longer always includes documents. Thanks to
+    www.github.com/hepp.
+
 Version 0.2
 -----------
 
