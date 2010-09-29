@@ -111,12 +111,26 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_getAllDocs()
   {
-    $this->assertTrue(is_array(
-      $this->couch->getAllDocs(true, 0, '""', '[]')->body->rows
-    ));
+    $resDefaults = $this->couch->getAllDocs();
+    $this->assertTrue(is_array($resDefaults->body->rows));
+    $this->assertTrue(isset($resDefaults->body->rows[0]));
+    $this->assertFalse(isset($resDefaults->body->rows[0]->doc));
 
-    $this->assertEquals('1',
-      $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
+    $resAllWithDocs = $this->couch->getAllDocs(true, null, '""', '[]');
+    $this->assertTrue(is_array($resAllWithDocs->body->rows));
+    $this->assertTrue(isset($resAllWithDocs->body->rows[0]->doc));
+    $this->assertEquals(
+              sizeof($resDefaults->body->rows), 
+              sizeof($resAllWithDocs->body->rows)
+    );
+
+    $resLimitZero = $this->couch->getAllDocs(false, 0);
+    $this->assertTrue(is_array($resLimitZero->body->rows));
+    $this->assertTrue(empty($resLimitZero->body->rows)); 
+
+    $this->assertEquals(
+              '1',
+              $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
     );
   }
 
