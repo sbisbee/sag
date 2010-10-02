@@ -586,6 +586,7 @@ class Sag
     // Prepare the data structure to store the response.
     $response = new StdClass();
     $response->headers = new StdClass();
+    $response->headers->_HTTP = new StdClass();
     $response->body = '';
 
     // Read in the response.
