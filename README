@@ -1,7 +1,7 @@
 Sag
 ===
 
-Version 0.2.0
+Version 0.3.0 (UNRELEASED)
 http://www.saggingcouch.com
 
 Sag is a simple PHP library for working with CouchDB. It is designed to not
@@ -13,8 +13,8 @@ it, and expand Sag to incorporate new CouchDB functionality.
 Compatability
 -------------
 
-Each Sag release is tested against CouchDB 0.11.x and 1.0.x. It is most likely
-still compatible with 0.10.x, but it's no longer tested.
+Each Sag release is tested against CouchDB 0.11.x and 1.0.x. The majority of
+Sag is most likely still compatible with 0.10.x, but it's no longer tested.
 
 Contents
 --------
@@ -130,6 +130,9 @@ Sag automatically decode into PHP objects with json_decode().
 If you've told Sag to not decode CouchDB's responses, then it'll only return
 the resulting JSON from CouchDB as a string (what would have been in the body
 property if you had set decode to true). None of the HTTP info is included.
+
+If CouchDB specifies Set-Cookies, then they will be stored in $result->cookies
+as a StdClass.
 
 Functions
 ---------
