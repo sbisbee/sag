@@ -97,7 +97,7 @@ class SagFileCache extends SagCache
     fclose($fh);
 
     // Only return the $oldCopy if it exists
-    return (is_object($oldCopy)) ? $oldCopy : true;
+    return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
   }
 
   public function get($url)
