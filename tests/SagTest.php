@@ -74,6 +74,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->post($doc)->body->ok);
   }
 
+  public function test_newDocInvalidType()
+  {
+    try
+    {
+      $this->couch->post(123); //should throw
+      $this->assertTrue(false); //shouldn't reach this line
+    }
+    catch(Exception $e)
+    {
+      $this->assertTrue(true);
+    }
+  }
+
   public function test_getID()
   {
     $result = $this->couch->get('/1');

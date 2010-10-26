@@ -179,7 +179,7 @@ class Sag
     if(!is_string($id))
       throw new SagException('put() expected a string for the doc id.');
 
-    if(!isset($data))
+    if(!isset($data) || (!is_object($data) && !is_string($data) && !is_array($data)))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
     if(!is_string($data))
@@ -202,7 +202,7 @@ class Sag
     if(!$this->db)
       throw new SagException('No database specified');
 
-    if(!isset($data))
+    if(!isset($data) || (!is_string($data) && !is_object($data) && !is_array($data)))
       throw new SagException('post() needs an object for data.');
 
     if(!is_string($data))
