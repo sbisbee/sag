@@ -62,6 +62,18 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($result->body->id, '1');
   }
 
+  public function test_newDocFromArray()
+  {
+    $doc = array("hi" => "there");
+    $this->assertTrue($this->couch->post($doc)->body->ok);
+  }
+
+  public function test_newDocFromString()
+  {
+    $doc = '{"aw": "yeah", "number": 1}';
+    $this->assertTrue($this->couch->post($doc)->body->ok);
+  }
+
   public function test_getID()
   {
     $result = $this->couch->get('/1');
