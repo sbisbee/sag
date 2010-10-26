@@ -177,10 +177,13 @@ class Sag
     if(!is_string($id))
       throw new SagException('put() expected a string for the doc id.');
 
-    if(!isset($data) || !is_object($data))
+    if(!isset($data))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
-    return $this->procPacket('PUT', "/{$this->db}/$id", json_encode($data));
+    if(!is_string($data))
+      $data = json_encode($data);
+
+    return $this->procPacket('PUT', "/{$this->db}/$id", $data);
   }
 
 
@@ -196,10 +199,13 @@ class Sag
     if(!$this->db)
       throw new SagException('No database specified');
 
-    if(!isset($data) || !is_object($data))
+    if(!isset($data))
       throw new SagException('post() needs an object for data.');
 
-    return $this->procPacket('POST', "/{$this->db}", json_encode($data));
+    if(!is_string($data))
+      $data = json_encode($data);
+
+    return $this->procPacket('POST', "/{$this->db}", $data);
   }
 
   /**
