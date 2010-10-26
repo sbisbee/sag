@@ -164,8 +164,8 @@ class Sag
    * PUT's the data to the document.
    *
    * @param string $id The document's _id.
-   * @param object $data The document, which should have _id and _rev
-   * properties.
+   * @param mixed $data The document, which should have _id and _rev
+   * properties. Can be an object, array, or string.
    *
    * @return mixed
    */
@@ -190,7 +190,8 @@ class Sag
   /**
    * POST's the provided document.
    *
-   * @param object $data The document that you want created.
+   * @param mixed $data The document that you want created. Can be an object,
+   * array, or string.
    *
    * @return mixed
    */
@@ -211,8 +212,8 @@ class Sag
   /**
    * Bulk pushes documents to the database.
    *
-   * @param array $docs An array of objects, which are the documents you want
-   * to push.
+   * @param array $docs An array of the documents you want to be pushed; they
+   * can be JSON strings, objects, or arrays.
    * @param bool $allOrNothing Whether to treat the transactions as "all or
    * nothing" or not. Defaults to false.
    *
