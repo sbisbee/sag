@@ -54,7 +54,8 @@ abstract class SagCache
    * cached item. If the cache's size will be exceeded by caching the new item,
    * then it will remove items from the cache until there is sufficient room.
    *
-   * Returns false if adding the item would exceed the cache size.
+   * Returns false if the item cannot be added to the cache for any reason:
+   * exceeds the cache size, invalid type, or relevant HTTP headers.
    *
    * Returns true if we were able to add the item, and there was no previously
    * cached item.

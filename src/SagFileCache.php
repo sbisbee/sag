@@ -79,6 +79,9 @@ class SagFileCache extends SagCache
     if(empty($url))
       throw new SagException('You need to provide a URL to cache.');
 
+    if(!parent::mayCache($item))
+      return false;
+
     $item = json_encode($item);
     $target = self::makeFilename($url);
 
