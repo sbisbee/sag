@@ -143,4 +143,28 @@ abstract class SagCache
 
     $this->currentSize += $amt;
   }
+
+  /**
+   * Returns whether or not the item may be cached. It has to be a StdClass
+   * that Sag would return, with a valid E-Tag, and no cache headers that tell
+   * us to not cache.
+   *
+   * @param The item that we're trying to cache - it should be a response as a
+   * StdClass.
+   * @return bool
+   */
+  protected function mayCache($item)
+  {
+    //TODO we should be checking ages, etc., even though CouchDB doesn't use
+    //them (an intermediate might)
+
+    return (
+      isset($item) && 
+      is_object($item) && 
+      isset($item->headers) &&
+      is_string($item->headers->Etag) &&
+      !empty($item->headers->Etag) &&
+      isset($item->body)
+    );
+  }
 }
