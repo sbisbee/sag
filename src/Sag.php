@@ -186,7 +186,8 @@ class Sag
 
 
   /**
-   * POST's the provided document.
+   * POST's the provided document. When using a SagCache, the created document
+   * and response are not cached.
    *
    * @param object $data The document that you want created.
    *
