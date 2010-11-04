@@ -268,7 +268,7 @@ class Sag
 
     $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
 
-    if($this->cache && $response->headers->Etag)
+    if($this->cache)
       $this->cache->set("/$dstID", $response);
 
     return $response;
