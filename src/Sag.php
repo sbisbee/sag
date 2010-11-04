@@ -121,9 +121,12 @@ class Sag
 
       if($response->headers->_HTTP->status == 304)
         return $prevResponse; //cache hit
+      
+      $this->cache->remove($url); 
     }
 
-    //Not caching, or are caching but there's nothing cached yet
+    //Not caching, or we are caching but there's nothing cached yet, or our
+    //cached item is no longer good.
     if(!$response)
       $response = $this->procPacket('GET', $url);
 
