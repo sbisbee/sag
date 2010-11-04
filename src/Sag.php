@@ -179,7 +179,7 @@ class Sag
     $response = $this->procPacket('PUT', $url, json_encode($data)); 
 
     if($this->cache)
-      $this->cache->set($url, json_encode($data));
+      $this->cache->set($url, $response);
 
     return $response;
   }
