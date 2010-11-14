@@ -383,7 +383,7 @@ class Sag
       array_push($qry, "limit=$limit");
     }
 
-    $qry = implode('&', $qry);
+    $qry = (sizeof($qry) > 0) ? '?'.implode('&', $qry) : null;
 
     if(isset($keys))
     {
@@ -393,10 +393,10 @@ class Sag
       $data = new StdClass();
       $data->keys = $keys;
 
-      return $this->procPacket('POST', "/{$this->db}/_all_docs?$qry", json_encode($data));
+      return $this->procPacket('POST', "/{$this->db}/_all_docs$qry", json_encode($data));
     }
 
-    return $this->procPacket('GET', "/{$this->db}/_all_docs?$qry");
+    return $this->procPacket('GET', "/{$this->db}/_all_docs$qry");
   }
 
   /**
