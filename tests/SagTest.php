@@ -25,6 +25,8 @@ class SagTest extends PHPUnit_Framework_TestCase
 {
   protected $couchIP;
   protected $couchDBName;
+  protected $couchAdminName;
+  protected $couchAdminPass;
 
   protected $couch;
   protected $session_couch;
@@ -33,14 +35,15 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->couchIP = '127.0.0.1';
     $this->couchDBName = 'sag_tests';
+    $this->couchAdminName = 'admin';
+    $this->couchAdminPass = 'passwd';
 
     $this->couch = new Sag($this->couchIP);
-    $this->couch->login('admin', 'passwd');
+    $this->couch->login($couchAdminName, $couchAdminPass);
     $this->couch->setDatabase($this->couchDBName);
 
     $this->session_couch = new Sag($this->couchIP);
     $this->session_couch->setDatabase($this->couchDBName);
-    $this->session_couch->login('admin', 'passwd');
   }
 
   public function test_createDB()
@@ -292,7 +295,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->assertTrue(is_string($this->session_couch->login('admin', 'passwd', Sag::$AUTH_COOKIE)));
+      $this->session_couch->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
     }
     catch(Exception $e)
     {
@@ -305,7 +308,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $db = new Sag($this->couchIP);
     $db->setDatabase($this->couchDBName);
-    $db->login('admin', 'passwd', Sag::$AUTH_COOKIE);
+    $db->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
 
     $doc = new StdClass();
     $doc->sag = 'for couchdb';
