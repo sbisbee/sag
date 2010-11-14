@@ -29,6 +29,8 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_createNew()
   {
+    $prevSize = $this->cache->getUsage();
+
     $url = '/bwah';
 
     $item = new StdClass();
@@ -48,12 +50,15 @@ class SagFileTest extends PHPUnit_Framework_TestCase
       is_writable($file)
     );
 
-    $this->assertEquals(
-      $item,
-      json_decode(file_get_contents($file))
-    );
-
-    $this->assertEquals(filesize($file), $this->cache->getUsage());
+    $fileContents = file_get_contents($file);
+    //compare objects as PHP classes
+    $this->assertEquals(json_decode(file_get_contents($file)), $item);
+    //compare objects as JSON
+    $this->assertEquals($fileContents, json_encode($item));
+    //compare sizes as JSON
+    $this->assertEquals(strlen($fileContents), strlen(json_encode($item)));
+    //compare size on disk with cache's reported size
+    $this->assertEquals(filesize($file), $this->cache->getUsage() - $prevSize);
   } 
 
   public function test_get()
