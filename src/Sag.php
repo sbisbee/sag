@@ -691,7 +691,7 @@ class Sag
           $isHeader = false; //the delim blank line
         else
         {
-          if(!isset($response->headers->_HTTP))
+          if(!isset($response->headers->_HTTP->raw))
           {
             //the first header line is always the HTTP info
             $response->headers->_HTTP->raw = $line;
