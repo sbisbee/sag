@@ -30,7 +30,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->couchIP = '192.168.1.2';
+    $this->couchIP = '127.0.0.1';
     $this->couchDBName = 'sag_tests';
 
     $this->couch = new Sag($this->couchIP);
