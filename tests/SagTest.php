@@ -19,6 +19,7 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('../src/Sag.php');
+require_once('../src/SagFileCache.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
@@ -311,6 +312,34 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $del_res = $db->delete('sag', $res->body->rev);
     $this->assertTrue($del_res->body->ok);
+  }
+
+  public function test_setCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+    $this->assertEquals($cache, $this->couch->getCache()); 
+  }
+
+  public function test_getFromCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+
+    $doc = new StdClass();
+    $doc->hi = "there";
+
+    $id = $this->couch->post($doc)->body->id;
+    
+    //doc creation is not cached
+    $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/$id");
+    $this->assertFalse(is_file($cFileName));
+
+    $fromDB = $this->couch->get("/$id");
+
+    //should now be cached
+    $this->assertTrue(is_file($cFileName));
+    $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
   }
 
   public function test_deleteDB()
