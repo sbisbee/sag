@@ -388,7 +388,7 @@ class Sag
     if(isset($keys))
     {
       if(!is_array($keys))
-        throw new SagException('gallAllDocs() expected an array for the keys.');
+        throw new SagException('getAllDocs() expected an array for the keys.');
 
       $data = new StdClass();
       $data->keys = $keys;
