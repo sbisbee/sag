@@ -102,6 +102,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($result->body->_id, $this->couch->get('1')->body->_id);
   }
 
+  public function test_head()
+  {
+    $metaDoc = $this->couch->head('/1');
+    $this->assertEquals($metaDoc->headers->_HTTP->status, "200");
+  }
+
   public function test_copyToNew()
   {
     $result = $this->couch->copy('1', '1copy');
