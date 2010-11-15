@@ -9,6 +9,7 @@ New Features
   * Cookie based authentication. Thanks to Benjamin Young. (closes #1)
   * Cache results with the SagCache interface. Currently supports caching to
     disk with SagFileCache.
+  * Support for HEAD requests. Thanks to Doug Cone. (closes #3)
 
 Fixed Bugs
 
