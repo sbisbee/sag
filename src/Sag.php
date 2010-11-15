@@ -165,6 +165,32 @@ class Sag
   }
 
   /**
+   * Performs an HTTP HEAD operation for the supplied document. The database name you
+   * provided is automatically prepended to the URL, so you only need to give
+   * the document or attachment ID.
+   * @see http://wiki.apache.org/couchdb/HTTP_Document_API#HEAD
+   *
+   * @param string $id The document id, with or without the leading slash.
+   * @return mixed
+   */
+  public function head($id)
+  {
+    if(!$this->db)
+      throw new SagException('No database specified');
+
+    //The first char of the URL should be a slash.
+    if(strpos($id, '/') !== 0)
+      $url = "/$id";
+
+    $url = "/{$this->db}$id";
+
+    //we're only asking for the HEAD so no caching is needed
+    $response = $this->procPacket('HEAD', $url);
+
+    return $response;
+  }
+
+  /**
    * DELETE's the specified document.
    *
    * @param string $id The document's _id.
