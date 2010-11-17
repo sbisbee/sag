@@ -19,11 +19,14 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('../src/Sag.php');
+require_once('../src/SagFileCache.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
   protected $couchIP;
   protected $couchDBName;
+  protected $couchAdminName;
+  protected $couchAdminPass;
 
   protected $couch;
   protected $session_couch;
@@ -32,14 +35,15 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->couchIP = '127.0.0.1';
     $this->couchDBName = 'sag_tests';
+    $this->couchAdminName = 'admin';
+    $this->couchAdminPass = 'passwd';
 
     $this->couch = new Sag($this->couchIP);
-    $this->couch->login('admin', 'passwd');
+    $this->couch->login($couchAdminName, $couchAdminPass);
     $this->couch->setDatabase($this->couchDBName);
 
     $this->session_couch = new Sag($this->couchIP);
     $this->session_couch->setDatabase($this->couchDBName);
-    $this->session_couch->login('admin', 'passwd');
   }
 
   public function test_createDB()
@@ -96,6 +100,12 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     //make sure we're prepending slashes when they're not present
     $this->assertEquals($result->body->_id, $this->couch->get('1')->body->_id);
+  }
+
+  public function test_head()
+  {
+    $metaDoc = $this->couch->head('/1');
+    $this->assertEquals($metaDoc->headers->_HTTP->status, "200");
   }
 
   public function test_copyToNew()
@@ -291,7 +301,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->assertTrue(is_string($this->session_couch->login('admin', 'passwd', Sag::$AUTH_COOKIE)));
+      $this->session_couch->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
     }
     catch(Exception $e)
     {
@@ -302,14 +312,46 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_createDocWithSession()
   {
+    $db = new Sag($this->couchIP);
+    $db->setDatabase($this->couchDBName);
+    $db->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
+
     $doc = new StdClass();
     $doc->sag = 'for couchdb';
 
-    $res = $this->session_couch->put('sag', $doc);
+    $res = $db->put('sag', $doc);
     $this->assertTrue($res->body->ok);
 
-    $del_res = $this->session_couch->delete('sag', $res->body->rev);
+    $del_res = $db->delete('sag', $res->body->rev);
     $this->assertTrue($del_res->body->ok);
+  }
+
+  public function test_setCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+    $this->assertEquals($cache, $this->couch->getCache()); 
+  }
+
+  public function test_getFromCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+
+    $doc = new StdClass();
+    $doc->hi = "there";
+
+    $id = $this->couch->post($doc)->body->id;
+    
+    //doc creation is not cached
+    $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/$id");
+    $this->assertFalse(is_file($cFileName));
+
+    $fromDB = $this->couch->get("/$id");
+
+    //should now be cached
+    $this->assertTrue(is_file($cFileName));
+    $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
   }
 
   public function test_deleteDB()

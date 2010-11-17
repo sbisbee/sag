@@ -52,6 +52,8 @@ class Sag
   private $socketRWTimeoutSeconds;      //The seconds for socket I/O timeout
   private $socketRWTimeoutMicroseconds; //The microseconds for socket I/O timeout
 
+  private $cache;
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -102,11 +104,9 @@ class Sag
         $this->authSession = $res->cookies->AuthSession;
         return $this->authSession;
         break;
-
-      default:
-        throw new SagException("Unknown auth type for login().");
-        break;
     }
+
+    throw new SagException("Unknown auth type for login().");
   }
 
   /**
@@ -140,7 +140,48 @@ class Sag
     if(strpos($url, '/') !== 0)
       $url = "/$url";
 
-    return $this->procPacket('GET', "/{$this->db}$url");
+    $url = "/{$this->db}$url";
+
+    //Deal with cached items
+    if($this->cache && ($prevResponse = $this->cache->get($url)))
+    {
+      $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+
+      if($response->headers->_HTTP->status == 304)
+        return $prevResponse; //cache hit
+      
+      $this->cache->remove($url); 
+    }
+
+    //Not caching, or we are caching but there's nothing cached yet, or our
+    //cached item is no longer good.
+    if(!$response)
+      $response = $this->procPacket('GET', $url);
+
+    if($this->cache)
+      $this->cache->set($url, $response);
+
+    return $response;
+  }
+
+  /**
+   * Performs an HTTP HEAD operation for the supplied document.
+   * @see http://wiki.apache.org/couchdb/HTTP_Document_API#HEAD
+   *
+   * @param string $url The URL, with or without the leading slash.
+   * @return mixed
+   */
+  public function head($url)
+  {
+    if(!$this->db)
+      throw new SagException('No database specified');
+
+    //The first char of the URL should be a slash.
+    if(strpos($url, '/') !== 0)
+      $url = "/$url";
+
+    //we're only asking for the HEAD so no caching is needed
+    return $this->procPacket('HEAD', "/{$this->db}$url");
   }
 
   /**
@@ -159,7 +200,12 @@ class Sag
     if(!is_string($id) || !is_string($rev) || empty($id) || empty($rev))
       throw new SagException('delete() expects two strings.');
 
-    return $this->procPacket('DELETE', "/{$this->db}/$id?rev=$rev");
+    $url = "/{$this->db}/$id";
+
+    if($this->cache)
+      $this->cache->remove($url);
+
+    return $this->procPacket('DELETE', "$url?rev=$rev");
   }
 
   /**
@@ -185,12 +231,19 @@ class Sag
     if(!is_string($data))
       $data = json_encode($data);
 
-    return $this->procPacket('PUT', "/{$this->db}/$id", $data);
+    $url = "/{$this->db}/$id";
+    $response = $this->procPacket('PUT', $url, $data);
+
+    if($this->cache)
+      $this->cache->set($url, $response);
+
+    return $response;
   }
 
 
   /**
-   * POST's the provided document.
+   * POST's the provided document. When using a SagCache, the created document
+   * and response are not cached.
    *
    * @param mixed $data The document that you want created. Can be an object,
    * array, or string.
@@ -245,9 +298,12 @@ class Sag
   /**
    * COPY's the document.
    *
+   * If you are using a SagCache and are copying to an existing destination,
+   * then the result will be cached (ie., what's copied to the /$destID URL).
+   *
    * @param string The _id of the document you're copying.
    * @param string The _id of the document you're copying to.
-   * @param string THe _rev of the document you're copying to. Defaults to
+   * @param string The _rev of the document you're copying to. Defaults to
    * null.
    *
    * @return mixed
@@ -270,7 +326,12 @@ class Sag
       "Destination" => "$dstID".(($dstRev) ? "?rev=$dstRev" : "")
     );
 
-    return $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers);
+    $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
+
+    if($this->cache)
+      $this->cache->set("/$dstID", $response);
+
+    return $response;
   }
 
   /**
@@ -288,7 +349,8 @@ class Sag
   }
 
   /**
-   * Gets all the documents in the database with _all_docs.
+   * Gets all the documents in the database with _all_docs. Its results will
+   * not be cached by SagCache.
    *
    * @param bool $incDocs Whether to include the documents or not. Defaults to
    * false.
@@ -309,7 +371,7 @@ class Sag
 
     $qry = array();
 
-    if(isset($incDocs))
+    if($incDocs !== false)
     {
       if(!is_bool($incDocs))
         throw new SagException('getAllDocs() expected a boolean for include_docs.');
@@ -537,6 +599,41 @@ class Sag
     $this->socketRWTimeoutMicroseconds = $microseconds;
   }
 
+  /*
+   * Pass an implementation of the SagCache, such as SagFileCache, that will be
+   * used when retrieving objects. It is taken and stored as a reference. 
+   *
+   * @param SagCache An implementation of SagCache (ex., SagFileCache).
+   */
+  public function setCache(&$cacheImpl)
+  {
+    if(!($cacheImpl instanceof SagCache))
+      throw new SagException('That is not a valid cache.');
+
+    $this->cache = $cacheImpl;
+  }
+
+  /**
+   * Returns the cache object that's currently being used. 
+   *
+   * @return SagCache
+   */
+  public function getCache()
+  {
+    return $this->cache;
+  }
+
+  /**
+   * Returns the name of the database Sag is currently working with, or null if
+   * setDatabase() hasn't been called yet.
+   *
+   * @return String
+   */
+  public function currentDatabase()
+  {
+    return $this->db;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
@@ -555,8 +652,6 @@ class Sag
       $headers['Cookie'] = 'AuthSession='.$this->authSession;
       $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
     }
-    else
-      unset($headers['Authorization'], $headers['Cookie'], $headers['X-CouchDB-WWW-Authenticate']);
 
     // JSON is our default and most used Content-Type, but others need to be
     // specified to allow attachments.
