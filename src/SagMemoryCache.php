@@ -53,7 +53,7 @@ class SagMemoryCache extends SagCache
     }
 
     $prevSize = memory_get_usage();
-    $this->cache[$url] = $item;
+    $this->cache[$url] = clone $item;
     self::addToSize(memory_get_usage() - $prevSize);
 
     return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
@@ -61,7 +61,7 @@ class SagMemoryCache extends SagCache
 
   public function get($url)
   {
-    return $this->cache[$url];
+    return ($this->cache[$url]) ? clone $this->cache[$url] : null;
   }
 
   public function remove($url)
