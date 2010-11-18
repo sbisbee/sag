@@ -51,5 +51,49 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_object($fromCache));
     $this->assertTrue(is_object($this->cache->get($url)));
   }
+
+  public function test_remove()
+  {
+    $url = '/aa';
+
+    $item = new StdClass();
+    $item->body = new StdClass();
+    $item->body->foo = "bar";
+    $item->headers = new StdClass();
+    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+
+    $this->cache->set($url, $item);
+    $this->assertTrue(is_object($this->cache->get($url)));
+    $this->cache->remove($url);
+    $this->assertFalse(is_object($this->cache->get($url)));
+  }
+
+  public function test_overwrite()
+  {
+    $url = '/bb';
+
+    $item = new StdClass();
+    $item->body = new StdClass();
+    $item->body->foo = "bar";
+    $item->headers = new StdClass();
+    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+
+    $this->cache->set($url, $item);
+
+    //local update shouldn't update cache
+    $item->body->foo = "hi there";
+    $fromCache = $this->cache->get($url);
+    $this->assertNotEquals(spl_object_hash($item), spl_object_hash($fromCache));
+
+    //update cache, so should be the same now
+    $this->cache->set($url, $item);
+    $fromCache = $this->cache->get($url);
+    $this->assertEquals($item, $fromCache); //same value, but...
+    $this->assertNotEquals(spl_object_hash($item), spl_object_hash($fromCache)); //...not the same reference
+
+    //test local deletion
+    unset($fromCache);
+    $this->assertNotNull($this->cache->get($url)); 
+  }
 }
 ?>
