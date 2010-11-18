@@ -32,7 +32,7 @@ class SagMemoryCache extends SagCache
 {
   private $cache;
 
-  public function SagFileCache()
+  public function SagMemoryCache()
   {
     $this->cache = array();
   }
