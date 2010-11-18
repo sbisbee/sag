@@ -76,6 +76,7 @@ class SagMemoryCache extends SagCache
   {
     unset($this->cache);
     $this->cache = array();
+    self::addToSize(-(self::getUsage()));
     return true;
   }
 } 

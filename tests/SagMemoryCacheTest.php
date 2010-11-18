@@ -95,5 +95,25 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
     unset($fromCache);
     $this->assertNotNull($this->cache->get($url)); 
   }
+
+  public function test_clear()
+  {
+    $this->assertEquals(0, $this->cache->getUsage());
+    
+    $item = new StdClass();
+    $item->body = new StdClass();
+    $item->body->foo = "bar";
+    $item->headers = new StdClass();
+    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+
+    $this->cache->set('/123', $item);
+    
+    $size = $this->cache->getUsage();
+    $this->assertTrue(is_int($size) && $size > 0);
+
+    $this->assertTrue($this->cache->clear());
+
+    $this->assertEquals(0, $this->cache->getUsage());
+  }
 }
 ?>
