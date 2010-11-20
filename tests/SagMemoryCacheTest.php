@@ -115,5 +115,12 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals(0, $this->cache->getUsage());
   }
+
+  public function test_defaultSizes()
+  {
+    //defaults
+    $this->assertEquals(1000000, $this->cache->getSize());
+    $this->assertEquals(0, $this->cache->getUsage());
+  }
 }
 ?>

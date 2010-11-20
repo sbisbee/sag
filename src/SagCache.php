@@ -33,7 +33,7 @@ abstract class SagCache
 {
   private $maxSize;                                     //in bytes
 
-  private $currentSize = 0;                             //in bytes
+  private $currentSize;                                 //in bytes
 
   public function SagCache()
   {
