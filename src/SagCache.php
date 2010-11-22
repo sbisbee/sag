@@ -117,7 +117,8 @@ abstract class SagCache
   }
 
   /**
-   * Returns the total size of the items in the cache in bytes.
+   * Returns the total size of the items in the cache in bytes. Not reliable if
+   * you're using SagMemoryCache.
    * 
    * @return int
    */
