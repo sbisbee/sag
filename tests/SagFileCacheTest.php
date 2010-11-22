@@ -118,5 +118,11 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $files = glob('/tmp/sag/*.sag');
     $this->assertTrue(empty($files));
   }
+
+  public function test_defaultSizes()
+  {
+    $this->assertEquals(1000000, $this->cache->getSize());
+    $this->assertEquals(0, $this->cache->getUsage());
+  }
 }
 ?>
