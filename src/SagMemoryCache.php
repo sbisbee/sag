@@ -49,20 +49,24 @@ class SagMemoryCache extends SagCache
     // If it already exists, then remove the old version but keep a copy
     if($this->cache[$url])
     {
-      $oldCopy = $this->cache[$url];
+      $oldCopy = json_decode($this->cache[$url]);
       self::remove($url);
     }
 
+    $serialized = $this->cache[$url] = $prevSize = $itemSize = 1; //for more accurate math
     $prevSize = memory_get_usage();
-    $this->cache[$url] = clone $item;
-    self::addToSize(memory_get_usage() - $prevSize);
+    $serialized = json_encode($item);
+    $itemSize = memory_get_usage() - $prevSize;
+    self::addToSize($itemSize);
+
+    $this->cache[$url] = $serialized;
 
     return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
   }
 
   public function get($url)
   {
-    return ($this->cache[$url]) ? clone $this->cache[$url] : null;
+    return ($this->cache[$url]) ? json_decode($this->cache[$url]) : null;
   }
 
   public function remove($url)
