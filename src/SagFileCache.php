@@ -82,7 +82,7 @@ class SagFileCache extends SagCache
     if(!parent::mayCache($item))
       return false;
 
-    $item = json_encode($item);
+    $serialized = json_encode($item);
     $target = self::makeFilename($url);
 
     // If it already exists, then remove the old version but keep a copy
@@ -94,7 +94,7 @@ class SagFileCache extends SagCache
 
     $fh = fopen($target, "w"); //in case self::remove() didn't get it?
 
-    fwrite($fh, $item, strlen($item)); //don't throw up if we fail - we're not mission critical
+    fwrite($fh, $serialized, strlen($serialized)); //don't throw up if we fail - we're not mission critical
     self::addToSize(filesize($target));
 
     fclose($fh);
