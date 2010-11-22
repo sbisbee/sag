@@ -71,7 +71,7 @@ abstract class SagCache
    * @param object $item The response we're caching.
    * @return mixed
    */
-  abstract public function set($url, $item);
+  abstract public function set($url, &$item);
 
   /**
    * Removes the item from the cache and returns it (null if nothing was

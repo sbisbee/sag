@@ -38,7 +38,7 @@ class SagMemoryCache extends SagCache
     $this->cache = array();
   }
 
-  public function set($url, $item)
+  public function set($url, &$item)
   {
     if(empty($url))
       throw new SagException('You need to provide a URL to cache.');

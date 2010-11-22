@@ -74,7 +74,7 @@ class SagFileCache extends SagCache
     return "$this->fsLocation/".self::makeKey($url).self::$fileExt;
   }
 
-  public function set($url, $item)
+  public function set($url, &$item)
   {
     if(empty($url))
       throw new SagException('You need to provide a URL to cache.');
