@@ -159,5 +159,19 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
     $this->cache->remove($url);
     $this->assertEquals(32, $this->cache->getUsage());
   }
+
+  public function test_cacheBadBody()
+  {
+    $item = new StdClass();
+    $item->headers = new StdClass();
+    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+
+    //try without a body
+    $this->assertFalse($this->cache->set('/hi', $item));
+
+    //try with an invalid body
+    $item->body = 123;
+    $this->assertFalse($this->cache->set('/hi', $item));
+  }
 }
 ?>
