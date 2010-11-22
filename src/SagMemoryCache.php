@@ -71,9 +71,14 @@ class SagMemoryCache extends SagCache
 
   public function remove($url)
   {
+    $prevSize = $removedSize = 1;
     $prevSize = memory_get_usage();
+
     unset($this->cache[$url]);
-    self::addToSize(-($prevSize - memory_get_usage()));
+
+    $removedSize = memory_get_usage() - $prevSize;
+    self::addToSize($removedSize);
+
     return true;
   }
 

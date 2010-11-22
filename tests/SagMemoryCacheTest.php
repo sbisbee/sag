@@ -141,6 +141,23 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(memory_get_usage() - $preSize, $this->cache->getUsage());
   }
 
-  //TODO public function test_memoryMathOnRemove()
+  public function test_memoryMathOnRemove()
+  {
+    $this->assertEquals(0, $this->cache->getUsage());
+
+    $item = new StdClass();
+    $item->body = new StdClass();
+    $item->body->foo = "bar";
+    $item->headers = new StdClass();
+    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+
+    $url = '/bwah';
+
+    $this->cache->set($url, $item);
+    $this->assertNotEquals(0, $this->cache->getUsage());
+
+    $this->cache->remove($url);
+    $this->assertEquals(32, $this->cache->getUsage());
+  }
 }
 ?>
