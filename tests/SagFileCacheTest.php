@@ -84,24 +84,30 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($new, json_decode(file_get_contents($file)));
   }
 
+  public function test_partialClear()
+  {
+    $files = glob('/tmp/sag/*.sag');
+
+    //block ourselves so we do a partial clear
+    foreach($files as $file)
+    {
+      $this->assertTrue(is_file($file));
+      $this->assertTrue(chmod($file, 0111));
+    }
+
+    //attempt the clear
+    $this->assertFalse($this->cache->clear());
+
+    //reset for future operations
+    foreach($files as $file)
+      $this->assertTrue(chmod($file, 0777));
+  }
+
   public function test_delete()
   {
     $this->assertNotNull($this->cache->get('/bwah'));
     $this->assertTrue($this->cache->remove('/bwah'));
     $this->assertNull($this->cache->get('/bwah'));
-  }
-
-  public function test_partialClear()
-  {
-    $file = array_shift(glob('/tmp/sag/*.sag'));
-    $this->assertTrue(is_file($file));
-    
-    //block ourselves so we do a partial clear
-    $this->assertTrue(chmod($file, 0111));
-    $this->assertFalse($this->cache->clear());
-
-    //reset for future operations
-    $this->assertTrue(chmod($file, 0777));
   }
 
   public function test_setSize()
@@ -117,6 +123,12 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
     $files = glob('/tmp/sag/*.sag');
     $this->assertTrue(empty($files));
+  }
+
+  public function test_defaultSizes()
+  {
+    $this->assertEquals(1000000, $this->cache->getSize());
+    $this->assertEquals(0, $this->cache->getUsage());
   }
 }
 ?>

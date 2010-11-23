@@ -33,7 +33,7 @@ abstract class SagCache
 {
   private $maxSize;                                     //in bytes
 
-  private $currentSize = 0;                             //in bytes
+  private $currentSize;                                 //in bytes
 
   public function SagCache()
   {
@@ -71,7 +71,7 @@ abstract class SagCache
    * @param object $item The response we're caching.
    * @return mixed
    */
-  abstract public function set($url, $item);
+  abstract public function set($url, &$item);
 
   /**
    * Removes the item from the cache and returns it (null if nothing was
@@ -117,7 +117,8 @@ abstract class SagCache
   }
 
   /**
-   * Returns the total size of the items in the cache in bytes.
+   * Returns the total size of the items in the cache in bytes. Not reliable if
+   * you're using SagMemoryCache.
    * 
    * @return int
    */
@@ -165,7 +166,8 @@ abstract class SagCache
       isset($item->headers) &&
       is_string($item->headers->Etag) &&
       !empty($item->headers->Etag) &&
-      isset($item->body)
+      isset($item->body) &&
+      is_object($item->body)
     );
   }
 }
