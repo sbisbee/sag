@@ -143,6 +143,7 @@ class Sag
     $url = "/{$this->db}$url";
 
     //Deal with cached items
+    $response = false;
     if($this->cache && ($prevResponse = $this->cache->get($url)))
     {
       $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
@@ -766,5 +767,47 @@ class Sag
     }
 
     return $response;
+  }
+  
+  /**
+   * @param string $group Singular security group: admin || reader
+   * @param string $type Type of permission (also singular): name || role
+   * @param string $name User or role name to set for the above group & type
+   **/
+  private function setSecurity($group, $type, $name)
+  {
+    if (!in_array($group, array('admin', 'reader')))
+      throw SagException('invalid security group: must be admin or reader');
+    if (!in_array($type, array('name', 'role')))
+      throw SagException('invalid security type: must be name or role');
+    
+    $url = "/{$this->db}/_security";
+    $response = $this->procPacket('GET', $url);
+    $old_perms = (array)$response->body;
+    $new_perms[$group.'s'][$type.'s'] = array($name);
+    $perms = array_merge_recursive($new_perms, $old_perms);
+    $response = $this->procPacket('PUT', $url, json_encode($perms));
+    
+    return $response; 
+  }
+  
+  public function setAdmin($name)
+  {
+    return $this->setSecurity('admin', 'name', $name);
+  }
+  
+  public function setAdminRole($name)
+  {
+    return $this->setSecurity('admin', 'role', $name);
+  }
+  
+  public function setReader($name)
+  {
+    return $this->setSecurity('reader', 'name', $name);
+  }
+  
+  public function setReaderRole($name)
+  {
+    return $this->setSecurity('reader', 'role', $name);
   }
 }
