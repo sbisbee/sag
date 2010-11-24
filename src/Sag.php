@@ -776,6 +776,9 @@ class Sag
    **/
   private function setSecurity($group, $type, $name)
   {
+    if(!$this->db)
+      throw new SagException('No database specified');
+
     if (!in_array($group, array('admin', 'reader')))
       throw SagException('invalid security group: must be admin or reader');
     if (!in_array($type, array('name', 'role')))
