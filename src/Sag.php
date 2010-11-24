@@ -485,7 +485,7 @@ class Sag
    *
    * @return mixed
    */
-  public function replicate($src, $target, $continuous = false)
+  public function replicate($src, $target, $continuous = false, $create_target = false, $filter = null, $query_params = null)
   {
     if(empty($src) || !is_string($src))
       throw new SagException('replicate() is missing a source to replicate from.');
@@ -496,12 +496,25 @@ class Sag
     if(!is_bool($continuous))
       throw new SagException('replicate() expected a boolean for its third argument.');
 
+    if(!is_bool($create_target))
+      throw new SagException('replicate() expected a boolean for its fourth argument.');
+
+    if(!empty($filter) && !is_string($filter))
+      throw new SagException('filter must be the name of a design doc\'s filter function: ddoc/filter');
+
+    if(!empty($query_params) && (!is_object($query_params) && !is_array($query_params)))
+      throw new SagException('query_params needs to be an object or an array');
+
     $data = new StdClass();
     $data->source = $src;
     $data->target = $target;
 
     if($continuous)
       $data->continuous = true; //only include if true (non-default), decreasing packet size
+    if($create_target)
+      $data->create_target = true;
+    if(!empty($filter)) $data->filter = $filter;
+    if(!empty($query_params)) $data->query_params = $query_params;
 
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }
