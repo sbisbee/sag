@@ -525,7 +525,7 @@ class Sag
       $data->continuous = true;
 
     if($createTarget)
-      $data->createTarget = true;
+      $data->create_target = true;
 
     if($filter)
     {
