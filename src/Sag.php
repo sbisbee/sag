@@ -482,10 +482,15 @@ class Sag
    * to.
    * @param bool $continuous Whether to make this a continuous replication job
    * or not. Defaults to false.
+   * @param bool $createTarget Specifies create_target, which will create the
+   * target database if it does not already exist.
+   * @param string $filter The name of the filter function to use.
+   * @param mixed $filterQueryParams An object or associative array of
+   * parameters to be passed to the filter function via query_params.
    *
    * @return mixed
    */
-  public function replicate($src, $target, $continuous = false, $create_target = false, $filter = null, $query_params = null)
+  public function replicate($src, $target, $continuous = false, $createTarget = false, $filter = null, $filterQueryParams = null)
   {
     if(empty($src) || !is_string($src))
       throw new SagException('replicate() is missing a source to replicate from.');
@@ -496,25 +501,33 @@ class Sag
     if(!is_bool($continuous))
       throw new SagException('replicate() expected a boolean for its third argument.');
 
-    if(!is_bool($create_target))
+    if(!is_bool($createTarget))
       throw new SagException('replicate() expected a boolean for its fourth argument.');
 
     if(!empty($filter) && !is_string($filter))
       throw new SagException('filter must be the name of a design doc\'s filter function: ddoc/filter');
 
-    if(!empty($query_params) && (!is_object($query_params) && !is_array($query_params)))
-      throw new SagException('query_params needs to be an object or an array');
+    if(!empty($filterQueryParams) && (!is_object($filterQueryParams) && !is_array($filterQueryParams)))
+      throw new SagException('filterQueryParams needs to be an object or an array');
 
     $data = new StdClass();
     $data->source = $src;
     $data->target = $target;
 
+    //These guys are optional, so only include them if non-default to save on
+    //packet size.
+
     if($continuous)
-      $data->continuous = true; //only include if true (non-default), decreasing packet size
-    if($create_target)
-      $data->create_target = true;
-    if(!empty($filter)) $data->filter = $filter;
-    if(!empty($query_params)) $data->query_params = $query_params;
+      $data->continuous = true;
+
+    if($createTarget)
+      $data->createTarget = true;
+
+    if(!empty($filter))
+      $data->filter = $filter;
+
+    if(!empty($filterQueryParams))
+      $data->filterQueryParams = $filterQueryParams;
 
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }
