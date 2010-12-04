@@ -241,9 +241,16 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $newDB = "sag_tests_replication";
 
+    // Basic
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->createDatabase($newDB)->body->ok);
     $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB)->body->ok);
+    $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
+
+    // create_target
+    $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
+    $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true)->body->ok);
+    $this->assertTrue(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
