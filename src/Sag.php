@@ -483,14 +483,15 @@ class Sag
    * @param bool $continuous Whether to make this a continuous replication job
    * or not. Defaults to false.
    * @param bool $createTarget Specifies create_target, which will create the
-   * target database if it does not already exist.
-   * @param string $filter The name of the filter function to use.
+   * target database if it does not already exist. (optional)
+   * @param string $filter The name of the filter function to use. (optional)
    * @param mixed $filterQueryParams An object or associative array of
-   * parameters to be passed to the filter function via query_params.
+   * parameters to be passed to the filter function via query_params. Only used
+   * if $filter is set.
    *
    * @return mixed
    */
-  public function replicate($src, $target, $continuous = false, $createTarget = false, $filter = null, $filterQueryParams = null)
+  public function replicate($src, $target, $continuous = false, $createTarget = null, $filter = null, $filterQueryParams = null)
   {
     if(empty($src) || !is_string($src))
       throw new SagException('replicate() is missing a source to replicate from.');
@@ -501,14 +502,17 @@ class Sag
     if(!is_bool($continuous))
       throw new SagException('replicate() expected a boolean for its third argument.');
 
-    if(!is_bool($createTarget))
-      throw new SagException('replicate() expected a boolean for its fourth argument.');
+    if(isset($createTarget) && !is_bool($createTarget))
+      throw new SagException('createTarget needs to be a boolean.');
 
-    if(!empty($filter) && !is_string($filter))
-      throw new SagException('filter must be the name of a design doc\'s filter function: ddoc/filter');
+    if(isset($filter))
+    {
+      if(!is_string($filter))
+        throw new SagException('filter must be the name of a design doc\'s filter function: ddoc/filter');
 
-    if(!empty($filterQueryParams) && (!is_object($filterQueryParams) && !is_array($filterQueryParams)))
-      throw new SagException('filterQueryParams needs to be an object or an array');
+      if(isset($filterQueryParams) && !is_object($filterQueryParams) && !is_array($filterQueryParams))
+        throw new SagException('filterQueryParams needs to be an object or an array');
+    }
 
     $data = new StdClass();
     $data->source = $src;
@@ -523,11 +527,13 @@ class Sag
     if($createTarget)
       $data->createTarget = true;
 
-    if(!empty($filter))
+    if($filter)
+    {
       $data->filter = $filter;
 
-    if(!empty($filterQueryParams))
-      $data->filterQueryParams = $filterQueryParams;
+      if($filterQueryParams)
+        $data->filterQueryParams = $filterQueryParams;
+    }
 
     return $this->procPacket('POST', '/_replicate', json_encode($data));
   }
