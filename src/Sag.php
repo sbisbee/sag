@@ -250,7 +250,7 @@ class Sag
    *
    * @return mixed
    */
-  public function post($data)
+  public function post($data, $path = null)
   {
     if(!$this->db)
       throw new SagException('No database specified');
@@ -261,7 +261,16 @@ class Sag
     if(!is_string($data))
       $data = json_encode($data);
 
-    return $this->procPacket('POST', "/{$this->db}", $data);
+    $uri = '/' . $this->db;
+
+    if (!is_null($path)) {
+      if (!substr($path, 0, 1) != '/') {
+        $path = '/' . $path;
+      }
+      $uri .= $path;
+    }
+
+    return $this->procPacket('POST', $uri, $data);
   }
 
   /**
