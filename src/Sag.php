@@ -247,6 +247,8 @@ class Sag
    *
    * @param mixed $data The document that you want created. Can be an object,
    * array, or string.
+   * @param string $path Can be the path to a view or /all_docs. The database
+   * will be prepended to the value.
    *
    * @return mixed
    */
