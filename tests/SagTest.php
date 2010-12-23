@@ -102,6 +102,33 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($result->body->_id, $this->couch->get('1')->body->_id);
   }
 
+  public function test_postAllDocs()
+  {
+    $result = $this->couch->post(array('keys' => array('1')), '/_all_docs');
+    $this->assertEquals(1, sizeof($result->body->rows));
+    $this->assertEquals("1", $result->body->rows[0]->id);
+    
+    $validData = new StdClass();
+    $invalidPaths = array(array(), "", new StdClass(), false, true);
+
+    foreach($invalidPaths as $v)
+    {
+      try
+      {
+        $this->couch->post($validData, $v);
+        $this->assertTrue(false); //above should throw
+      }
+      catch(SagException $e)
+      {
+        $this->assertTrue(true);
+      }
+      catch(Exception $e)
+      {
+        $this->assertTrue(false); //wrong type of exception
+      }
+    }
+  }
+
   public function test_head()
   {
     $metaDoc = $this->couch->head('/1');

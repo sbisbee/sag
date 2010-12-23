@@ -263,16 +263,12 @@ class Sag
     if(!is_string($data))
       $data = json_encode($data);
 
-    $uri = '/' . $this->db;
+    if(is_string($path) && !empty($path))
+      $uri = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
+    elseif(isset($path))
+      throw new SagException('post() needs a string for a path.');
 
-    if (!is_null($path)) {
-      if (!substr($path, 0, 1) != '/') {
-        $path = '/' . $path;
-      }
-      $uri .= $path;
-    }
-
-    return $this->procPacket('POST', $uri, $data);
+    return $this->procPacket('POST', "/{$this->db}{$path}", $data);
   }
 
   /**
