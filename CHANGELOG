@@ -10,6 +10,9 @@ New Features
   * Cache results with the SagCache interface. Currently supports caching to
     disk with SagFileCache.
   * Support for HEAD requests. Thanks to Doug Cone. (closes #3)
+  * You can now POST to any URI in the database, adding a second $uri parameter
+    to the post() function. Allows POST'ing to views. Thanks to Peter Kruithof.
+    (closes #7)
 
 Fixed Bugs
 
