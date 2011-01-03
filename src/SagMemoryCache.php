@@ -18,15 +18,15 @@
 require_once('SagCache.php');
 require_once('SagException.php');
 
-/*
- * Cache to the local hard disk. Uses the system's default temp directory by
- * default, but you can specify another location.
+/**
+ * Stores cached items in PHP's memory as serialized JSON, which was
+ * benchmarked as being faster than serliaze() and clone.
  *
- * Cache keys are used for file names, and the contents are JSON. System file
- * sizes are used to calculate the cache's current size.
+ * Memory sizes will not be exact because of how PHP allocates and cleans
+ * memory.
  *
  * @package Cache 
- * @version 0.2.0
+ * @version 0.3.0
  */
 class SagMemoryCache extends SagCache 
 {
