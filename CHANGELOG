@@ -13,6 +13,7 @@ New Features
   * You can now POST to any URI in the database, adding a second $uri parameter
     to the post() function. Allows POST'ing to views. Thanks to Peter Kruithof.
     (closes #7)
+  * Exposing CouchDB's runtime _stats interface with the getStats() function.
 
 Fixed Bugs
 

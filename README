@@ -1,7 +1,7 @@
 Sag
 ===
 
-Version 0.3.0 (UNRELEASED)
+Version 0.3.0
 http://www.saggingcouch.com
 
 Sag is a simple PHP library for working with CouchDB. It is designed to not
@@ -36,6 +36,17 @@ src/SagException.php            The SagException class. You don't need to
 
 src/SagCouchException.php       The SagCouchException class. You don't need to
                                 include it.
+
+src/SagCache.php                The interface that all caching mechanisms
+                                extend.
+
+src/SagFileCache.php            Caching mechanism that uses the local file
+                                system.
+
+src/SagMemoryCache.php          Caching mechanism that uses PHP objects in
+                                memory. Reported cache sizes are only
+                                semi-accurate, but are less important than file
+                                caching.
 
 tests/                          The unit tests for Sag. You can ignore these
                                 files, though SagTests.php may be interesting
