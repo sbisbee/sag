@@ -335,7 +335,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     try
     {
-      $this->session_couch->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
+      $this->session_couch->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
     }
     catch(Exception $e)
     {
@@ -348,7 +348,7 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $db = new Sag($this->couchIP);
     $db->setDatabase($this->couchDBName);
-    $db->login($couchAdminName, $couchAdminPass, Sag::$AUTH_COOKIE);
+    $db->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
 
     $doc = new StdClass();
     $doc->sag = 'for couchdb';
