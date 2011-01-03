@@ -21,7 +21,7 @@ require_once('SagCouchException.php');
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
  *
- * @version 0.3.0
+ * @version 0.4.0
  * @package Core
  */
 class Sag
