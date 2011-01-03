@@ -18,15 +18,18 @@
 require_once('SagCache.php');
 require_once('SagException.php');
 
-/*
- * Cache to the local hard disk. Uses the system's default temp directory by
- * default, but you can specify another location.
+/**
+ * Cache to the local hard disk. Uses /tmp by default, but you can specify
+ * another location.
  *
- * Cache keys are used for file names, and the contents are JSON. System file
+ * Cache keys are used for file names and the contents are JSON. System file
  * sizes are used to calculate the cache's current size.
  *
+ * Every operation goes to the disk, so this cache will not be ideal for high
+ * I/O operations.
+ *
  * @package Cache 
- * @version 0.2.0
+ * @version 0.3.0
  */
 class SagFileCache extends SagCache 
 {
