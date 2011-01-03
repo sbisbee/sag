@@ -491,4 +491,11 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(false);
     }
   }
+
+  public function test_getStats()
+  {
+    $resp = $this->couch->getStats();
+    $this->assertTrue(is_object($resp->body));
+    $this->assertTrue(is_object($resp->body->couchdb));
+  }
 }

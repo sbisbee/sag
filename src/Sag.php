@@ -673,6 +673,16 @@ class Sag
     return $this->db;
   }
 
+  /**
+   * Retrieves the run time metrics from CouchDB that lives at /_stats.
+   *
+   * @return StdClass
+   */
+  public function getStats()
+  {
+    return $this->procPacket('GET', '/_stats');
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
