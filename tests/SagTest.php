@@ -279,6 +279,42 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true)->body->ok);
     $this->assertTrue(in_array($newDB, $this->couch->getAllDatabases()->body));
     $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
+
+    // filter
+    try
+    {
+      //Provide a valid filter function that does not exist.
+      $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true, "test")->body->ok);
+      $this->assertFalse(true); //should not get this far
+    }
+    catch(SagCouchException $e)
+    {
+      $this->assertTrue(true); //we want this to happen
+    }
+
+    try
+    {
+      $this->assertFalse($this->couch->replicate($this->couchDBName, $newDB, false, false, 123)->body->ok);
+      $this->assertFalse(true); //should not get this far
+    }
+    catch(SagException $e)
+    {
+      $this->assertTrue(true); //we want this to happen
+    }
+
+    // filter query params
+    try
+    {
+      //Provide a valid filter function that does not exist.
+      $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true, "test", 123)->body->ok);
+      $this->assertFalse(true); //should not get this far
+    }
+    catch(SagException $e)
+    {
+      $this->assertTrue(true); //we want this to happen
+    }
+
+    $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
   public function test_compactView()
