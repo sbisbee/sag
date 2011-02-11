@@ -15,6 +15,9 @@
    limitations under the License.
 */
 
+require_once('SagConfigurationCheck.php');
+SagConfigurationCheck::run();
+
 require_once('SagException.php');
 require_once('SagCouchException.php');
 
