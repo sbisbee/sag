@@ -8,6 +8,7 @@ New Features
 
   * When initiated, Sag checks the PHP environment for unsupported
     error_reporting values. Thanks to Simeon Willbanks. (closes #8, #9)
+  * Support for temporary views with Sag->runTempView().
 
 Version 0.3
 -----------

@@ -148,6 +148,13 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($result->headers->_HTTP->status, '201');
   }
 
+  public function test_tempView()
+  {
+    $result = $this->couch->runTempView('function(doc) { emit(doc._id, 1); }', '_sum')->body->rows[0]->value;
+    $this->assertTrue(is_int($result));
+    $this->assertTrue($result > 0);
+  }
+
   public function test_getIDNoDecode()
   {
     $this->couch->decode(false);
