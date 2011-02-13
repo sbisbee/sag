@@ -15,11 +15,9 @@
    limitations under the License.
 */
 
-require_once('SagConfigurationCheck.php');
-SagConfigurationCheck::run();
-
 require_once('SagException.php');
 require_once('SagCouchException.php');
+require_once('SagConfigurationCheck.php');
 
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
@@ -64,6 +62,8 @@ class Sag
    */
   public function Sag($host = "127.0.0.1", $port = "5984")
   {
+    SagConfigurationCheck::run();
+
     $this->host = $host;
     $this->port = $port;
   }
