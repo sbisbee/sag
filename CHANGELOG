@@ -4,6 +4,10 @@ Sag Changes
 Version 0.4.0-UNRELEASED
 ------------------------
 
+New Features
+
+  * When initiated, Sag checks the PHP environment for unsupported
+    error_reporting values. Thanks to Simeon Willbanks. (closes #8, #9)
 
 Version 0.3
 -----------
