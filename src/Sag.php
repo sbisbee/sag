@@ -686,6 +686,34 @@ class Sag
     return $this->procPacket('GET', '/_stats');
   }
 
+
+  /**
+   * Executes a temporary view against the database.
+   *
+   * @param string $map The map function.
+   * @param string $reduce The reduce function.
+   *
+   * @return mixed 
+   */
+  public function runTempView($map, $reduce = null)
+  {
+    if(!is_string($map))
+      throw new SagException('You must pass the map function as a string.');
+
+    $data = new StdClass();
+    $data->map = $map;
+
+    if($reduce)
+    {
+      if(!is_string($reduce))
+        throw new SagException('You must pass the reduce function as a string.');
+
+      $data->reduce = $reduce;
+    } 
+
+    return $this->procPacket('POST', "/{$this->currentDatabase()}/_temp_view", json_encode($data), array('Content-Type' => 'application/json'));
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
