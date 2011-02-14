@@ -150,7 +150,11 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_tempView()
   {
-    $result = $this->couch->runTempView('function(doc) { emit(doc._id, 1); }', '_sum')->body->rows[0]->value;
+    $data = new StdClass();
+    $data->map = 'function(doc) { emit(doc._id, 1); }';
+    $data->reduce = '_sum';
+
+    $result = $this->couch->post($data, '/_temp_view');
     $this->assertTrue(is_int($result));
     $this->assertTrue($result > 0);
   }
