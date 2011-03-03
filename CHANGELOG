@@ -9,6 +9,11 @@ New Features
   * When initiated, Sag checks the PHP environment for unsupported
     error_reporting values. Thanks to Simeon Willbanks. (closes #8, #9)
 
+Fixed Bugs
+
+  * Fixed a bug where an invalid Content-Size was being sent even if no data
+    was passed to the packet.
+
 Version 0.3
 -----------
 
