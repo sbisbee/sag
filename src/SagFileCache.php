@@ -51,7 +51,7 @@ class SagFileCache extends SagCache
     if(!is_readable($location) || !is_writable($location))
       throw new SagException("Insufficient privileges to the supplied cache directory.");
 
-    parent::SagCache();
+    parent::__construct();
 
     $this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
 
