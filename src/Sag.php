@@ -690,6 +690,11 @@ class Sag
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
+    // For now we only data data as strings. Streams and other formats will be
+    // permitted later.
+    if($data && !is_string($data))
+      throw new SagException('Unexpected data format. Please report this bug.');
+
     // Do some string replacing for HTTP sanity.
     $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
