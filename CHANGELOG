@@ -13,6 +13,8 @@ Fixed Bugs
 
   * Fixed a bug where an invalid Content-Size was being sent even if no data
     was passed to the packet.
+  * Fixed a bug in POST where an incorrect variable name was being used,
+    allowing improper paths to be sent to CouchDB.
 
 Version 0.3
 -----------

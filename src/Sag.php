@@ -267,7 +267,7 @@ class Sag
       $data = json_encode($data);
 
     if(is_string($path) && !empty($path))
-      $uri = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
+      $path = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
     elseif(isset($path))
       throw new SagException('post() needs a string for a path.');
 
