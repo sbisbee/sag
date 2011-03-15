@@ -60,7 +60,7 @@ class Sag
    * to.
    * @param string $port The host's port that Couch is listening on.
    */
-  public function Sag($host = "127.0.0.1", $port = "5984")
+  public function __construct($host = "127.0.0.1", $port = "5984")
   {
     SagConfigurationCheck::run();
 

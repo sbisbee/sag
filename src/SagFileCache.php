@@ -43,7 +43,7 @@ class SagFileCache extends SagCache
    * used by default.
    * @return SagFileCache
    */
-  public function SagFileCache($location)
+  public function __construct($location)
   {
     if(!is_dir($location))
       throw new SagException("The provided cache location is not a directory.");

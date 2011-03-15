@@ -35,7 +35,7 @@ abstract class SagCache
 
   private $currentSize;                                 //in bytes
 
-  public function SagCache()
+  public function __construct()
   {
     $this->currentSize = 0;
     $this->maxSize = 1000000; 
