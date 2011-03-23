@@ -62,7 +62,7 @@ class Sag
    * to.
    * @param string $port The host's port that Couch is listening on.
    */
-  public function Sag($host = "127.0.0.1", $port = "5984")
+  public function __construct($host = "127.0.0.1", $port = "5984")
   {
     SagConfigurationCheck::run();
 
@@ -278,7 +278,7 @@ class Sag
       $data = json_encode($data);
 
     if(is_string($path) && !empty($path))
-      $uri = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
+      $path = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
     elseif(isset($path))
       throw new SagException('post() needs a string for a path.');
 
@@ -719,12 +719,17 @@ class Sag
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
+    // For now we only data data as strings. Streams and other formats will be
+    // permitted later.
+    if($data && !is_string($data))
+      throw new SagException('Unexpected data format. Please report this bug.');
+
     // Do some string replacing for HTTP sanity.
     $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/.3";
+    $headers["User-Agent"] = "Sag/.4";
 
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
@@ -740,7 +745,8 @@ class Sag
     if(!isset($headers['Content-Type']))
       $headers['Content-Type'] = 'application/json';
 
-    $headers['Content-Length'] = ($data) ? strlen($data) : null;
+    if($data)
+      $headers['Content-Length'] = strlen($data); 
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)

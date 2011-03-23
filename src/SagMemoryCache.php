@@ -32,9 +32,9 @@ class SagMemoryCache extends SagCache
 {
   private $cache;
 
-  public function SagMemoryCache()
+  public function __construct()
   {
-    parent::SagCache();
+    parent::__construct();
     $this->cache = array();
   }
 

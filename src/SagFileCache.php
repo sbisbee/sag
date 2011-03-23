@@ -43,7 +43,7 @@ class SagFileCache extends SagCache
    * used by default.
    * @return SagFileCache
    */
-  public function SagFileCache($location)
+  public function __construct($location)
   {
     if(!is_dir($location))
       throw new SagException("The provided cache location is not a directory.");
@@ -51,7 +51,7 @@ class SagFileCache extends SagCache
     if(!is_readable($location) || !is_writable($location))
       throw new SagException("Insufficient privileges to the supplied cache directory.");
 
-    parent::SagCache();
+    parent::__construct();
 
     $this->fsLocation = rtrim($location, "/ \t\n\r\0\x0B");
 
