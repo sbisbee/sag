@@ -435,6 +435,34 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
   }
 
+  public function test_setStaleDefaul()
+  {
+    try
+    {
+      //We do not want these to throw an exception
+
+      $this->couch->setStaleDefault(true);
+      $this->couch->setStaleDefault(false);
+      $this->assertTrue(true);
+    }
+    catch(Exception $e)
+    {
+      $this->assertTrue(false);
+    }
+
+    try
+    {
+      //We want this to throw an exception
+
+      $this->couch->setStaleDefault(123);
+      $this->assertTrue(false);
+    }
+    catch(Exception $e)
+    {
+      $this->assertTrue(true);
+    }
+  }
+
   public function test_deleteDB()
   {
     $this->assertTrue($this->couch->deleteDatabase($this->couchDBName)->body->ok);

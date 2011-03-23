@@ -55,6 +55,8 @@ class Sag
 
   private $cache;
 
+  private $staleDefault;                //Whether or not to use ?stale=ok on all design doc calls
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -145,6 +147,9 @@ class Sag
 
     $url = "/{$this->db}$url";
 
+    if($this->staleDefault)
+      $url = self::setURLParameter($url, 'stale', 'ok');
+
     //Deal with cached items
     if($this->cache && ($prevResponse = $this->cache->get($url)))
     {
@@ -168,7 +173,10 @@ class Sag
   }
 
   /**
-   * Performs an HTTP HEAD operation for the supplied document.
+   * Performs an HTTP HEAD operation for the supplied document. This operation
+   * does not try to read from a provided cache, and does not cache its
+   * results.
+   *
    * @see http://wiki.apache.org/couchdb/HTTP_Document_API#HEAD
    *
    * @param string $url The URL, with or without the leading slash.
@@ -182,6 +190,9 @@ class Sag
     //The first char of the URL should be a slash.
     if(strpos($url, '/') !== 0)
       $url = "/$url";
+
+    if($this->staleDefault)
+      $url = self::setURLParameter($url, 'stale', 'ok');
 
     //we're only asking for the HEAD so no caching is needed
     return $this->procPacket('HEAD', "/{$this->db}$url");
@@ -686,6 +697,24 @@ class Sag
     return $this->procPacket('GET', '/_stats');
   }
 
+  /**
+   * Set whether or not to include ?stale=ok by default when running GET and
+   * HEAD requests.
+   *
+   * When set to true, a very slight overhead in the get() and head() functions
+   * will occur, as they will parse out the parameters from the URL you
+   * provide and ensure that no other value is being passed to the stale
+   * variable.
+   *
+   * @param bool $stale True will make stale=ok be sent by default.
+   */
+  public function setStaleDefault($stale)
+  {
+    if(!is_bool($stale))
+      throw new SagException('setStaleDefault() expected a boolean argument.');
+
+    $this->staleDefault = $stale;
+  }
 
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
@@ -819,5 +848,28 @@ class Sag
     }
 
     return $response;
+  }
+
+  /**
+   * Takes a URL and k/v combo for a URL parameter, break the query string out
+   * of the URL, and sets the parameter to the k/v pair you pass in. This will
+   * overwrite a paramter's value if it already exists in the URL, or simply
+   * create it if it doesn't already.
+   *
+   *
+   * @param string $url The URL to run against.
+   * @param string $key The name of the parameter to set in the URL.
+   * @param string $value The value of the parameter to set in the URL.
+   *
+   * @return string The modified URL.
+   */
+  private function setURLParameter($url, $key, $value)
+  {
+    $url = parse_url($url);
+    
+    parse_str($url['query'], $params);
+    $params[$key] = $value;
+
+    return $url = $url['path'].'?'.http_build_query($params);
   }
 }
