@@ -16,6 +16,10 @@ Fixed Bugs
   * Fixed a bug in POST where an incorrect variable name was being used,
     allowing improper paths to be sent to CouchDB.
 
+  * When caching, bulk() now iterates over the documents it's trying to update
+    and sends them to the cache. If a document's _deleted property is true,
+    then it's removed from the cache.
+
 Version 0.3
 -----------
 

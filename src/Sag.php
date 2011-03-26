@@ -276,6 +276,10 @@ class Sag
 
   /**
    * Bulk pushes documents to the database.
+   * 
+   * If you are caching, then this function will iterate over each item and
+   * update or delete it accordingly. This can be slow if you are sending a lot
+   * of documents, so you probably want to turn caching off in that case.
    *
    * @param array $docs An array of the documents you want to be pushed; they
    * can be JSON strings, objects, or arrays.
@@ -296,11 +300,16 @@ class Sag
       throw new SagException('bulk() expects a boolean for its second argument');
 
     $data = new StdClass();
+
     //Only send all_or_nothing if it's non-default (true), saving bandwidth.
     if($allOrNothing)
       $data->all_or_nothing = $allOrNothing;
 
     $data->docs = $docs;
+
+    if($this->cache)
+      foreach($data->docs as &$v)
+        $this->cache(($v->_deleted) ? null : $v);
 
     return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
   }
