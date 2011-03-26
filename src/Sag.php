@@ -372,6 +372,9 @@ class Sag
    */
   public function setDatabase($db)
   {
+    if($this->db == $db)
+      return true;
+
     if(!is_string($db))
       throw new SagException('setDatabase() expected a string.');
 
