@@ -368,9 +368,19 @@ class Sag
    * Sets which database Sag is going to send all of its database related
    * communications to (ex., dealing with documents).
    *
+   * When specifying that the database should be created if it doesn't already
+   * exists, this will cause an HTTP GET to be sent to /dbName and
+   * createDatabase($db) if a 404 response is returned. So, only turn it on if
+   * it makes sense for your application, because it could cause needless HTTP
+   * GET calls.
+   *
    * @param string $db The database's name, as you'd put in the URL.
+   * @param bool $createIfNotFound Whether to try and create the specified
+   * database if it doesn't exist yet (checks every time this is called).
+   *
+   * @return bool Whether the function succeeded or not.
    */
-  public function setDatabase($db)
+  public function setDatabase($db, $createIfNotFound = false)
   {
     if($this->db == $db)
       return true;
@@ -378,7 +388,23 @@ class Sag
     if(!is_string($db))
       throw new SagException('setDatabase() expected a string.');
 
+    if($createIfNotFound)
+    {
+      try
+      {
+        $result = self::procPacket('GET', "/{$db}");
+      }
+      catch(SagCouchException $e)
+      {
+        if($e->getCode() != 404)
+          throw $e; //these are not the errors that we are looking for
+
+        self::createDatabase($db);
+      }
+    }
+
     $this->db = $db;
+    return true;
   }
 
   /**

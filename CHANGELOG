@@ -15,6 +15,10 @@ New Features
     views, allowing another process to trigger index updates based on the
     _changes feed.
 
+  * Now when calling setDatabase() you can tell it to create the database if it
+    does not exist (uses an HTTP GET to check if it exists). If the database
+    does not exist, then createDatabase() is called to create it.
+
 Fixed Bugs
 
   * Fixed a bug where an invalid Content-Size was being sent even if no data
