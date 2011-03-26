@@ -167,7 +167,4 @@ session_set_save_handler(
                           "CouchSessionStore::destroy",
                           "CouchSessionStore::gc"
                         );
-session_start();
-$_SESSION['foo'] = 100;
-echo session_id();
 ?>
