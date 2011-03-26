@@ -5,30 +5,35 @@ require_once '../../src/SagMemoryCache.php';
 class CouchSessionStore
 {
   private static $sag;
+  private static $sessionName;
 
   public static function setSag($sag)
   {
-    if(!($sag instanceof Sag))
-      return false;
+    if($sag == null)
+    {
+      //Use defaults
+      self::$sag = new Sag('sbisbee.com');
+      self::$sag->setCache(new SagMemoryCache());
+    }
+    elseif(!($sag instanceof Sag))
+      throw new Exception('That is not an instance of Sag.');
+    else
+      self::$sag = $sag;
 
-    self::$sag = $sag;
-    return true;
-  }
+    self::$sag->setDatabase(self::$sessionName);
 
-  public static function resetSag()
-  {
-    self::$sag = new Sag('sbisbee.com');
-    self::$sag->setDatabase('php-sessions');
-    self::$sag->setCache(new SagMemoryCache());
+    return self::$sag;
   }
 
   public static function open($sessionPath, $sessionName)
   {
+    self::$sessionName = $sessionName;
+
     //Set up Sag
     try
     {
       if(!self::$sag)
-        self::resetSag();
+        self::setSag(null);
     }
     catch(Exception $e)
     {
