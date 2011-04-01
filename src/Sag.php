@@ -712,7 +712,7 @@ class Sag
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/.4";
+    $headers["User-Agent"] = "Sag/0.4";
 
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
