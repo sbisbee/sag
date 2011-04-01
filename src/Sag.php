@@ -55,6 +55,8 @@ class Sag
 
   private $cache;
 
+  private $staleDefault;                //Whether or not to use ?stale=ok on all design doc calls
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -145,6 +147,9 @@ class Sag
 
     $url = "/{$this->db}$url";
 
+    if($this->staleDefault)
+      $url = self::setURLParameter($url, 'stale', 'ok');
+
     //Deal with cached items
     if($this->cache && ($prevResponse = $this->cache->get($url)))
     {
@@ -168,7 +173,10 @@ class Sag
   }
 
   /**
-   * Performs an HTTP HEAD operation for the supplied document.
+   * Performs an HTTP HEAD operation for the supplied document. This operation
+   * does not try to read from a provided cache, and does not cache its
+   * results.
+   *
    * @see http://wiki.apache.org/couchdb/HTTP_Document_API#HEAD
    *
    * @param string $url The URL, with or without the leading slash.
@@ -182,6 +190,9 @@ class Sag
     //The first char of the URL should be a slash.
     if(strpos($url, '/') !== 0)
       $url = "/$url";
+
+    if($this->staleDefault)
+      $url = self::setURLParameter($url, 'stale', 'ok');
 
     //we're only asking for the HEAD so no caching is needed
     return $this->procPacket('HEAD', "/{$this->db}$url");
@@ -276,6 +287,10 @@ class Sag
 
   /**
    * Bulk pushes documents to the database.
+   * 
+   * If you are caching, then this function will iterate over each item and
+   * update or delete it accordingly. This can be slow if you are sending a lot
+   * of documents, so you probably want to turn caching off in that case.
    *
    * @param array $docs An array of the documents you want to be pushed; they
    * can be JSON strings, objects, or arrays.
@@ -296,11 +311,16 @@ class Sag
       throw new SagException('bulk() expects a boolean for its second argument');
 
     $data = new StdClass();
+
     //Only send all_or_nothing if it's non-default (true), saving bandwidth.
     if($allOrNothing)
       $data->all_or_nothing = $allOrNothing;
 
     $data->docs = $docs;
+
+    if($this->cache)
+      foreach($data->docs as &$v)
+        $this->cache(($v->_deleted) ? null : $v);
 
     return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
   }
@@ -348,14 +368,43 @@ class Sag
    * Sets which database Sag is going to send all of its database related
    * communications to (ex., dealing with documents).
    *
+   * When specifying that the database should be created if it doesn't already
+   * exists, this will cause an HTTP GET to be sent to /dbName and
+   * createDatabase($db) if a 404 response is returned. So, only turn it on if
+   * it makes sense for your application, because it could cause needless HTTP
+   * GET calls.
+   *
    * @param string $db The database's name, as you'd put in the URL.
+   * @param bool $createIfNotFound Whether to try and create the specified
+   * database if it doesn't exist yet (checks every time this is called).
+   *
+   * @return bool Whether the function succeeded or not.
    */
-  public function setDatabase($db)
+  public function setDatabase($db, $createIfNotFound = false)
   {
+    if($this->db == $db)
+      return true;
+
     if(!is_string($db))
       throw new SagException('setDatabase() expected a string.');
 
+    if($createIfNotFound)
+    {
+      try
+      {
+        $result = self::procPacket('GET', "/{$db}");
+      }
+      catch(SagCouchException $e)
+      {
+        if($e->getCode() != 404)
+          throw $e; //these are not the errors that we are looking for
+
+        self::createDatabase($db);
+      }
+    }
+
     $this->db = $db;
+    return true;
   }
 
   /**
@@ -686,6 +735,24 @@ class Sag
     return $this->procPacket('GET', '/_stats');
   }
 
+  /**
+   * Set whether or not to include ?stale=ok by default when running GET and
+   * HEAD requests.
+   *
+   * When set to true, a very slight overhead in the get() and head() functions
+   * will occur, as they will parse out the parameters from the URL you
+   * provide and ensure that no other value is being passed to the stale
+   * variable.
+   *
+   * @param bool $stale True will make stale=ok be sent by default.
+   */
+  public function setStaleDefault($stale)
+  {
+    if(!is_bool($stale))
+      throw new SagException('setStaleDefault() expected a boolean argument.');
+
+    $this->staleDefault = $stale;
+  }
 
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
@@ -825,5 +892,28 @@ class Sag
     }
 
     return $response;
+  }
+
+  /**
+   * Takes a URL and k/v combo for a URL parameter, break the query string out
+   * of the URL, and sets the parameter to the k/v pair you pass in. This will
+   * overwrite a paramter's value if it already exists in the URL, or simply
+   * create it if it doesn't already.
+   *
+   *
+   * @param string $url The URL to run against.
+   * @param string $key The name of the parameter to set in the URL.
+   * @param string $value The value of the parameter to set in the URL.
+   *
+   * @return string The modified URL.
+   */
+  private function setURLParameter($url, $key, $value)
+  {
+    $url = parse_url($url);
+    
+    parse_str($url['query'], $params);
+    $params[$key] = $value;
+
+    return $url = $url['path'].'?'.http_build_query($params);
   }
 }
