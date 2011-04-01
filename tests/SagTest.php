@@ -154,7 +154,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $data->map = 'function(doc) { emit(doc._id, 1); }';
     $data->reduce = '_sum';
 
-    $result = $this->couch->post($data, '/_temp_view');
+    $result = $this->couch->post($data, '/_temp_view')->body->rows[0]->value;
     $this->assertTrue(is_int($result));
     $this->assertTrue($result > 0);
   }
