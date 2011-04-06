@@ -39,7 +39,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couchAdminPass = 'passwd';
 
     $this->couch = new Sag($this->couchIP);
-    $this->couch->login($couchAdminName, $couchAdminPass);
+    $this->couch->login($this->couchAdminName, $this->couchAdminPass);
     $this->couch->setDatabase($this->couchDBName);
 
     $this->session_couch = new Sag($this->couchIP);
@@ -154,7 +154,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $data->map = 'function(doc) { emit(doc._id, 1); }';
     $data->reduce = '_sum';
 
-    $result = $this->couch->post($data, '/_temp_view');
+    $result = $this->couch->post($data, '/_temp_view')->body->rows[0]->value;
     $this->assertTrue(is_int($result));
     $this->assertTrue($result > 0);
   }
@@ -435,13 +435,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
   }
 
-  public function test_setStaleDefaul()
+  public function test_setStaleDefault()
   {
+    // Test passing valid values.
     try
     {
       //We do not want these to throw an exception
 
       $this->couch->setStaleDefault(true);
+      $this->couch->setStaleDefault(false);
       $this->couch->setStaleDefault(false);
       $this->assertTrue(true);
     }
@@ -450,6 +452,7 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(false);
     }
 
+    // Test passing invalid values.
     try
     {
       //We want this to throw an exception
@@ -461,6 +464,30 @@ class SagTest extends PHPUnit_Framework_TestCase
     {
       $this->assertTrue(true);
     }
+
+    // Test updating a ddoc and then querying for its old results
+    $ddoc = new StdClass();
+    $ddoc->_id = "_design/app";
+    $ddoc->views = new StdClass();
+    $ddoc->views->count = new StdClass();
+    $ddoc->views->count->map = 'function(doc) { emit(null, 1); }';
+    $ddoc->views->count->reduce = '_sum';
+
+    $this->couch->put($ddoc->_id, $ddoc);
+
+    $url = '/_design/app/_view/count';
+
+    $beforeValue = $this->couch->get($url)->body->rows[0]->value;
+
+    $this->couch->post(new StdClass());
+
+    // Expect previous value
+    $this->couch->setStaleDefault(true);
+    $this->assertEquals($beforeValue, $this->couch->get($url)->body->rows[0]->value);
+
+    // Expect the new value (we added one doc)
+    $this->couch->setStaleDefault(false);
+    $this->assertEquals($beforeValue + 1, $this->couch->get($url)->body->rows[0]->value);
   }
 
   public function test_deleteDB()

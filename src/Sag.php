@@ -287,6 +287,10 @@ class Sag
 
   /**
    * Bulk pushes documents to the database.
+   * 
+   * If you are caching, then this function will iterate over each item and
+   * update or delete it accordingly. This can be slow if you are sending a lot
+   * of documents, so you probably want to turn caching off in that case.
    *
    * @param array $docs An array of the documents you want to be pushed; they
    * can be JSON strings, objects, or arrays.
@@ -307,11 +311,16 @@ class Sag
       throw new SagException('bulk() expects a boolean for its second argument');
 
     $data = new StdClass();
+
     //Only send all_or_nothing if it's non-default (true), saving bandwidth.
     if($allOrNothing)
       $data->all_or_nothing = $allOrNothing;
 
     $data->docs = $docs;
+
+    if($this->cache)
+      foreach($data->docs as &$v)
+        $this->cache(($v->_deleted) ? null : $v);
 
     return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
   }
@@ -359,14 +368,43 @@ class Sag
    * Sets which database Sag is going to send all of its database related
    * communications to (ex., dealing with documents).
    *
+   * When specifying that the database should be created if it doesn't already
+   * exists, this will cause an HTTP GET to be sent to /dbName and
+   * createDatabase($db) if a 404 response is returned. So, only turn it on if
+   * it makes sense for your application, because it could cause needless HTTP
+   * GET calls.
+   *
    * @param string $db The database's name, as you'd put in the URL.
+   * @param bool $createIfNotFound Whether to try and create the specified
+   * database if it doesn't exist yet (checks every time this is called).
+   *
+   * @return bool Whether the function succeeded or not.
    */
-  public function setDatabase($db)
+  public function setDatabase($db, $createIfNotFound = false)
   {
+    if($this->db == $db)
+      return true;
+
     if(!is_string($db))
       throw new SagException('setDatabase() expected a string.');
 
+    if($createIfNotFound)
+    {
+      try
+      {
+        $result = self::procPacket('GET', "/{$db}");
+      }
+      catch(SagCouchException $e)
+      {
+        if($e->getCode() != 404)
+          throw $e; //these are not the errors that we are looking for
+
+        self::createDatabase($db);
+      }
+    }
+
     $this->db = $db;
+    return true;
   }
 
   /**
@@ -729,7 +767,7 @@ class Sag
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/.4";
+    $headers["User-Agent"] = "Sag/0.4";
 
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
