@@ -2,17 +2,29 @@
 require_once '../../src/Sag.php';
 require_once '../../src/SagMemoryCache.php';
 
+/**
+ * Acts as an adapter between PHP's session CRUD functions and CouchDB's,
+ * storing session data and meta-data on your couch.
+ */
 class CouchSessionStore
 {
   private static $sag;
   private static $sessionName;
 
+  /**
+   * Allows users to define their own Sag object. Don't bother specifying a
+   * database name though, because it will be overwritten with the results of
+   * session_name().
+   *
+   * @param Sag $sag Your initialized Sag object.
+   * @return Sag The updated Sag object that will be used.
+   */
   public static function setSag($sag)
   {
     if($sag == null)
     {
       //Use defaults
-      self::$sag = new Sag('sbisbee.com');
+      self::$sag = new Sag();
       self::$sag->setCache(new SagMemoryCache());
     }
     elseif(!($sag instanceof Sag))
@@ -20,14 +32,23 @@ class CouchSessionStore
     else
       self::$sag = $sag;
 
-    self::$sag->setDatabase(self::$sessionName);
+    self::$sag->setDatabase(self::$sessionName, true);
 
     return self::$sag;
   }
 
+  /**
+   * Opens the session, creating the design document if necessary. You do not
+   * need to call this function directly, because PHP will do it for you.
+   *
+   * @param string $sessionPath The save path (not used).
+   * @param string $sessionName The session name, which will be used for the
+   * database name.
+   * @return bool Whether or not the operation was successful.
+   */
   public static function open($sessionPath, $sessionName)
   {
-    self::$sessionName = $sessionName;
+    self::$sessionName = strtolower($sessionName);
 
     //Set up Sag
     try
@@ -40,7 +61,9 @@ class CouchSessionStore
       return false;
     }
 
-    //See if the design doc exists, creating it if it isn't
+    self::$sag->setDatabase(self::$sessionName, true);
+
+    //See if the design doc exists, creating it if it doesn't
     try
     { 
       //it does exist, so finish early
@@ -66,8 +89,8 @@ class CouchSessionStore
     catch(Exception $e)
     {
       /*
-       * 409 code means there was a conflict, so another client already created
-       * the design doc for us. This is fine.
+       * A 409 status code means there was a conflict, so another client
+       * already created the design doc for us. This is fine.
        */
       if($e->getCode() != 409)
         return false;
@@ -76,11 +99,27 @@ class CouchSessionStore
     return true;
   }
 
+  /**
+   * Closes the session, destroying the Sag object and session name.
+   *
+   * @return bool Always returns true, because there's nothing for us to clean
+   * up.
+   */
   public static function close()
   {
+    self::$sag = null;
+    self::$sessionName = null;
+
     return true;
   }
 
+  /**
+   * Retrieves the session by its ID (document's _id).
+   *
+   * @param string $id The session ID.
+   * @return string The serialized session data (PHP takes care of
+   * deserialization for us).
+   */
   public static function read($id)
   {
     try
@@ -93,6 +132,15 @@ class CouchSessionStore
     }
   }
 
+  /**
+   * Updates the session data, creating it if necessary. This will also advance
+   * the session's createdAt timestamp to time(), pushing out when it will
+   * expire and be garbage collected.
+   *
+   * @param string $id The sesion ID.
+   * @param string $data The serialized data to store.
+   * @return bool Whether or not the operation was successful.
+   */
   public static function write($id, $data)
   {
     try
@@ -124,6 +172,12 @@ class CouchSessionStore
     return true;
   }
 
+  /**
+   * Destroys the session, deleting it from CouchDB.
+   *
+   * @param string $id The session ID.
+   * @return bool Whether or not the operation was successful.
+   */
   public static function destroy($id)
   {
     try
@@ -138,8 +192,17 @@ class CouchSessionStore
     return true;
   }
 
+  /**
+   * Runs garbage collection against the sessions, deleting all those that are
+   * older than the number of seconds passed to this function. Uses CouchDB's
+   * Bulk Document API instead of deleting each one individually.
+   *
+   * @param int $maxLife The maximum life of a session in seconds.
+   * @return bool Whether or not the operation was successful.
+   */
   public static function gc($maxLife)
   {
+    $toDelete = array();
     $now = time();
 
     try
@@ -147,8 +210,16 @@ class CouchSessionStore
       $rows = self::$sag->get('/_design/app/_view/byCreateTime?include_docs=true&endkey='.$now)->body->rows;
 
       foreach($rows as $row)
+      {
         if($row->doc->createdOn + $maxLife < $now)
-          self::$sag->delete($row->doc->_id, $row->doc->_rev);          
+        {
+          $row->doc->_deleted = true;
+          $toDelete[] = $row->doc;
+        }
+      }
+
+      if(sizeof($toDelete) > 0)
+        self::$sag->bulk($toDelete);
     }
     catch(Exception $e)
     {
@@ -159,12 +230,12 @@ class CouchSessionStore
   }
 }
 
-session_set_save_handler(
-                          "CouchSessionStore::open",
-                          "CouchSessionStore::close",
-                          "CouchSessionStore::read",
-                          "CouchSessionStore::write",
-                          "CouchSessionStore::destroy",
-                          "CouchSessionStore::gc"
+session_set_save_handler(                                                                                            
+                          array(CouchSessionStore, "open"),
+                          array(CouchSessionStore, "close"),
+                          array(CouchSessionStore, "read"),
+                          array(CouchSessionStore, "write"),
+                          array(CouchSessionStore, "destroy"),
+                          array(CouchSessionStore, "gc")
                         );
 ?>
