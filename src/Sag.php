@@ -57,6 +57,8 @@ class Sag
 
   private $staleDefault;                //Whether or not to use ?stale=ok on all design doc calls
 
+  private $connPool = array();          //Connection pool
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -68,6 +70,15 @@ class Sag
 
     $this->host = $host;
     $this->port = $port;
+  }
+
+  /**
+   * Closes any sockets that are left open in the connection pool.
+   */
+  public function __destruct()
+  {
+    foreach($this->connPool as $sock)
+      @fclose($sock);
   }
 
   /**
@@ -768,6 +779,7 @@ class Sag
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/0.4";
+    $headers["Connection"] = "Keep-Alive";
 
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
@@ -796,10 +808,15 @@ class Sag
       $buff .= "\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
-    if($this->socketOpenTimeout)
-      $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+    if(sizeof($this->connPool) <= 0)
+    {
+      if($this->socketOpenTimeout)
+        $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+      else
+        $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+    }
     else
-      $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+      $sock = array_shift($this->connPool);
 
     if(!$sock)
       throw new SagException("Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo).");
@@ -817,23 +834,37 @@ class Sag
     $response->headers->_HTTP = new StdClass();
     $response->body = '';
 
-    // Read in the response.
-    $isHeader = true; //whether or not we're reading the HTTP headers or data
-
+    $isHeader = true;
     $sockInfo = stream_get_meta_data($sock);
 
-    while(!feof($sock))
+    // Read in the response.
+    while(
+      !feof($sock) && 
+      (
+        (
+          $isHeader &&
+          !isset($response->headers->{'Content-Length'})
+        ) ||
+        (
+          !$isHeader &&
+          isset($response->headers->{'Content-Length'}) &&
+          strlen($response->body) < $response->headers->{'Content-Length'}
+        )
+      )
+    )
     {
       if($sockInfo['timed_out'])
         throw new SagException('Connection timed out while reading.');
 
       $line = fgets($sock);
+var_dump($line);
+var_dump($isHeader);
 
       if($isHeader)
       {
         $line = trim($line);
 
-        if(empty($line))
+        if($isHeader && empty($line))
           $isHeader = false; //the delim blank line
         else
         {
@@ -871,6 +902,11 @@ class Sag
       else
         $response->body .= $line;
     }
+echo 'out';
+
+    //We're done with the socket, so someone else can use it.
+    if($response->headers->Connection == 'Keep-Alive')
+      $this->connPool[] = $sock;
 
     /*
      * $json won't be set if invalid JSON is sent back to us. This will most
