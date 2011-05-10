@@ -841,14 +841,17 @@ class Sag
     while(
       !feof($sock) && 
       (
-        (
-          $isHeader &&
-          !isset($response->headers->{'Content-Length'})
-        ) ||
+        $isHeader ||
         (
           !$isHeader &&
-          isset($response->headers->{'Content-Length'}) &&
-          strlen($response->body) < $response->headers->{'Content-Length'}
+          $method != 'HEAD' &&
+          (
+            !isset($response->headers->{'Content-Length'}) ||
+            (
+              isset($response->headers->{'Content-Length'}) &&
+              strlen($response->body) < $response->headers->{'Content-Length'}
+            )
+          )
         )
       )
     )
@@ -857,8 +860,6 @@ class Sag
         throw new SagException('Connection timed out while reading.');
 
       $line = fgets($sock);
-var_dump($line);
-var_dump($isHeader);
 
       if($isHeader)
       {
@@ -902,11 +903,14 @@ var_dump($isHeader);
       else
         $response->body .= $line;
     }
-echo 'out';
 
     //We're done with the socket, so someone else can use it.
     if($response->headers->Connection == 'Keep-Alive')
       $this->connPool[] = $sock;
+
+    //Make sure we got the complete response.
+    if($method != 'HEAD' && isset($response->headers->{'Content-Length'}) && strlen($response->body) < $response->headers->{'Content-Length'})
+      throw new SagException('Unexpected end of packet.');
 
     /*
      * $json won't be set if invalid JSON is sent back to us. This will most
