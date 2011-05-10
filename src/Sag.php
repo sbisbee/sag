@@ -808,15 +808,27 @@ class Sag
       $buff .= "\r\n\r\n";
 
     // Open the socket only once we know everything is ready and valid.
-    if(sizeof($this->connPool) <= 0)
+    $sock = null;
+    while(!$sock)
     {
-      if($this->socketOpenTimeout)
-        $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+      if(sizeof($this->connPool) > 0)
+      {
+        $maybeSock = array_shift($this->connPool);
+        $meta = stream_get_meta_data($maybeSock);
+
+        if(!$meta['timed_out'] && !$meta['eof'])
+          $sock = $maybeSock;
+        elseif(is_resource($maybeSock))
+          fclose($maybeSock);
+      }
       else
-        $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+      {
+        if($this->socketOpenTimeout)
+          $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+        else
+          $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+      }
     }
-    else
-      $sock = array_shift($this->connPool);
 
     if(!$sock)
       throw new SagException("Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo).");
