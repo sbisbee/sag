@@ -22,7 +22,7 @@ require_once('SagConfigurationCheck.php');
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
  *
- * @version 0.4.0
+ * @version 0.5.0
  * @package Core
  */
 class Sag
@@ -712,7 +712,7 @@ class Sag
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/0.4";
+    $headers["User-Agent"] = "Sag/0.5";
 
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
