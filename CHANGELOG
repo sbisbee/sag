@@ -6,6 +6,10 @@ Version 0.5.0
 
 New Features
 
+  * Added the examples/ directory with an example of how one could store PHP
+    session data in CouchDB. Related blog post:
+    http://weblog.bocoup.com/storing-php-sessions-in-couchdb
+
 Fixed Bugs
 
   * All query parameters are now properly URL encoded. However, developers must
