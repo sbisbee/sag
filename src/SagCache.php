@@ -157,9 +157,6 @@ abstract class SagCache
    */
   protected function mayCache($item)
   {
-    //TODO we should be checking ages, etc., even though CouchDB doesn't use
-    //them (an intermediate might)
-
     return (
       isset($item) && 
       is_object($item) && 
