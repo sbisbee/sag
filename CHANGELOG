@@ -8,6 +8,10 @@ New Features
 
 Fixed Bugs
 
+  * All query parameters are now properly URL encoded. However, developers must
+    do their own URL encoding for get($url) URLs, etc., which is now noted in
+    the documentation.
+
 Version 0.4.0
 -------------
 
