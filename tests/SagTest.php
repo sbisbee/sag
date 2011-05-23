@@ -35,8 +35,8 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->couchIP = '127.0.0.1';
     $this->couchDBName = 'sag_tests';
-    $this->couchAdminName = 'admin';
-    $this->couchAdminPass = 'passwd';
+    $this->couchAdminName = 'sam bisbee';
+    $this->couchAdminPass = 'hi/there';
 
     $this->couch = new Sag($this->couchIP);
     $this->couch->login($this->couchAdminName, $this->couchAdminPass);

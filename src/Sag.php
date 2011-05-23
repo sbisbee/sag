@@ -104,7 +104,9 @@ class Sag
         break;
 
       case Sag::$AUTH_COOKIE:
-        // TODO: url encode user data
+        $user = urlencode($user);
+        $pass = urlencode($pass);
+
         $res = $this->procPacket('POST', '/_session', "name=$user&password=$pass", array('Content-Type' => 'application/x-www-form-urlencoded'));
         $this->authSession = $res->cookies->AuthSession;
         return $this->authSession;
