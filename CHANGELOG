@@ -4,6 +4,13 @@ Sag Changes
 Version 0.5.0
 -------------
 
+Breaking Changes
+
+  * These functions now return the current instance of Sag ($this):
+    decode, setDatabase, setOpenTimeout, setRWTimeout, setCache,
+    setStaleDefault. This allows configuration functions to be chained before
+    you make a call to CouchDB. (closes #14)
+
 New Features
 
   * Added the examples/ directory with an example of how one could store PHP
