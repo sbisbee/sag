@@ -411,7 +411,7 @@ class Sag
       if(!is_string($startKey))
         throw new SagException('getAllDocs() expected a string for startkey.');
 
-      array_push($qry, "startkey=$startKey");
+      $qry[] = 'startkey='.urlencode($startKey);
     }
 
     if(isset($endKey))
@@ -419,7 +419,7 @@ class Sag
       if(!is_string($endKey))
         throw new SagException('getAllDocs() expected a string for endkey.');
 
-      array_push($qry, "endkey=$endKey");
+      $qry[] = 'endkey='.$endKey;
     }
 
     if(isset($limit))
@@ -427,7 +427,7 @@ class Sag
       if(!is_int($limit) || $limit < 0)
         throw new SagException('getAllDocs() expected a positive integeter for limit.');
 
-      array_push($qry, "limit=$limit");
+      $qry[] = 'limit='.urlencode($limit);
     }
 
     $qry = (sizeof($qry) > 0) ? '?'.implode('&', $qry) : null;
