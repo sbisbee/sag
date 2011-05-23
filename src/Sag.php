@@ -467,6 +467,7 @@ class Sag
     if(!is_int($num) || $num < 0)
       throw new SagException('generateIDs() expected an integer >= 0.');
 
+    //don't need to URL encode since ints are, well, harmless lil' ol' ints
     return $this->procPacket('GET', "/_uuids?count=$num");
   }
 
@@ -612,7 +613,7 @@ class Sag
     if(empty($contentType))
       throw new SagException('You need to provide the data\'s Content-Type.');
 
-    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
+    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".urlencode(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
   }
 
   /**
