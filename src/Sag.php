@@ -387,24 +387,24 @@ class Sag
    */
   public function setDatabase($db, $createIfNotFound = false)
   {
-    if($this->db == $db)
-      return true;
-
-    if(!is_string($db))
-      throw new SagException('setDatabase() expected a string.');
-
-    if($createIfNotFound)
+    if($this->db != $db)
     {
-      try
-      {
-        $result = self::procPacket('GET', "/{$db}");
-      }
-      catch(SagCouchException $e)
-      {
-        if($e->getCode() != 404)
-          throw $e; //these are not the errors that we are looking for
+      if(!is_string($db))
+        throw new SagException('setDatabase() expected a string.');
 
-        self::createDatabase($db);
+      if($createIfNotFound)
+      {
+        try
+        {
+          $result = self::procPacket('GET', "/{$db}");
+        }
+        catch(SagCouchException $e)
+        {
+          if($e->getCode() != 404)
+            throw $e; //these are not the errors that we are looking for
+
+          self::createDatabase($db);
+        }
       }
     }
 
