@@ -97,6 +97,7 @@ class Sag
     switch($type)
     {
       case Sag::$AUTH_BASIC:
+        //these will end up in a header, so don't URL encode them
         $this->user = $user;
         $this->pass = $pass;
 
@@ -134,6 +135,8 @@ class Sag
    * Performs an HTTP GET operation for the supplied URL. The database name you
    * provided is automatically prepended to the URL, so you only need to give
    * the portion of the URL that comes after the database name.
+   *
+   * You are responsible for URL encoding your own parameters.
    *
    * @param string $url The URL, with or without the leading slash.
    * @return mixed
