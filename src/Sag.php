@@ -467,7 +467,7 @@ class Sag
       $qry[] = 'limit='.urlencode($limit);
     }
 
-    $qry = (sizeof($qry) > 0) ? '?'.implode('&', $qry) : null;
+    $qry = '?'.implode('&', $qry);
 
     if(isset($keys))
     {
