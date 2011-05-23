@@ -84,6 +84,9 @@ class Sag
    * @param string $type The type of login system being used. Defaults to
    * Sag::$AUTH_BASIC.
    *
+   * @return mixed Returns true if the input was valid. If using $AUTH_COOKIE,
+   * then the autoSession value will be returned. Throws on failure.
+   *
    * @see $AUTH_BASIC
    * @see $AUTH_COOKIE
    */
@@ -122,6 +125,7 @@ class Sag
    * or to simply return the JSON as a string. Defaults to true.
    *
    * @param bool $decode True to decode, false to not decode.
+   * @return Sag Returns $this.
    */
   public function decode($decode)
   {
@@ -129,6 +133,8 @@ class Sag
       throw new SagException('decode() expected a boolean');
 
     $this->decodeResp = $decode;
+
+    return $this;
   }
 
   /**
@@ -383,7 +389,7 @@ class Sag
    * @param bool $createIfNotFound Whether to try and create the specified
    * database if it doesn't exist yet (checks every time this is called).
    *
-   * @return bool Whether the function succeeded or not.
+   * @return Sag Returns $this. Throws on failure.
    */
   public function setDatabase($db, $createIfNotFound = false)
   {
@@ -409,7 +415,8 @@ class Sag
     }
 
     $this->db = $db;
-    return true;
+
+    return $this;
   }
 
   /**
@@ -658,6 +665,7 @@ class Sag
    * settings the read/write timeout.
    *
    * @param int $seconds
+   * @return Sag Returns $this.
    */
   public function setOpenTimeout($seconds)
   {
@@ -665,6 +673,8 @@ class Sag
       throw new Exception('setOpenTimeout() expects a positive integer.');
 
     $this->socketOpenTimeout = $seconds;
+
+    return $this;
   }
 
   /**
@@ -676,6 +686,7 @@ class Sag
    *
    * @param int $seconds The seconds part of the timeout.
    * @param int $microseconds optional The microseconds part of the timeout.
+   * @return Sag Returns $this.
    */
   public function setRWTimeout($seconds, $microseconds = 0)
   {
@@ -694,6 +705,8 @@ class Sag
 
     $this->socketRWTimeoutSeconds = $seconds;
     $this->socketRWTimeoutMicroseconds = $microseconds;
+
+    return $this;
   }
 
   /*
@@ -701,6 +714,7 @@ class Sag
    * used when retrieving objects. It is taken and stored as a reference. 
    *
    * @param SagCache An implementation of SagCache (ex., SagFileCache).
+   * @return Sag Returns $this.
    */
   public function setCache(&$cacheImpl)
   {
@@ -708,6 +722,8 @@ class Sag
       throw new SagException('That is not a valid cache.');
 
     $this->cache = $cacheImpl;
+
+    return $this;
   }
 
   /**
@@ -751,6 +767,7 @@ class Sag
    * variable.
    *
    * @param bool $stale True will make stale=ok be sent by default.
+   * @return Sag Returns $this.
    */
   public function setStaleDefault($stale)
   {
@@ -758,6 +775,8 @@ class Sag
       throw new SagException('setStaleDefault() expected a boolean argument.');
 
     $this->staleDefault = $stale;
+
+    return $this;
   }
 
   // The main driver - does all the socket and protocol work.
