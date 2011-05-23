@@ -213,7 +213,7 @@ class Sag
     if($this->cache)
       $this->cache->remove($url);
 
-    return $this->procPacket('DELETE', "$url?rev=$rev");
+    return $this->procPacket('DELETE', $url.'?rev='.urlencode($rev));
   }
 
   /**
