@@ -13,8 +13,12 @@ and Xdebug.
 Running the Tests
 -----------------
 
-Make sure you present working directory is the tests directory (where you found
-this file) and that the Sag src directory is above it (../src/).
+Make sure your present working directory is the tests directory (where you
+found this file) and that the Sag src directory is above it (../src/).
+
+You should always run `./bootstrap.php` first, as it will check to make sure
+you have all the required binaries, that the test database doesn't already
+exist, and that your user permissions are correct.
 
 `phpunit .` will simply run all the tests
 
