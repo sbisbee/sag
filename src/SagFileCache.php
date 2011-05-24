@@ -147,7 +147,7 @@ class SagFileCache extends SagCache
         if(@unlink($file))
           self::addToSize(-$oldSize);
         else
-          $part = true;
+          $part = true; //this should really never run
       }
       else
         $part = true;
