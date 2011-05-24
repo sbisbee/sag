@@ -25,6 +25,8 @@ LICENSE                         A copy of the license that Sag is released under
 
 README                          This file.
 
+examples/                       Examples of how to use Sag.
+
 src/                            This is the code that you will want to include
                                 in your application.
 
