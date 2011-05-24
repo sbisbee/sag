@@ -809,6 +809,7 @@ class Sag
 
     // Open the socket only once we know everything is ready and valid.
     $sock = null;
+
     while(!$sock)
     {
       if(sizeof($this->connPool) > 0)
@@ -823,10 +824,18 @@ class Sag
       }
       else
       {
-        if($this->socketOpenTimeout)
-          $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
-        else
-          $sock = @fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+        try
+        {
+          //these calls should throw on error
+          if($this->socketOpenTimeout)
+            $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+          else
+            $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+        }
+        catch(Exception $e)
+        {
+          throw new SagException('Was unable to fsockopen a new socket: '.$e->getMessage());
+        }
       }
     }
 
