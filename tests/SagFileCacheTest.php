@@ -22,6 +22,8 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 {
   protected $cache;
 
+  private $FILE_EXT = '.sag';
+
   public function setUp()
   {
     $this->cache = new SagFileCache('/tmp/sag');
@@ -29,36 +31,35 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_createNew()
   {
-    $prevSize = $this->cache->getUsage();
+    foreach(array('/bwah', '/hithere', '/yup') as $url)
+    {
+      $prevSize = $this->cache->getUsage();
 
-    $url = '/bwah';
+      $item = new StdClass();
+      $item->body = new StdClass();
+      $item->body->foo = "bar";
+      $item->headers = new StdClass();
+      $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
-    $item = new StdClass();
-    $item->body = new StdClass();
-    $item->body->foo = "bar";
-    $item->headers = new StdClass();
-    $item->headers->Etag = "\"asdfasfsadfsadf\"";
+      $res = $this->cache->set($url, $item);
+      $this->assertTrue($res === true || is_object($res)); 
 
-    $res = $this->cache->set($url, $item);
-    $this->assertTrue($res === true || is_object($res)); 
+      $file = '/tmp/sag/'.$this->cache->makeKey($url).$this->FILE_EXT;
 
-    $file = '/tmp/sag/'.$this->cache->makeKey($url).'.sag';
+      $this->assertTrue(is_file($file));
+      $this->assertTrue(is_readable($file));
+      $this->assertTrue(is_writable($file));
 
-    $this->assertTrue(
-      is_file($file) &&
-      is_readable($file) &&
-      is_writable($file)
-    );
-
-    $fileContents = file_get_contents($file);
-    //compare objects as PHP classes
-    $this->assertEquals(json_decode(file_get_contents($file)), $item);
-    //compare objects as JSON
-    $this->assertEquals($fileContents, json_encode($item));
-    //compare sizes as JSON
-    $this->assertEquals(strlen($fileContents), strlen(json_encode($item)));
-    //compare size on disk with cache's reported size
-    $this->assertEquals(filesize($file), $this->cache->getUsage() - $prevSize);
+      $fileContents = file_get_contents($file);
+      //compare objects as PHP classes
+      $this->assertEquals(json_decode(file_get_contents($file)), $item);
+      //compare objects as JSON
+      $this->assertEquals($fileContents, json_encode($item));
+      //compare sizes as JSON
+      $this->assertEquals(strlen($fileContents), strlen(json_encode($item)));
+      //compare size on disk with cache's reported size
+      $this->assertEquals(filesize($file), $this->cache->getUsage() - $prevSize);
+    }
   } 
 
   public function test_get()
@@ -86,7 +87,7 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_partialClear()
   {
-    $files = glob('/tmp/sag/*.sag');
+    $files = glob('/tmp/sag/*'.$this->FILE_EXT);
 
     //block ourselves so we do a partial clear
     foreach($files as $file)
@@ -119,9 +120,12 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_clear()
   {
+    $files = glob('/tmp/sag/*'.$this->FILE_EXT);
+    $this->assertFalse(empty($files));
+
     $this->assertTrue($this->cache->clear());
 
-    $files = glob('/tmp/sag/*.sag');
+    $files = glob('/tmp/sag/*'.$this->FILE_EXT);
     $this->assertTrue(empty($files));
   }
 
