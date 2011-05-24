@@ -17,6 +17,8 @@ New Features
     session data in CouchDB. Related blog post:
     http://weblog.bocoup.com/storing-php-sessions-in-couchdb
 
+  * Added tests/bootstrap.php to make running the tests easier.
+
 Fixed Bugs
 
   * All query parameters are now properly URL encoded. However, developers must
