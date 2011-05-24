@@ -13,6 +13,12 @@ Breaking Changes
 
 New Features
 
+  * We now support connection pooling for sockets with HTTP's Connection:
+    Keep-Alive. This means we no longer open and close a socket for each
+    request made (better performance). No management is provided for the
+    maximum number of sockets that can be kept open, since this should be done
+    at the operating system level (ulimit or pam for Linux/Unix). (closes #15)
+
   * Added the examples/ directory with an example of how one could store PHP
     session data in CouchDB. Related blog post:
     http://weblog.bocoup.com/storing-php-sessions-in-couchdb
