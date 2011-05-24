@@ -19,19 +19,46 @@
 # Assumes that tests are independent from each another. That is, if one step
 # fails then the other steps should still run.
 
+numSteps=0
 failures=0
 
-echo -e -n "Checking for phpunit...\t\t\t\t" &&
-  which phpunit > /dev/null && 
-    echo "done." ||
-    (
-      echo "FAIL!" &&
-      failures=1
-    )
-  
-echo -e -n "Deleting the sag_tests database...\t\t" &&
-  curl -s -X DELETE http://admin:passwd@localhost:5984/sag_tests > /dev/null &&
+function success
+{
   echo "done."
+}
 
-[ $failures > 0 ] &&
-  echo -e "\n!!! One or more steps failed. Please resolve and re-run. !!!"
+function failure
+{
+  echo "FAIL!"
+  ((failures++))
+}
+
+for cmd in curl phpunit 
+do
+  ((numSteps++))
+  echo -e -n "checking for $cmd...\t\t\t\t"
+
+  which $cmd > /dev/null
+
+  [ $? -eq 0 ] && success || failure
+done
+
+((numSteps++))
+echo -e -n "Checking for admin:passwd credentials...\t"
+curl -s http://admin:passwd@localhost:5984/_session | grep 'name":"admin' > /dev/null
+[ $? -eq 0 ] && success || failure
+  
+((numSteps++))
+echo -e -n "Deleting the sag_tests database...\t\t"
+curl -s -X DELETE http://admin:passwd@localhost:5984/sag_tests > /dev/null
+[ $? -eq 0 ] && success || failure
+
+echo -e "\n"
+
+if [ $failures -gt 0 ]
+then
+  echo "!!! $failures/$numSteps failed. Please resolve and re-run. !!!"
+  exit 1
+else
+  echo "Success!"
+fi
