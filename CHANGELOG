@@ -11,7 +11,12 @@ Breaking Changes
     setStaleDefault. This allows configuration functions to be chained before
     you make a call to CouchDB. (closes #14)
 
+  * No longer officially supporting 0.11.x, though most of the library will
+    still work with it.
+
 New Features
+
+  * Adding support for 1.1.x.
 
   * Added the examples/ directory with an example of how one could store PHP
     session data in CouchDB. Related blog post:

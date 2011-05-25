@@ -13,8 +13,8 @@ it, and expand Sag to incorporate new CouchDB functionality.
 Compatability
 -------------
 
-Each Sag release is tested against CouchDB 0.11.x and 1.0.x. The majority of
-Sag is most likely still compatible with 0.10.x, but it's no longer tested.
+Each Sag release is tested against CouchDB 1.0.x and 1.1.x. The majority of Sag
+is most likely still compatible with 0.10.x, but it's no longer tested.
 
 Contents
 --------
