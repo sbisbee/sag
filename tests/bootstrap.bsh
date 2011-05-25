@@ -33,27 +33,35 @@ function failure
   ((failures++))
 }
 
-for cmd in curl phpunit 
+# Check for needed programs.
+for cmd in php curl phpunit
 do
   ((numSteps++))
-  echo -e -n "checking for $cmd...\t\t\t\t"
+  echo -n "Checking for $cmd..."
 
   which $cmd > /dev/null
 
   [ $? -eq 0 ] && success || failure
 done
 
+# Check PHP version number
+echo -n "Checking for PHP 5.3..."
+php -v | grep '^PHP 5.3' > /dev/null
+[ $? -eq 0 ] && success || failure
+
+# Check CouchDB credentials
 ((numSteps++))
-echo -e -n "Checking for admin:passwd credentials...\t"
+echo -n "Checking for admin:passwd credentials..."
 curl -s http://admin:passwd@localhost:5984/_session | grep 'name":"admin' > /dev/null
 [ $? -eq 0 ] && success || failure
   
+# Make sure the databases are deleted
 ((numSteps++))
-echo -e -n "Deleting the sag_tests database...\t\t"
+echo -n "Deleting the sag_tests database..."
 curl -s -X DELETE http://admin:passwd@localhost:5984/sag_tests > /dev/null
 [ $? -eq 0 ] && success || failure
 
-echo -e "\n"
+echo -e ''
 
 if [ $failures -gt 0 ]
 then
