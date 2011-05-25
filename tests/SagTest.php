@@ -33,16 +33,18 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->couchIP = '127.0.0.1';
+    $this->couchIP = ($GLOBALS['host']) ?: '127.0.0.1';
+    $this->couchPort = ($GLOBALS['port']) ?: '5983';
     $this->couchDBName = 'sag_tests';
     $this->couchAdminName = 'admin';
     $this->couchAdminPass = 'passwd';
 
-    $this->couch = new Sag($this->couchIP);
+    $this->couch = new Sag($this->couchIP, $this->couchPort);
     $this->couch->login($this->couchAdminName, $this->couchAdminPass);
     $this->couch->setDatabase($this->couchDBName);
+    $this->couch->setRWTimeout(5);
 
-    $this->session_couch = new Sag($this->couchIP);
+    $this->session_couch = new Sag($this->couchIP, $this->couchPort);
     $this->session_couch->setDatabase($this->couchDBName);
   }
 
@@ -393,7 +395,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_createDocWithSession()
   {
-    $db = new Sag($this->couchIP);
+    $db = new Sag($this->couchIP, $this->couchPort);
     $db->setDatabase($this->couchDBName);
     $db->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
 

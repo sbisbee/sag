@@ -905,6 +905,8 @@ class Sag
       if($sockInfo['timed_out'])
         throw new SagException('Connection timed out while reading.');
 
+      //TODO deal with fgets() returning false
+      //TODO add tests to check binary safeness
       $line = fgets($sock);
 
       if($isHeader)
