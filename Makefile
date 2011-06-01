@@ -16,6 +16,7 @@ all: ${DIST_DIR}
 
 	@@echo "Archiving and compressing..."
 	@@tar -zcvvf ${DIST_FILE} ${DIST_DIR} > /dev/null
+	@@rm -rf ${DIST_DIR}
 
 sign: all
 	@@gpg --output ${DIST_FILE_SIG} --detach-sig ${DIST_FILE}
