@@ -47,6 +47,10 @@ echo -n "Checking for PHP 5.3..."
 php -v | grep '^PHP 5.3' > /dev/null
 [ $? -eq 0 ] && success || failure
 
+# Check for /tmp/sag/
+echo -n "Checking for the /tmp/sag/ directory..."
+[ -d "/tmp/sag/" ] && success || failure
+
 # Check CouchDB credentials
 ((numSteps++))
 echo -n "Checking for admin:passwd credentials..."
