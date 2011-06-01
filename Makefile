@@ -7,16 +7,20 @@ FILES := CHANGELOG LICENSE NOTICE README
 
 PREFIX := .
 DIST_DIR := ${PREFIX}/sag-${VERSION}
+DIST_FILE := ${DIST_DIR}.tar.gz
 
 all: ${DIST_DIR}
 	@@echo "Copying..."
 	@@cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
 	@@echo "Archiving and compressing..."
-	@@tar -zcvvf sag-${VERSION}.tar.gz ${DIST_DIR} > /dev/null
+	@@tar -zcvvf ${DIST_FILE} ${DIST_DIR} > /dev/null
+
+sign:
+	@@gpg --sign ${DIST_FILE}
 
 clean:
-	@@rm -rf ${DIST_DIR} ${DIST_DIR}.tar.gz
+	@@rm -rf ${DIST_DIR} ${DIST_FILE} 
   
 ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
