@@ -566,4 +566,10 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_object($resp->body));
     $this->assertTrue(is_object($resp->body->couchdb));
   }
+
+  public function test_urlEncodingDatabaseName()
+  {
+    $this->couch->setDatabase('/test');
+    $this->assertEquals('%2Ftest', $this->couch->currentDatabase());
+  }
 }

@@ -32,6 +32,7 @@ class Sag
    * @static
    */
   public static $AUTH_BASIC = "AUTH_BASIC";
+
   /**
    * @var string Used by login() to use HTTP Cookie Authentication.
    * @static
@@ -396,7 +397,8 @@ class Sag
    * it makes sense for your application, because it could cause needless HTTP
    * GET calls.
    *
-   * @param string $db The database's name, as you'd put in the URL.
+   * @param string $db The database's name, as you'd put in the URL. This
+   * string will be URL encoded using PHP's urlencode().
    * @param bool $createIfNotFound Whether to try and create the specified
    * database if it doesn't exist yet (checks every time this is called).
    *
@@ -408,6 +410,8 @@ class Sag
     {
       if(!is_string($db))
         throw new SagException('setDatabase() expected a string.');
+
+      $db = urlencode($db);
 
       if($createIfNotFound)
       {
@@ -423,9 +427,9 @@ class Sag
           self::createDatabase($db);
         }
       }
-    }
 
-    $this->db = $db;
+      $this->db = $db;
+    }
 
     return $this;
   }
