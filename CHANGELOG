@@ -11,18 +11,21 @@ Breaking Changes
     setStaleDefault. This allows configuration functions to be chained before
     you make a call to CouchDB. (closes #14)
 
-  * No longer officially supporting 0.11.x, though most of the library will
-    still work with it.
+  * setDatabase() will now URL encode database names that are passed to it.
+    This may break your code if you were already encoding database names before
+    passing them. For example, `$sag->setDatabase(urlencode('some/db'));` will
+    no longer work as expected. Instead use `$sag->setDatabase('some/db');`.
 
 New Features
 
-  * We now support connection pooling for sockets with HTTP's Connection:
-    Keep-Alive. This means we no longer open and close a socket for each
+  * Sag now supports connection pooling for sockets with HTTP's Connection:
+    Keep-Alive. This means Sag no longer opens and closes a socket for each
     request made (better performance). No management is provided for the
     maximum number of sockets that can be kept open, since this should be done
     at the operating system level (ulimit or pam for Linux/Unix). (closes #15)
 
-  * Adding support for 1.1.x.
+  * Adding support for CouchDB 1.1.x, while dropping support for 0.11.x - most
+    of, or all of, 0.11.x will still work with Sag.
 
   * Added the examples/ directory with an example of how one could store PHP
     session data in CouchDB. Related blog post:
@@ -32,9 +35,11 @@ New Features
 
 Fixed Bugs
 
-  * All query parameters are now properly URL encoded. However, developers must
-    do their own URL encoding for get($url) URLs, etc., which is now noted in
-    the documentation.
+  * All functions that take query parameters as function parameters, such as
+    'startkey' in getAllDocs(), now URL encode those parameters before adding
+    them to the URL. However, functions that you pass whole URLs to, like
+    get(), do not deconstruct the URL for parameters - you must do your own URL
+    encoding when providing a full URL to a function.
 
 Version 0.4.0
 -------------
