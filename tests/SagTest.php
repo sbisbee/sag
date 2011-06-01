@@ -20,6 +20,7 @@
 require_once('PHPUnit/Framework.php');
 require_once('../src/Sag.php');
 require_once('../src/SagFileCache.php');
+require_once('../src/SagMemoryCache.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
@@ -571,5 +572,15 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->couch->setDatabase('/test');
     $this->assertEquals('%2Ftest', $this->couch->currentDatabase());
+  }
+
+  public function test_settersReturnSag()
+  {
+    $this->assertEquals($this->couch, $this->couch->decode(true));
+    $this->assertEquals($this->couch, $this->couch->setDatabase('bwah'));
+    $this->assertEquals($this->couch, $this->couch->setOpenTimeout(1));
+    $this->assertEquals($this->couch, $this->couch->setRWTimeout(1));
+    $this->assertEquals($this->couch, $this->couch->setCache(new SagMemoryCache()));
+    $this->assertEquals($this->couch, $this->couch->setStaleDefault(true));
   }
 }
