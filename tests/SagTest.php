@@ -35,9 +35,9 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->couchIP = ($GLOBALS['host']) ?: '127.0.0.1';
     $this->couchPort = ($GLOBALS['port']) ?: '5983';
-    $this->couchDBName = 'sag_tests';
-    $this->couchAdminName = 'admin';
-    $this->couchAdminPass = 'passwd';
+    $this->couchDBName = ($GLOBALS['db']) ?: 'sag_tests';
+    $this->couchAdminName = ($GLOBALS['adminName']) ?: 'admin';
+    $this->couchAdminPass = ($GLOBALS['adminPass']) ?: 'passwd';
 
     $this->couch = new Sag($this->couchIP, $this->couchPort);
     $this->couch->login($this->couchAdminName, $this->couchAdminPass);
@@ -279,7 +279,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_replication()
   {
-    $newDB = "sag_tests_replication";
+    $newDB = ($GLOBALS['dbReplication']) ?: 'sag_tests_replication';
 
     // Basic
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
