@@ -8,6 +8,7 @@ FILES := CHANGELOG LICENSE NOTICE README
 PREFIX := .
 DIST_DIR := ${PREFIX}/sag-${VERSION}
 DIST_FILE := ${DIST_DIR}.tar.gz
+DIST_FILE_SIG := ${DIST_FILE}.sig
 
 all: ${DIST_DIR}
 	@@echo "Copying..."
@@ -16,11 +17,11 @@ all: ${DIST_DIR}
 	@@echo "Archiving and compressing..."
 	@@tar -zcvvf ${DIST_FILE} ${DIST_DIR} > /dev/null
 
-sign:
-	@@gpg --sign ${DIST_FILE}
+sign: all
+	@@gpg --output ${DIST_FILE_SIG} --detach-sig ${DIST_FILE}
 
 clean:
-	@@rm -rf ${DIST_DIR} ${DIST_FILE} 
+	@@rm -rf ${DIST_DIR} ${DIST_FILE} ${DIST_FILE_SIG}
   
 ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
