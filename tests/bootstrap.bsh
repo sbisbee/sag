@@ -56,10 +56,13 @@ curl -s http://admin:passwd@localhost:5984/_session | grep 'name":"admin' > /dev
 [ $? -eq 0 ] && success || failure
   
 # Make sure the databases are deleted
-((numSteps++))
-echo -n "Deleting the sag_tests database..."
-curl -s -X DELETE http://admin:passwd@localhost:5984/sag_tests > /dev/null
-[ $? -eq 0 ] && success || failure
+for db in sag_tests sag_tests_replication bwah
+do
+  ((numSteps++))
+  echo -e -n "Deleting the $db database..."
+  curl -s -X DELETE http://admin:passwd@localhost:5984/$db > /dev/null
+  [ $? -eq 0 ] && success || failure
+done
 
 echo -e ''
 
