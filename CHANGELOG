@@ -6,15 +6,16 @@ Version 0.5.0
 
 Breaking Changes
 
-  * These functions now return the current instance of Sag ($this):
+  * These Sag class functions now return the class's current instance ($this):
     decode, setDatabase, setOpenTimeout, setRWTimeout, setCache,
     setStaleDefault. This allows configuration functions to be chained before
     you make a call to CouchDB. (closes #14)
 
-  * setDatabase() will now URL encode database names that are passed to it.
-    This may break your code if you were already encoding database names before
-    passing them. For example, `$sag->setDatabase(urlencode('some/db'));` will
-    no longer work as expected. Instead use `$sag->setDatabase('some/db');`.
+  * Sag->setDatabase() will now URL encode database names that are passed to
+    it. This may break your code if you were already encoding database names
+    before passing them. For example,
+    `$sag->setDatabase(urlencode('some/db'));` will no longer work as expected.
+    Instead use `$sag->setDatabase('some/db');`.
 
 New Features
 
@@ -36,10 +37,13 @@ New Features
 Fixed Bugs
 
   * All functions that take query parameters as function parameters, such as
-    'startkey' in getAllDocs(), now URL encode those parameters before adding
-    them to the URL. However, functions that you pass whole URLs to, like
-    get(), do not deconstruct the URL for parameters - you must do your own URL
-    encoding when providing a full URL to a function.
+    'startkey' in Sag->getAllDocs(), now URL encode those parameters before
+    adding them to the URL. However, functions that you pass whole URLs to,
+    like Sag->get(), do not deconstruct the URL for parameters - you must do
+    your own URL encoding when providing a full URL to a function.
+
+  * Sag->bulk() no longer attempts to cache. This is not a breaking change,
+    because it was never able to successfully cache before.
 
 Version 0.4.0
 -------------
