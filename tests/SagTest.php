@@ -268,12 +268,23 @@ class SagTest extends PHPUnit_Framework_TestCase
     $b->hi = "there";
     $b->lo = "fi";
 
-    $result = $this->couch->bulk(array($a, $b));
-    $this->assertTrue(is_array($result->body));
+    $c = new StdClass();
+    $c->_id = "namedDoc";
+    $c->num = 123;
 
-    $doc = $this->couch->get('/'.$result->body[0]->id);
-    $this->assertEquals($doc->body->foo, $a->foo);
-    $this->assertEquals($doc->body->bwah, $a->bwah);
+    $docs = array($a, $b, $c);
+
+    $result = $this->couch->bulk($docs);
+    $this->assertTrue(is_array($result->body));
+    $this->assertEquals(sizeof($result->body), sizeof($docs));
+
+    foreach($result->body as $i => $res)
+    {
+      $remoteDoc = $this->couch->get($res->id)->body;
+
+      foreach($docs[$i] as $k => $v)
+        $this->assertEquals($remoteDoc->$k, $v);
+    }
   }
 
   public function test_replication()
