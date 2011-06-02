@@ -14,7 +14,7 @@
 */
 
 require_once('PHPUnit/Framework.php');
-require_once('../src/SagMemoryCache.php');
+require_once('SagMemoryCache.php');
 
 class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 {

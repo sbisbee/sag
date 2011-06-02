@@ -16,9 +16,9 @@
 // See the README in tests/ for information on running and writing these tests.
 
 require_once('PHPUnit/Framework.php');
-require_once('../src/Sag.php');
-require_once('../src/SagFileCache.php');
-require_once('../src/SagMemoryCache.php');
+require_once('Sag.php');
+require_once('SagFileCache.php');
+require_once('SagMemoryCache.php');
 
 class SagTest extends PHPUnit_Framework_TestCase
 {
