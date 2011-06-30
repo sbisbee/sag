@@ -27,7 +27,7 @@ require_once('SagException.php');
  * I/O operations.
  *
  * @package Cache 
- * @version 0.5.0
+ * @version 0.6.0
  */
 class SagFileCache extends SagCache 
 {
