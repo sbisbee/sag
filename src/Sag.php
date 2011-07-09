@@ -269,8 +269,9 @@ class Sag
     $url = "/{$this->db}/$id";
     $response = $this->procPacket('PUT', $url, $data);
 
-    if($this->cache)
-      $this->cache->set($url, $response);
+    if($this->cache) {
+      $this->cache->remove($url);
+    }
 
     return $response;
   }
@@ -373,9 +374,6 @@ class Sag
     );
 
     $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
-
-    if($this->cache)
-      $this->cache->set("/$dstID", $response);
 
     return $response;
   }

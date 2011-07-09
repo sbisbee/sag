@@ -1,6 +1,15 @@
 Sag Changes
 ===========
 
+Version 0.5.1
+-------------
+
+Fixed Bugs
+
+  * Invalidating cached items on write, instead of caching unhelpful write
+    responses. Thanks to Peter Kruithof for reporting and original patch.
+    (closes #17)
+
 Version 0.5.0
 -------------
 
