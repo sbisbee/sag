@@ -58,6 +58,8 @@ class Sag
 
   private $connPool = array();          //Connection pool
 
+  private $globalCookies = array();
+
   /**
    * @param string $host The host's IP or address of the Couch we're connecting
    * to.
@@ -787,6 +789,48 @@ class Sag
     return $this;
   }
 
+  /**
+   * Sets a global cookie that will overwrite any other internal cookie values
+   * that Sag tries to set. For example, if you set AuthSession and call
+   * login(), then the AuthSession value you specify will overwrite the value
+   * retrieved from the server, so don't set AuthSession while using login().
+   *
+   * Setting the value to null will make Sag no longer send the cookie.
+   *
+   * @param string $key The cookie's key.
+   * @param string $value The cookie's value.
+   * @return Sag Returns $this.
+   *
+   * @see getCookie()
+   */
+  public function setCookie($key, $value)
+  {
+    if(!$key || !is_string($key))
+      throw new SagException('Unexpected cookie key.');
+
+    if($value && !is_string($value))
+        throw new SagException('Unexpected cookie value.');
+
+    if($value)
+      $this->globalCookies[$key] = $value;
+    else
+      unset($this->globalCookies[$key]);
+
+    return $this;
+  }
+
+  /**
+   * Returns the global cookie as set in setCookie().
+   *
+   * @return String The cookie's value or null if not set.
+   *
+   * @see setCookie()
+   */
+  public function getCookie($key)
+  {
+    return ($this->globalCookies[$key]) ?: null;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array())
   {
@@ -808,8 +852,28 @@ class Sag
       $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}");
     elseif($this->authType == Sag::$AUTH_COOKIE && isset($this->authSession))
     {
-      $headers['Cookie'] = 'AuthSession='.$this->authSession;
+      $headers['Cookie'] = array( 'AuthSession' => $this->authSession );
       $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
+    }
+
+    if(is_array($this->globalCookies) && sizeof($this->globalCookies))
+    {
+      //might have been set before by auth handling
+      if($headers['Cookie'])
+        $headers['Cookie'] = array_merge($headers['Cookie'], $this->globalCookies);
+      else
+        $headers['Cookie'] = $this->globalCookies;
+    }
+
+    if($headers['Cookie'])
+    {
+      $buff = '';
+
+      foreach($headers['Cookie'] as $k => $v)
+        $buff = (($buff) ? ' ' : '') . "$k=$v;";
+
+      $headers['Cookie'] = $buff;
+      unset($buff);
     }
 
     // JSON is our default and most used Content-Type, but others need to be
@@ -936,6 +1000,7 @@ class Sag
             if($line[0] == 'Set-Cookie')
             {
               $response->cookies = new StdClass();
+
               foreach(explode('; ', $line[1]) as $cookie)
               {
                 $crumbs = explode('=', $cookie);

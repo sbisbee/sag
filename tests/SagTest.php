@@ -606,5 +606,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch, $this->couch->setRWTimeout(1));
     $this->assertEquals($this->couch, $this->couch->setCache(new SagMemoryCache()));
     $this->assertEquals($this->couch, $this->couch->setStaleDefault(true));
+    $this->assertEquals($this->couch, $this->couch->setCookie('a', 'b'));
+  }
+
+  public function test_setAndGetCookie()
+  {
+    $this->couch->setCookie('foo', 'bar');
+    $this->assertEquals($this->couch->getCookie('foo'), 'bar');
+
+    $this->couch->setCookie('foo', null);
+    $this->assertFalse($this->couch->getCookie('foo'));
   }
 }
