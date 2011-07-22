@@ -445,6 +445,27 @@ class SagTest extends PHPUnit_Framework_TestCase
     //should now be cached
     $this->assertTrue(is_file($cFileName));
     $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
+
+    //now create a doc with PUT, which should cache
+    $doc = new StdClass();
+    $doc->_id = 'bwah';
+    $doc->foo = 'bar';
+
+    $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/{$doc->_id}");
+    $this->assertFalse(is_file($cFileName));
+
+    $fromDB = $this->couch->put($doc->_id, $doc);
+
+    $this->assertTrue($fromDB->body->ok);
+    $this->assertEquals($fromDB->body->id, $doc->_id);
+
+    $this->assertTrue(is_file($cFileName));
+
+    $fromCache = json_decode(file_get_contents($cFileName));
+
+    $this->assertEquals($fromCache->body->_id, $doc->_id);
+    $this->assertEquals($fromCache->body->_rev, $fromDB->body->rev);
+    $this->assertEquals($fromCache->body->foo, $doc->foo);
   }
 
   public function test_setStaleDefault()

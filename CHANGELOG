@@ -6,9 +6,13 @@ Version 0.5.1
 
 Fixed Bugs
 
-  * Invalidating cached items on write, instead of caching unhelpful write
-    responses. Thanks to Peter Kruithof for reporting and original patch.
-    (closes #17)
+  * Previously PUT was caching CouchDB's response, which created unexpected
+    results (the actual data being POST'd was expected to be cached). This is
+    now fixed: that data provided to post() is combined with the server's
+    response to create a cacheable object whose headers will not be entirely
+    accurate. POST is still not cached because CouchDB does not respond with an
+    E-tag to cache against. Thanks to Peter Kruithof for reporting and original
+    patch. (closes #17)
 
 Version 0.5.0
 -------------

@@ -263,14 +263,33 @@ class Sag
     if(!isset($data) || (!is_object($data) && !is_string($data) && !is_array($data)))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
-    if(!is_string($data))
-      $data = json_encode($data);
+    $toSend = (is_string($data)) ? $data : json_encode($data);
 
     $url = "/{$this->db}/$id";
-    $response = $this->procPacket('PUT', $url, $data);
+    $response = $this->procPacket('PUT', $url, $toSend);
 
-    if($this->cache) {
-      $this->cache->remove($url);
+    unset($toSend);
+
+    /*
+     * We're going to pretend like we issued a GET or HEAD by replacing the PUT
+     * response's body with the data we sent. We then update that data with the
+     * _rev from the PUT's response's body. Of course this should only run when
+     * there is a successful write to the database: we don't want to be caching
+     * failures.
+     */
+    if($this->cache && $response->body->ok) {
+      if(is_string($data)) {
+        $data = json_decode($data);
+      }
+
+      $data->_rev = $response->body->rev;
+
+      $toCache = clone $response;
+      $toCache->body = $data;
+
+      $this->cache->set($url, $toCache);
+
+      unset($toCache);
     }
 
     return $response;
