@@ -388,6 +388,30 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     // Check contents, via stand alone
     $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
+
+    // Try to update the attachment, forcing the ?rev URL param to be sent.
+    $data = 'the world was gonna roll me.';
+    $res = $this->couch->setAttachment($name, $data, $ct, $docID, $res->body->_rev);
+
+    // Make sure the new doc was updated.
+    $this->assertEquals('201', $res->headers->_HTTP->status);
+
+    $res = $this->couch->get("/$docID");
+
+    // Same type?
+    $this->assertEquals($ct, $res->body->_attachments->{$name}->content_type);
+
+    // Don't get the whole attachment by default.
+    $this->assertTrue($res->body->_attachments->{$name}->stub);
+
+    // Get the attachment inline style
+    $res = $this->couch->get("/$docID?attachments=true");
+
+    // Check contents - text/plain gets base64 encoded
+    $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
+
+    // Check contents, via stand alone
+    $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
   }
 
   public function test_createSession()

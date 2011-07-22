@@ -682,7 +682,7 @@ class Sag
     if(empty($contentType))
       throw new SagException('You need to provide the data\'s Content-Type.');
 
-    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".urlencode(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
+    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=".urlencode($rev) : ""), $data, array("Content-Type" => $contentType));
   }
 
   /**
