@@ -543,6 +543,11 @@ class SagTest extends PHPUnit_Framework_TestCase
     {
       $this->assertTrue(true);
     }
+    catch(Exception $e)
+    {
+      //Wrong type of exception
+      $this->assertTrue(false);
+    }
   }
 
   public function test_timeoutRWValues()

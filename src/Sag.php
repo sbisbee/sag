@@ -870,10 +870,15 @@ class Sag
             $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
           else
             $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+
+          //some PHP configurations don't throw when fsockopen() fails
+          if(!$sock) {
+            throw Exception($sockErrStr, $sockErrNo);
+          }
         }
         catch(Exception $e)
         {
-          throw new SagException('Was unable to fsockopen a new socket: '.$e->getMessage());
+          throw new SagException('Was unable to fsockopen() a new socket: '.$e->getMessage());
         }
       }
     }
