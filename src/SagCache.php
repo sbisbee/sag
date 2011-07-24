@@ -25,7 +25,7 @@ require_once("SagException.php");
  * storage).
  *
  * @package Cache 
- * @version 0.5.0
+ * @version 0.5.1
  */
 abstract class SagCache 
 {
