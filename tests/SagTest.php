@@ -29,6 +29,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   protected $couch;
   protected $session_couch;
+  protected $noCacheCouch;
 
   public function setUp()
   {
@@ -45,6 +46,10 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $this->session_couch = new Sag($this->couchIP, $this->couchPort);
     $this->session_couch->setDatabase($this->couchDBName);
+
+    $this->noCacheCouch = new Sag($this->couchIP, $this->couchPort);
+    $this->noCacheCouch->setDatabase($this->couchDBName);
+    $this->noCacheCouch->login($this->couchAdminName, $this->couchAdminPass);
   }
 
   public function test_createDB()
@@ -490,6 +495,31 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($fromCache->body->_id, $doc->_id);
     $this->assertEquals($fromCache->body->_rev, $fromDB->body->rev);
     $this->assertEquals($fromCache->body->foo, $doc->foo);
+
+    /* 
+     * get() using the cache, which should result in a HEAD and a 304, meaning
+     * the cache returns the 201 Created response.
+     */
+    $fromDB = $this->couch->get($doc->_id);
+
+    $this->assertEquals($fromDB->body->_id, $doc->_id);
+    $this->assertEquals($fromDB->body->foo, $doc->foo);
+    $this->assertEquals($fromDB->headers->_HTTP->status, '201');
+
+    /*
+     * Now we asynchronously update the cached document using a different Sag
+     * instance so as to not invalidate the cached item. Then we'll try to get
+     * the cached item with the first instance, which will result in a cache
+     * miss and a GET, and should cause the old cached item to be removed.
+     */
+    $this->noCacheCouch->put($doc->_id, $doc);
+
+    $fromDB = $this->couch->get($doc->_id);
+
+    $this->assertEquals($fromDB->body->_id, $doc->_id);
+    $this->assertNotEquals($fromDB->body->_rev, $doc->_rev);
+    $this->assertEquals($fromDB->body->foo, $doc->foo);
+    $this->assertEquals($fromDB->headers->_HTTP->status, '200');
   }
 
   public function test_setStaleDefault()
