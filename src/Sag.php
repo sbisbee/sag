@@ -172,14 +172,21 @@ class Sag
       $url = self::setURLParameter($url, 'stale', 'ok');
 
     //Deal with cached items
-    if($this->cache && ($prevResponse = $this->cache->get($url)))
+    if($this->cache)
     {
-      $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+      $prevResponse = $this->cache->get($url);
 
-      if($response->headers->_HTTP->status == 304)
-        return $prevResponse; //cache hit
+      if($prevResponse)
+      {
+        $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+
+        if($response->headers->_HTTP->status == 304)
+          return $prevResponse; //cache hit
       
-      $this->cache->remove($url); 
+        $this->cache->remove($url); 
+      }
+
+      unset($prevResponse);
     }
 
     //Not caching, or we are caching but there's nothing cached yet, or our
