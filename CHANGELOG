@@ -13,6 +13,23 @@ New Features
     your PHP layer to CouchDB, making it easier to have user accounts in your
     application without rewriting user management yet again.
 
+Version 0.5.1
+-------------
+
+Fixed Bugs
+
+  * Previously PUT was caching CouchDB's response, which created unexpected
+    results (the actual data being POST'd was expected to be cached). This is
+    now fixed: that data provided to post() is combined with the server's
+    response to create a cacheable object whose headers will not be entirely
+    accurate. POST is still not cached because CouchDB does not respond with an
+    E-tag to cache against. Thanks to Peter Kruithof for reporting and original
+    patch. (closes #17)
+
+  * setAttachment() now properly URL encodes the ?rev parameter when you
+    specify the document's _rev (last function parameter). Thanks to skyshard
+    for reporting the issue and the fix. (closes #19)
+
 Version 0.5.0
 -------------
 
