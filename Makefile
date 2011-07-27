@@ -14,11 +14,11 @@
 VERSION := $(shell sed --expression '/^Version /!d' --expression 's/^Version //' README)
 
 # Main directories and files
-PREFIX := .
-SRC_DIR := ${PREFIX}/src
-TESTS_DIR := ${PREFIX}/tests
-EXAMPLES_DIR := ${PREFIX}/examples
-FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE ${PREFIX}/README
+PREFIX :=
+SRC_DIR := ${PREFIX}src
+TESTS_DIR := ${PREFIX}tests
+EXAMPLES_DIR := ${PREFIX}examples
+FILES := ${PREFIX}CHANGELOG ${PREFIX}LICENSE ${PREFIX}NOTICE ${PREFIX}README
 
 # Main binaries
 PHPDOC := phpdoc
@@ -26,7 +26,7 @@ PHPUNIT := phpunit
 GPG := gpg
 
 # Distribution locations
-DIST_DIR := ${PREFIX}/sag-${VERSION}
+DIST_DIR := ${PREFIX}sag-${VERSION}
 DIST_FILE := ${DIST_DIR}.tar.gz
 DIST_FILE_SIG := ${DIST_FILE}.sig
 
@@ -39,7 +39,7 @@ TESTS_PHPUNIT_OPTS := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
 			--configuration=${TESTS_CONFIG}
 
 # PHPDocs related tools and files
-DOCS_DIR := ${PREFIX}/docs
+DOCS_DIR := ${PREFIX}docs
 PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} -o HTML:Smarty:PHP -dn Core -ti "Sag Documentation"
 
 # Build the distribution
