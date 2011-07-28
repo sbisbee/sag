@@ -29,6 +29,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   protected $couch;
   protected $session_couch;
+  protected $noCacheCouch;
 
   public function setUp()
   {
@@ -45,6 +46,10 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $this->session_couch = new Sag($this->couchIP, $this->couchPort);
     $this->session_couch->setDatabase($this->couchDBName);
+
+    $this->noCacheCouch = new Sag($this->couchIP, $this->couchPort);
+    $this->noCacheCouch->setDatabase($this->couchDBName);
+    $this->noCacheCouch->login($this->couchAdminName, $this->couchAdminPass);
   }
 
   public function test_createDB()
@@ -388,6 +393,30 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     // Check contents, via stand alone
     $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
+
+    // Try to update the attachment, forcing the ?rev URL param to be sent.
+    $data = 'the world was gonna roll me.';
+    $res = $this->couch->setAttachment($name, $data, $ct, $docID, $res->body->_rev);
+
+    // Make sure the new doc was updated.
+    $this->assertEquals('201', $res->headers->_HTTP->status);
+
+    $res = $this->couch->get("/$docID");
+
+    // Same type?
+    $this->assertEquals($ct, $res->body->_attachments->{$name}->content_type);
+
+    // Don't get the whole attachment by default.
+    $this->assertTrue($res->body->_attachments->{$name}->stub);
+
+    // Get the attachment inline style
+    $res = $this->couch->get("/$docID?attachments=true");
+
+    // Check contents - text/plain gets base64 encoded
+    $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
+
+    // Check contents, via stand alone
+    $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
   }
 
   public function test_createSession()
@@ -445,6 +474,52 @@ class SagTest extends PHPUnit_Framework_TestCase
     //should now be cached
     $this->assertTrue(is_file($cFileName));
     $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
+
+    //now create a doc with PUT, which should cache
+    $doc = new StdClass();
+    $doc->_id = 'bwah';
+    $doc->foo = 'bar';
+
+    $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/{$doc->_id}");
+    $this->assertFalse(is_file($cFileName));
+
+    $fromDB = $this->couch->put($doc->_id, $doc);
+
+    $this->assertTrue($fromDB->body->ok);
+    $this->assertEquals($fromDB->body->id, $doc->_id);
+
+    $this->assertTrue(is_file($cFileName));
+
+    $fromCache = json_decode(file_get_contents($cFileName));
+
+    $this->assertEquals($fromCache->body->_id, $doc->_id);
+    $this->assertEquals($fromCache->body->_rev, $fromDB->body->rev);
+    $this->assertEquals($fromCache->body->foo, $doc->foo);
+
+    /* 
+     * get() using the cache, which should result in a HEAD and a 304, meaning
+     * the cache returns the 201 Created response.
+     */
+    $fromDB = $this->couch->get($doc->_id);
+
+    $this->assertEquals($fromDB->body->_id, $doc->_id);
+    $this->assertEquals($fromDB->body->foo, $doc->foo);
+    $this->assertEquals($fromDB->headers->_HTTP->status, '201');
+
+    /*
+     * Now we asynchronously update the cached document using a different Sag
+     * instance so as to not invalidate the cached item. Then we'll try to get
+     * the cached item with the first instance, which will result in a cache
+     * miss and a GET, and should cause the old cached item to be removed.
+     */
+    $this->noCacheCouch->put($doc->_id, $doc);
+
+    $fromDB = $this->couch->get($doc->_id);
+
+    $this->assertEquals($fromDB->body->_id, $doc->_id);
+    $this->assertNotEquals($fromDB->body->_rev, $doc->_rev);
+    $this->assertEquals($fromDB->body->foo, $doc->foo);
+    $this->assertEquals($fromDB->headers->_HTTP->status, '200');
   }
 
   public function test_setStaleDefault()
@@ -521,6 +596,11 @@ class SagTest extends PHPUnit_Framework_TestCase
     catch(SagException $e)
     {
       $this->assertTrue(true);
+    }
+    catch(Exception $e)
+    {
+      //Wrong type of exception
+      $this->assertTrue(false);
     }
   }
 

@@ -16,8 +16,11 @@
 require_once('Sag.php');
 
 /**
- * Utilities for creating, managing, and removing users in CouchDB's _users
- * database.
+ * Provides utilities to work with and manage CouchDB users, which wraps the
+ * Sag class.
+ *
+ * @version 0.6.0
+ * @package Utils
  */
 class SagUserUtils
 {

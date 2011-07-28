@@ -45,7 +45,7 @@ class SagMemoryCache extends SagCache
       return false;
 
     // If it already exists, then remove the old version but keep a copy
-    if($this->cache[$url])
+    if(isset($this->cache[$url]))
     {
       $oldCopy = json_decode($this->cache[$url]);
       self::remove($url);
@@ -64,7 +64,7 @@ class SagMemoryCache extends SagCache
 
   public function get($url)
   {
-    return ($this->cache[$url]) ? json_decode($this->cache[$url]) : null;
+    return (isset($this->cache[$url])) ? json_decode($this->cache[$url]) : null;
   }
 
   public function remove($url)

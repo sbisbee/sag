@@ -174,14 +174,21 @@ class Sag
       $url = self::setURLParameter($url, 'stale', 'ok');
 
     //Deal with cached items
-    if($this->cache && ($prevResponse = $this->cache->get($url)))
+    if($this->cache)
     {
-      $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+      $prevResponse = $this->cache->get($url);
 
-      if($response->headers->_HTTP->status == 304)
-        return $prevResponse; //cache hit
+      if($prevResponse)
+      {
+        $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+
+        if($response->headers->_HTTP->status == 304)
+          return $prevResponse; //cache hit
       
-      $this->cache->remove($url); 
+        $this->cache->remove($url); 
+      }
+
+      unset($prevResponse);
     }
 
     //Not caching, or we are caching but there's nothing cached yet, or our
@@ -265,14 +272,34 @@ class Sag
     if(!isset($data) || (!is_object($data) && !is_string($data) && !is_array($data)))
       throw new SagException('put() needs an object for data - are you trying to use delete()?');
 
-    if(!is_string($data))
-      $data = json_encode($data);
+    $toSend = (is_string($data)) ? $data : json_encode($data);
 
     $url = "/{$this->db}/$id";
-    $response = $this->procPacket('PUT', $url, $data);
+    $response = $this->procPacket('PUT', $url, $toSend);
 
-    if($this->cache)
-      $this->cache->set($url, $response);
+    unset($toSend);
+
+    /*
+     * We're going to pretend like we issued a GET or HEAD by replacing the PUT
+     * response's body with the data we sent. We then update that data with the
+     * _rev from the PUT's response's body. Of course this should only run when
+     * there is a successful write to the database: we don't want to be caching
+     * failures.
+     */
+    if($this->cache && $response->body->ok) {
+      if(is_string($data)) {
+        $data = json_decode($data);
+      }
+
+      $data->_rev = $response->body->rev;
+
+      $toCache = clone $response;
+      $toCache->body = $data;
+
+      $this->cache->set($url, $toCache);
+
+      unset($toCache);
+    }
 
     return $response;
   }
@@ -375,9 +402,6 @@ class Sag
     );
 
     $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
-
-    if($this->cache)
-      $this->cache->set("/$dstID", $response);
 
     return $response;
   }
@@ -667,7 +691,7 @@ class Sag
     if(empty($contentType))
       throw new SagException('You need to provide the data\'s Content-Type.');
 
-    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".urlencode(($rev) ? "?rev=$rev" : ""), $data, array("Content-Type" => $contentType));
+    return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=".urlencode($rev) : ""), $data, array("Content-Type" => $contentType));
   }
 
   /**
@@ -917,10 +941,15 @@ class Sag
             $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
           else
             $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+
+          //some PHP configurations don't throw when fsockopen() fails
+          if(!$sock) {
+            throw Exception($sockErrStr, $sockErrNo);
+          }
         }
         catch(Exception $e)
         {
-          throw new SagException('Was unable to fsockopen a new socket: '.$e->getMessage());
+          throw new SagException('Was unable to fsockopen() a new socket: '.$e->getMessage());
         }
       }
     }
