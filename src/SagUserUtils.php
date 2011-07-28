@@ -3,6 +3,8 @@ require('Sag.php');
 
 class SagUserUtils
 {
+  private static $USER_ID_PREFIX = 'org.couchdb.user';
+
   /**
    * @param Sag $sag An instantiated copy of Sag that you want this class to
    * use. If you don't specify a database (empty($sag->currentDatabase())) then
@@ -25,6 +27,71 @@ class SagUserUtils
   }
 
   /**
+   * Creates a user and returns the server's response. If no name is provided,
+   * then the id is duplicated into that position.
+   *
+   * @param string $id The user's ID without the 'org.couchdb.user:' prefix.
+   *
+   * @param string $password The password, which will be salted and encrypted
+   * for you.
+   *
+   * @param string $name (OPTIONAL) The user's name. If not provided, then it
+   * will be the same as the provided $id.
+   *
+   * @param array $roles (OPTIONAL) An array of roles (strings) for the user.
+   *
+   * @return object The server's response, as you would expect from Sag's put()
+   * function.
+   *
+   * @see Sag::put()
+   */
+  public function createUser($id, $password, $name = null, $roles = array()) {
+    if(!is_string($id) || empty($id)) {
+      throw new SagException('Invalid user id.');
+    }
+
+    if(!is_string($password) || empty($password)) {
+      throw new SagException('Invalid user password.');
+    }
+
+    if($name && (!is_string($name) || empty($name))) {
+      throw new SagException('Invalid user name.');
+    }
+
+    if(!is_array($roles)) {
+      throw new SagException('Invalid list of roles: it must be an array.');
+    }
+    else {
+      foreach($roles as $k => $v) {
+        if(!is_int($k)) {
+          throw new SagException('The roles array cannot be an associative array.');
+        }
+
+        if(!is_string($v) || empty($v)) {
+          throw new SagException("An invalid role was specified at array position $k");
+        }
+      }
+    }
+
+    if(!$name) {
+      $name = $id;
+    }
+
+    $id = self::$USER_ID_PREFIX.$id;
+
+    $salt = self::makeSalt();
+
+    return $this->sag->put($id, array(
+      '_id' => $id,
+      'type' => 'user',
+      'name' => $name,
+      'roles' => $roles,
+      'password_sha' => sha1($password . $salt),
+      'salt' => $salt
+    ));
+  }
+
+  /**
    * Returns the user document from the database (just the response body, not
    * HTTP info).
    *
@@ -39,7 +106,7 @@ class SagUserUtils
    */
   public function getUser($id, $hasPrepend = false)
   {
-    return $this->sag->get((($hasPrepend) ? '' : 'org.couchdb.user:') . $id);
+    return $this->sag->get((($hasPrepend) ? '' : self::$USER_ID_PREFIX) . $id);
   }
 
   /**
@@ -70,10 +137,20 @@ class SagUserUtils
     if(empty($newPassword))
       throw new SagException('Empty password are not allowed.');
 
-    $doc->salt = $this->sag->generateIDs(1)->body->uuids[0];
-    $doc->password_sha = sha1($newPassword + $doc->salt);
+    $doc->password_sha = sha1($newPassword + self::makeSalt());
 
     return ($upload) ? $this->sag->put($doc->_id, $doc) : $doc;
+  }
+
+  /**
+   * Generates a salt that will be used when setting users' passwords. By
+   * default it requests a uuid from the CouchDB server you specified.
+   *
+   * @return string A randomly generated string of characters that will be used
+   * to salt users' passwords.
+   */
+  public function makeSalt() {
+    return $this->sag->generateIDs(1)->body->uuids[0];   
   }
 }
 ?>
