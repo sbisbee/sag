@@ -27,10 +27,7 @@ class SagConfigurationCheck
   public static function run()
   {
     // This is the default value set in php.ini and Sags preferred value
-    $sag_supported = E_ALL ^ E_NOTICE;
-    $current = ini_get('error_reporting');
-
-    if ($current > $sag_supported || $current < 0) {
+    if ((error_reporting() & E_NOTICE) > 0) {
       $notice = "With the current error_reporting value, Sag will generate PHP Notices.";
       trigger_error($notice, E_USER_NOTICE);
     }  
