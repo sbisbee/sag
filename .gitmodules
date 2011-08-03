@@ -1,0 +1,3 @@
+[submodule "build/apigen"]
+	path = build/apigen
+	url = git://github.com/sbisbee/apigen.git

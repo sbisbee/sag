@@ -14,16 +14,17 @@
 VERSION := $(shell sed --expression '/^Version /!d' --expression 's/^Version //' README)
 
 # Main directories and files
-PREFIX :=
+PREFIX := ./
 SRC_DIR := ${PREFIX}src
 TESTS_DIR := ${PREFIX}tests
 EXAMPLES_DIR := ${PREFIX}examples
 FILES := ${PREFIX}CHANGELOG ${PREFIX}LICENSE ${PREFIX}NOTICE ${PREFIX}README
 
 # Main binaries
-PHPDOC := phpdoc
+APIGEN := apigen 
 PHPUNIT := phpunit
 GPG := gpg
+GIT := git
 
 # Distribution locations
 DIST_DIR := ${PREFIX}sag-${VERSION}
@@ -38,9 +39,13 @@ TESTS_COVERAGE_DIR := ${TESTS_DIR}/coverage
 TESTS_PHPUNIT_OPTS := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
 			--configuration=${TESTS_CONFIG}
 
-# PHPDocs related tools and files
+# Documentation related tools and files
 DOCS_DIR := ${PREFIX}docs
-PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} -o HTML:Smarty:PHP -dn Core -ti "Sag Documentation"
+APIGEN_OPTS := -s ${SRC_DIR} -d ${DOCS_DIR} -t "Sag Documentation"
+
+# Update git submodules
+update_submodules:
+	${GIT} submodule init && ${GIT} submodule update
 
 # Build the distribution
 dist: clean ${DIST_DIR} check
@@ -59,18 +64,21 @@ checkCoverage:
 	$(MAKE) check TESTS_PHPUNIT_OPTS="${TESTS_PHPUNIT_OPTS} --coverage-html=${TESTS_COVERAGE_DIR}"
 
 # Generate documentation with PHPDocumentation
-docs:
-	rm -rf ${DOCS_DIR}
-	${PHPDOC} ${PHPDOC_OPTS}
+docs: cleanDocs update_submodules
+	${APIGEN} ${APIGEN_OPTS}
 
 # Sign the distribution
 sign: dist
 	${GPG} --output ${DIST_FILE_SIG} --detach-sig ${DIST_FILE}
 
+# Remove documentation files
+cleanDocs:
+	rm -rf ${DOCS_DIR}
+
 # Remove all distribution and other build files
 clean:
 	rm -rf ${DIST_DIR} ${DIST_FILE} ${DIST_FILE_SIG} \
-		${TESTS_COVERAGE_DIR} ${DOCS_DIR}
+		${TESTS_COVERAGE_DIR}
   
 # Create the distribution directory that will be archived
 ${DIST_DIR}:
