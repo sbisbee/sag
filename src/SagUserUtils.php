@@ -27,7 +27,7 @@ class SagUserUtils
   private static $USER_ID_PREFIX = 'org.couchdb.user';
 
   /**
-   * @param Sag $sag An instantiated copy of Sag that you want this class to
+   * @param Sag An instantiated copy of Sag that you want this class to
    * use. If you don't specify a database (empty($sag->currentDatabase())) then
    * it will be set to '_users'.
    *
@@ -51,15 +51,15 @@ class SagUserUtils
    * Creates a user and returns the server's response. If no name is provided,
    * then the id is duplicated into that position.
    *
-   * @param string $id The user's ID without the 'org.couchdb.user:' prefix.
+   * @param string The user's ID without the 'org.couchdb.user:' prefix.
    *
-   * @param string $password The password, which will be salted and encrypted
+   * @param string The password, which will be salted and encrypted
    * for you.
    *
-   * @param string $name (OPTIONAL) The user's name. If not provided, then it
+   * @param string (OPTIONAL) The user's name. If not provided, then it
    * will be the same as the provided $id.
    *
-   * @param array $roles (OPTIONAL) An array of roles (strings) for the user.
+   * @param array (OPTIONAL) An array of roles (strings) for the user.
    *
    * @return object The server's response, as you would expect from Sag's put()
    * function.
@@ -116,9 +116,9 @@ class SagUserUtils
    * Returns the user document from the database (just the response body, not
    * HTTP info).
    *
-   * @param string $id The user's _id.
+   * @param string The user's _id.
    *
-   * @param bool $hasPrepend Specify whether the $id you are providing has
+   * @param bool Specify whether the $id you are providing has
    * 'org.couchdb.user:' prepended to it. If it doesn't (set to false, which is
    * the default) then the string will be prepended for you.
    *
@@ -135,12 +135,12 @@ class SagUserUtils
    * password for that user document. You can optionally have the function send
    * the updated document to the server as well.
    *
-   * @param object $doc The user document. Expected to look like what
+   * @param object The user document. Expected to look like what
    * SagUserUtils->getUser() returns.
    *
-   * @param string $newPassword The new password for the user.
+   * @param string The new password for the user.
    *
-   * @param bool $upload Whether to PUT the document to the server after
+   * @param bool Whether to PUT the document to the server after
    * updating it. Defaults to false.
    *
    * @return object If you set $upload to false, then just the updated document

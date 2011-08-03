@@ -36,7 +36,7 @@ class SagFileCache extends SagCache
   private $fsLocation;
 
   /**
-   * @param string $location The file system path to the directory that should
+   * @param string The file system path to the directory that should
    * be used to store the cache files. The local system's temp directory is
    * used by default.
    * @return SagFileCache
@@ -67,7 +67,7 @@ class SagFileCache extends SagCache
    * Generates the full filename/path that would be used for a given URL's
    * cache object.
    *
-   * @param string $url The URL for the cached item.
+   * @param string The URL for the cached item.
    * @return string
    */
   public function makeFilename($url)

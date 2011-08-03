@@ -42,7 +42,7 @@ abstract class SagCache
   /** 
    * Returns the cached object or null if nothing is cached.
    * 
-   * @param string $url The URL of the request we're caching.  
+   * @param string The URL of the request we're caching.  
    * @return object
    */
   abstract public function get($url);
@@ -65,8 +65,8 @@ abstract class SagCache
    * the file to the cache would exceed 95% of the disk or partition's free
    * space.
    *
-   * @param string $url The URL of the request we're caching.
-   * @param object $item The response we're caching.
+   * @param string The URL of the request we're caching.
+   * @param object The response we're caching.
    * @return mixed
    */
   abstract public function set($url, &$item);
@@ -75,7 +75,7 @@ abstract class SagCache
    * Removes the item from the cache and returns it (null if nothing was
    * cached).
    *
-   * @param string $url The URL of the response we're removing from the cache.
+   * @param string The URL of the response we're removing from the cache.
    * @return mixed
    */
   abstract public function remove($url);
@@ -93,7 +93,7 @@ abstract class SagCache
   /**
    * Sets the max size of the cache in bytes.
    * 
-   * @param int $bytes The size of the cache in bytes (>0).
+   * @param int The size of the cache in bytes (>0).
    */
   public function setSize($bytes)
   {
@@ -128,7 +128,7 @@ abstract class SagCache
   /**
    * Generates the hash of the provided URL that will be used as the cache key.
    *
-   * @param string $url The URL to hash.
+   * @param string The URL to hash.
    * @return string
    */
   public function makeKey($url)

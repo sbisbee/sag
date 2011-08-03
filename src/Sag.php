@@ -61,9 +61,9 @@ class Sag
   private $globalCookies = array();
 
   /**
-   * @param string $host The host's IP or address of the Couch we're connecting
+   * @param string The host's IP or address of the Couch we're connecting
    * to.
-   * @param string $port The host's port that Couch is listening on.
+   * @param string The host's port that Couch is listening on.
    */
   public function __construct($host = "127.0.0.1", $port = "5984")
   {
@@ -91,9 +91,9 @@ class Sag
    * Cookie authentication will cause a call to the server to establish the
    * session, and will throw an exception if the credentials weren't valid.
    *
-   * @param string $user The username you want to login with. (null for none)
-   * @param string $pass The password you want to login with. (null for none)
-   * @param string $type The type of login system being used. Defaults to
+   * @param string The username you want to login with. (null for none)
+   * @param string The password you want to login with. (null for none)
+   * @param string The type of login system being used. Defaults to
    * Sag::$AUTH_BASIC.
    *
    * @return mixed Returns true if the input was valid. If using $AUTH_COOKIE,
@@ -136,7 +136,7 @@ class Sag
    * Sets whether Sag will decode CouchDB's JSON responses with json_decode()
    * or to simply return the JSON as a string. Defaults to true.
    *
-   * @param bool $decode True to decode, false to not decode.
+   * @param bool True to decode, false to not decode.
    * @return Sag Returns $this.
    */
   public function decode($decode)
@@ -156,7 +156,7 @@ class Sag
    *
    * You are responsible for URL encoding your own parameters.
    *
-   * @param string $url The URL, with or without the leading slash.
+   * @param string The URL, with or without the leading slash.
    * @return mixed
    */
   public function get($url)
@@ -209,7 +209,7 @@ class Sag
    *
    * @see http://wiki.apache.org/couchdb/HTTP_Document_API#HEAD
    *
-   * @param string $url The URL, with or without the leading slash.
+   * @param string The URL, with or without the leading slash.
    * @return mixed
    */
   public function head($url)
@@ -231,8 +231,8 @@ class Sag
   /**
    * DELETE's the specified document.
    *
-   * @param string $id The document's _id.
-   * @param string $rev The document's _rev.
+   * @param string The document's _id.
+   * @param string The document's _rev.
    *
    * @return mixed
    */
@@ -255,8 +255,8 @@ class Sag
   /**
    * PUT's the data to the document.
    *
-   * @param string $id The document's _id.
-   * @param mixed $data The document, which should have _id and _rev
+   * @param string The document's _id.
+   * @param mixed The document, which should have _id and _rev
    * properties. Can be an object, array, or string.
    *
    * @return mixed
@@ -309,9 +309,9 @@ class Sag
    * POST's the provided document. When using a SagCache, the created document
    * and response are not cached.
    *
-   * @param mixed $data The document that you want created. Can be an object,
+   * @param mixed The document that you want created. Can be an object,
    * array, or string.
-   * @param string $path Can be the path to a view or /all_docs. The database
+   * @param string Can be the path to a view or /all_docs. The database
    * will be prepended to the value.
    *
    * @return mixed
@@ -341,9 +341,9 @@ class Sag
    * This function does not leverage the caching mechanism you specify with
    * setCache().
    *
-   * @param array $docs An array of the documents you want to be pushed; they
+   * @param array An array of the documents you want to be pushed; they
    * can be JSON strings, objects, or arrays.
-   * @param bool $allOrNothing Whether to treat the transactions as "all or
+   * @param bool Whether to treat the transactions as "all or
    * nothing" or not. Defaults to false.
    *
    * @return mixed
@@ -416,9 +416,9 @@ class Sag
    * it makes sense for your application, because it could cause needless HTTP
    * GET calls.
    *
-   * @param string $db The database's name, as you'd put in the URL. This
+   * @param string The database's name, as you'd put in the URL. This
    * string will be URL encoded using PHP's urlencode().
-   * @param bool $createIfNotFound Whether to try and create the specified
+   * @param bool Whether to try and create the specified
    * database if it doesn't exist yet (checks every time this is called).
    *
    * @return Sag Returns $this. Throws on failure.
@@ -457,14 +457,14 @@ class Sag
    * Gets all the documents in the database with _all_docs. Its results will
    * not be cached by SagCache.
    *
-   * @param bool $incDocs Whether to include the documents or not. Defaults to
+   * @param bool Whether to include the documents or not. Defaults to
    * false.
-   * @param int $limit Limits the number of documents to return. Must be >= 0,
+   * @param int Limits the number of documents to return. Must be >= 0,
    * or null for no limit. Defaults to null (no limit).
-   * @param string $startKey The startkey variable (valid JSON). Defaults to
+   * @param string The startkey variable (valid JSON). Defaults to
    * null.
-   * @param string $endKey The endkey variable (valid JSON). Defaults to null.
-   * @param array $keys An array of keys (strings) of the specific documents
+   * @param string The endkey variable (valid JSON). Defaults to null.
+   * @param array An array of keys (strings) of the specific documents
    * you're trying to get.
    *
    * @return mixed
@@ -537,7 +537,7 @@ class Sag
   /**
    * Uses CouchDB to generate IDs.
    *
-   * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
+   * @param int The number of IDs to generate (>= 0). Defaults to 10.
    * @returns mixed
    */
   public function generateIDs($num = 10)
@@ -552,7 +552,7 @@ class Sag
   /**
    * Creates a database with the specified name.
    *
-   * @param string $name The name of the database you want to create.
+   * @param string The name of the database you want to create.
    *
    * @return mixed
    */
@@ -567,7 +567,7 @@ class Sag
   /**
    * Deletes the specified database.
    *
-   * @param string $name The database's name.
+   * @param string The database's name.
    *
    * @return mixed
    */
@@ -583,15 +583,15 @@ class Sag
    * Starts a replication job between two databases, independently of which
    * database you set with Sag.
    *
-   * @param string $src The name of the database that you are replicating from.
-   * @param string $target The name of the database that you are replicating
+   * @param string The name of the database that you are replicating from.
+   * @param string The name of the database that you are replicating
    * to.
-   * @param bool $continuous Whether to make this a continuous replication job
+   * @param bool Whether to make this a continuous replication job
    * or not. Defaults to false.
-   * @param bool $createTarget Specifies create_target, which will create the
+   * @param bool Specifies create_target, which will create the
    * target database if it does not already exist. (optional)
-   * @param string $filter The name of the filter function to use. (optional)
-   * @param mixed $filterQueryParams An object or associative array of
+   * @param string The name of the filter function to use. (optional)
+   * @param mixed An object or associative array of
    * parameters to be passed to the filter function via query_params. Only used
    * if $filter is set.
    *
@@ -648,7 +648,7 @@ class Sag
    * Starts a compaction job on the database you selected, or optionally one of
    * its views.
    *
-   * @param string $viewName The database's view that you want to compact,
+   * @param string The database's view that you want to compact,
    * instead of the whole database.
    *
    * @return mixed
@@ -662,13 +662,13 @@ class Sag
    * Create or update attachments on documents by passing in a serialized
    * version of your attachment (a string).
    *
-   * @param string $name The attachment's name.
-   * @param string $data The attachment's data, in string representation. Ie.,
+   * @param string The attachment's name.
+   * @param string The attachment's data, in string representation. Ie.,
    * you need to serialize your attachment.
-   * @param string $contentType The proper Content-Type for your attachment.
-   * @param string $docID The _id of the document that the attachment
+   * @param string The proper Content-Type for your attachment.
+   * @param string The _id of the document that the attachment
    * belongs to.
-   * @param string $rev optional The _rev of the document that the attachment
+   * @param string optional The _rev of the document that the attachment
    * belongs to. Leave blank if you are creating a new document.
    *
    * @return mixed
@@ -718,8 +718,8 @@ class Sag
    *
    * Use setOpenTimeout() to set the timeout on opening the socket.
    *
-   * @param int $seconds The seconds part of the timeout.
-   * @param int $microseconds optional The microseconds part of the timeout.
+   * @param int The seconds part of the timeout.
+   * @param int optional The microseconds part of the timeout.
    * @return Sag Returns $this.
    */
   public function setRWTimeout($seconds, $microseconds = 0)
@@ -800,7 +800,7 @@ class Sag
    * provide and ensure that no other value is being passed to the stale
    * variable.
    *
-   * @param bool $stale True will make stale=ok be sent by default.
+   * @param bool True will make stale=ok be sent by default.
    * @return Sag Returns $this.
    */
   public function setStaleDefault($stale)
@@ -821,8 +821,8 @@ class Sag
    *
    * Setting the value to null will make Sag no longer send the cookie.
    *
-   * @param string $key The cookie's key.
-   * @param string $value The cookie's value.
+   * @param string The cookie's key.
+   * @param string The cookie's value.
    * @return Sag Returns $this.
    *
    * @see getCookie()
@@ -1080,9 +1080,9 @@ class Sag
    * create it if it doesn't already.
    *
    *
-   * @param string $url The URL to run against.
-   * @param string $key The name of the parameter to set in the URL.
-   * @param string $value The value of the parameter to set in the URL.
+   * @param string The URL to run against.
+   * @param string The name of the parameter to set in the URL.
+   * @param string The value of the parameter to set in the URL.
    *
    * @return string The modified URL.
    */
