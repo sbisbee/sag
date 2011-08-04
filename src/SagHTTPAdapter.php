@@ -23,7 +23,7 @@ abstract class SagHTTPAdapter {
    */
   abstract public function procPacket($method, $url, $data = null, $headers = array());
 
-  private function makeResult($response) {
+  protected function makeResult($response) {
     /*
      * $json won't be set if invalid JSON is sent back to us. This will most
      * likely happen if we're GET'ing an attachment that isn't JSON (ex., a
