@@ -143,7 +143,7 @@ class Sag
     if(!is_bool($decode))
       throw new SagException('decode() expected a boolean');
 
-    $this->decodeResp = $decode;
+    $this->httpAdapter->decodeResp = $decode;
 
     return $this;
   }
