@@ -8,7 +8,7 @@
  * @package HTTP
  */
 abstract class SagHTTPAdapter {
-  public $decodeJSON = true;
+  public $decodeResp = true;
 
   protected $host;
   protected $port;
