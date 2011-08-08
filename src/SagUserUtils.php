@@ -24,7 +24,7 @@ require_once('Sag.php');
  */
 class SagUserUtils
 {
-  private static $USER_ID_PREFIX = 'org.couchdb.user';
+  private static $USER_ID_PREFIX = 'org.couchdb.user:';
 
   /**
    * @param Sag $sag An instantiated copy of Sag that you want this class to
