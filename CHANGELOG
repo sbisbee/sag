@@ -9,6 +9,10 @@ New Features
   * You can now set cookies that will be sent with every request using
     setCookie(), and retrieve them with getCookie().
 
+  * SagUserUtils is the first of several utility classes that will be added to
+    Sag. It gently wraps the Sag interface to make managing CouchDB users much
+    easier. You can create and get users, and change their password.
+
   * An example of how to proxy the cookie based auth's AuthSession cookie from
     your PHP layer to CouchDB, making it easier to have user accounts in your
     application without rewriting user management yet again.
