@@ -24,10 +24,8 @@
  * @version 0.6.0
  * @package Core
  */
-class SagCouchException extends Exception
-{
-  public function __construct($msg = "", $code = 0)
-  {
+class SagCouchException extends Exception {
+  public function __construct($msg = "", $code = 0) {
     parent::__construct("CouchDB Error: $msg", $code);
   }
 }
