@@ -51,6 +51,12 @@ dist: clean ${DIST_DIR} check
 
 # Run the tests
 check:
+	for file in ${SRC_DIR}/*.php ${TESTS_DIR}/*.php; do \
+	  php -l "$$file"; \
+	done
+
+	@echo ""
+
 	${TESTS_BOOTSTRAP}
 	${PHPUNIT} ${TESTS_PHPUNIT_OPTS} ${TESTS_DIR}
 
