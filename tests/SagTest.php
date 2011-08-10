@@ -699,6 +699,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch->getCookie('foo'), 'bar');
 
     $this->couch->setCookie('foo', null);
-    $this->assertFalse($this->couch->getCookie('foo'));
+    $this->assertEquals($this->couch->getCookie('foo'), null);
   }
 }
