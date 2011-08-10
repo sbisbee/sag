@@ -386,6 +386,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     // Get the attachment inline style
     $res = $this->couch->get("/$docID?attachments=true");
 
+    // Make sure we are not crazy.
+    $this->assertTrue(is_object($res->body));
+    $this->assertTrue(is_object($res->body->_attachments));
+    $this->assertTrue(is_object($res->body->_attachments->{$name}));
+    $this->assertTrue(is_string($res->body->_attachments->{$name}->data));
+
     // Check contents - text/plain gets base64 encoded
     $this->assertEquals($data, base64_decode($res->body->_attachments->{$name}->data));
 
