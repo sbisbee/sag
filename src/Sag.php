@@ -1003,8 +1003,11 @@ class Sag
       if($sockInfo['timed_out'])
         throw new SagException('Connection timed out while reading.');
 
-      //TODO deal with fgets() returning false
       $line = fgets($sock);
+
+      if(!$line && !feof($sock)) {
+        throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
+      }
 
       if($isHeader)
       {
