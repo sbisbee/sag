@@ -684,7 +684,6 @@ class Sag
     if(empty($data))
       throw new SagException('You need to provide the attachment\'s data.');
 
-    //TODO support type conversion, streams, etc.
     if(!is_string($data))
       throw new SagException('You need to provide the attachment\'s data as a string.');
 
