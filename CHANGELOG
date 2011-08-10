@@ -17,6 +17,13 @@ New Features
     your PHP layer to CouchDB, making it easier to have user accounts in your
     application without rewriting user management yet again.
 
+Fixed Bugs
+
+  * As of CouchDB 1.1.0 inline attachments are sent as multipart HTTP
+    responses, which was breaking our parser. This is now fixed by always
+    sending an Accept header for 'application/json'. Thanks to Rob Newson and
+    Dale Harvey in #couchdb for helping on this. (closes #23)
+
 Version 0.5.1
 -------------
 

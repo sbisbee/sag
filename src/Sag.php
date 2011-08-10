@@ -871,6 +871,13 @@ class Sag
     $headers["User-Agent"] = "Sag/0.6";
     $headers["Connection"] = "Keep-Alive";
 
+    /*
+     * This prevents some unRESTful requests, such as inline attachments in
+     * CouchDB 1.1.0, from sending multipart responses that would break our
+     * parser.
+     */
+    $headers['Accept'] = 'application/json';
+
     //usernames and passwords can be blank
     if($this->authType == Sag::$AUTH_BASIC && (isset($this->user) || isset($this->pass)))
       $headers["Authorization"] = 'Basic '.base64_encode("{$this->user}:{$this->pass}");
@@ -902,11 +909,13 @@ class Sag
 
     // JSON is our default and most used Content-Type, but others need to be
     // specified to allow attachments.
-    if(!isset($headers['Content-Type']))
+    if(!isset($headers['Content-Type'])) {
       $headers['Content-Type'] = 'application/json';
+    }
 
-    if($data)
+    if($data) {
       $headers['Content-Length'] = strlen($data); 
+    }
 
     $buff = "$method $url HTTP/1.0\r\n";
     foreach($headers as $k => $v)
