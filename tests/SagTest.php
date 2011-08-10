@@ -341,8 +341,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     {
       $this->assertTrue(true); //we want this to happen
     }
-
-    $this->assertTrue($this->couch->deleteDatabase($newDB)->body->ok);
   }
 
   public function test_compactView()
