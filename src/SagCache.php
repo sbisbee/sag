@@ -27,14 +27,12 @@ require_once("SagException.php");
  * @package Cache 
  * @version 0.6.0
  */
-abstract class SagCache 
-{
+abstract class SagCache {
   private $maxSize;                                     //in bytes
 
   private $currentSize;                                 //in bytes
 
-  public function __construct()
-  {
+  public function __construct() {
     $this->currentSize = 0;
     $this->maxSize = 1000000; 
   }
@@ -95,10 +93,10 @@ abstract class SagCache
    * 
    * @param int $bytes The size of the cache in bytes (>0).
    */
-  public function setSize($bytes)
-  {
-    if(!is_int($bytes) || $bytes <= 0)
+  public function setSize($bytes) {
+    if(!is_int($bytes) || $bytes <= 0) {
       throw new Exception("The cache size must be a positive integer (bytes).");
+    }
 
     $this->maxSize = $bytes;
   }
@@ -109,8 +107,7 @@ abstract class SagCache
    *
    * @return int
    */
-  public function getSize()
-  {
+  public function getSize() {
     return $this->maxSize;
   }
 
@@ -120,8 +117,7 @@ abstract class SagCache
    * 
    * @return int
    */
-  public function getUsage()
-  {
+  public function getUsage() {
     return $this->currentSize;
   }
 
@@ -131,15 +127,14 @@ abstract class SagCache
    * @param string $url The URL to hash.
    * @return string
    */
-  public function makeKey($url)
-  {
+  public function makeKey($url) {
     return sha1($url);
   }
 
-  protected function addToSize($amt)
-  {
-    if(!is_int($amt) && !is_float($amt))
+  protected function addToSize($amt) {
+    if(!is_int($amt) && !is_float($amt)) {
       throw new SagException('Invalid cache size modifier.');
+    }
 
     $this->currentSize += $amt;
   }
@@ -153,8 +148,7 @@ abstract class SagCache
    * StdClass.
    * @return bool
    */
-  protected function mayCache($item)
-  {
+  protected function mayCache($item) {
     return (
       isset($item) && 
       is_object($item) && 
