@@ -22,8 +22,7 @@ require_once('Sag.php');
  * @version 0.6.0
  * @package Utils
  */
-class SagUserUtils
-{
+class SagUserUtils {
   private static $USER_ID_PREFIX = 'org.couchdb.user:';
 
   /**
@@ -33,16 +32,17 @@ class SagUserUtils
    *
    * @return SagUserUtils
    */
-  public function __construct($sag)
-  {
-    if(!($sag instanceof Sag))
+  public function __construct($sag) {
+    if(!($sag instanceof Sag)) {
       throw new SagException('Tried to call setSag() with a non-Sag implementation.');
+    }
 
     //Use the database if they pre-selected it, else default to Couch's default.
     $db = $sag->currentDatabase();
 
-    if(empty($db))
+    if(empty($db)) {
       $sag->setDatabase('_users');
+    }
 
     $this->sag = $sag;
   }
@@ -125,8 +125,7 @@ class SagUserUtils
    * @return object The user document: just the body property from Sag->get()'s
    * return value.
    */
-  public function getUser($id, $hasPrepend = false)
-  {
+  public function getUser($id, $hasPrepend = false) {
     return $this->sag->get((($hasPrepend) ? '' : self::$USER_ID_PREFIX) . $id);
   }
 
@@ -147,16 +146,18 @@ class SagUserUtils
    * is returned. If you set $upload to true, then the result of Sag->put() is
    * returned, so you get the updated document and HTTP information.
    */
-  public function changePassword($doc, $newPassword, $upload = false)
-  {
-    if(empty($doc->_id))
+  public function changePassword($doc, $newPassword, $upload = false) {
+    if(empty($doc->_id)) {
       throw new SagException('This does not look like a document: there is no _id.');
+    }
 
-    if(empty($doc->salt) || empty($doc->password_sha))
+    if(empty($doc->salt) || empty($doc->password_sha)) {
       throw new SagException('This does not look like a user or it is an admin. Change admin passwords via the server config.');
+    }
 
-    if(empty($newPassword))
+    if(empty($newPassword)) {
       throw new SagException('Empty password are not allowed.');
+    }
 
     $doc->password_sha = sha1($newPassword + self::makeSalt());
 
