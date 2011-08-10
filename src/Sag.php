@@ -373,7 +373,7 @@ class Sag {
       throw new SagException('bulk() expects a boolean for its second argument');
     }
 
-    $data = new StdClass();
+    $data = new stdClass();
 
     //Only send all_or_nothing if it's non-default (true), saving bandwidth.
     if($allOrNothing) {
@@ -531,7 +531,7 @@ class Sag {
         throw new SagException('getAllDocs() expected an array for the keys.');
       }
 
-      $data = new StdClass();
+      $data = new stdClass();
       $data->keys = $keys;
 
       return $this->procPacket('POST', "/{$this->db}/_all_docs$qry", json_encode($data));
@@ -639,7 +639,7 @@ class Sag {
       }
     }
 
-    $data = new StdClass();
+    $data = new stdClass();
     $data->source = $src;
     $data->target = $target;
 
@@ -807,7 +807,7 @@ class Sag {
   /**
    * Retrieves the run time metrics from CouchDB that lives at /_stats.
    *
-   * @return StdClass
+   * @return stdClass
    */
   public function getStats() {
     return $this->procPacket('GET', '/_stats');
@@ -1002,9 +1002,9 @@ class Sag {
     }
 
     // Prepare the data structure to store the response.
-    $response = new StdClass();
-    $response->headers = new StdClass();
-    $response->headers->_HTTP = new StdClass();
+    $response = new stdClass();
+    $response->headers = new stdClass();
+    $response->headers->_HTTP = new stdClass();
     $response->body = '';
 
     $isHeader = true;
@@ -1063,7 +1063,7 @@ class Sag {
             $response->headers->$line[0] = ltrim($line[1]);
 
             if($line[0] == 'Set-Cookie') {
-              $response->cookies = new StdClass();
+              $response->cookies = new stdClass();
 
               foreach(explode('; ', $line[1]) as $cookie) {
                 $crumbs = explode('=', $cookie);

@@ -31,10 +31,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
     $url = '/bwah';
 
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $res = $this->cache->set($url, $item);
@@ -54,10 +54,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
   {
     $url = '/aa';
 
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $this->cache->set($url, $item);
@@ -70,10 +70,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
   {
     $url = '/bb';
 
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $this->cache->set($url, $item);
@@ -98,10 +98,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
   {
     $this->assertEquals(0, $this->cache->getUsage());
     
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $this->cache->set('/123', $item);
@@ -123,10 +123,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
   public function test_memoryMathOnSet()
   {
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $this->cache->set('/bwah', $item);
@@ -143,10 +143,10 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
   {
     $this->assertEquals(0, $this->cache->getUsage());
 
-    $item = new StdClass();
-    $item->body = new StdClass();
+    $item = new stdClass();
+    $item->body = new stdClass();
     $item->body->foo = "bar";
-    $item->headers = new StdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     $url = '/bwah';
@@ -160,8 +160,8 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
   public function test_cacheBadBody()
   {
-    $item = new StdClass();
-    $item->headers = new StdClass();
+    $item = new stdClass();
+    $item->headers = new stdClass();
     $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
     //try without a body

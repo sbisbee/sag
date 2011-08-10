@@ -33,10 +33,10 @@ class SagFileTest extends PHPUnit_Framework_TestCase
     {
       $prevSize = $this->cache->getUsage();
 
-      $item = new StdClass();
-      $item->body = new StdClass();
+      $item = new stdClass();
+      $item->body = new stdClass();
       $item->body->foo = "bar";
-      $item->headers = new StdClass();
+      $item->headers = new stdClass();
       $item->headers->Etag = "\"asdfasfsadfsadf\"";
 
       $res = $this->cache->set($url, $item);
@@ -68,10 +68,10 @@ class SagFileTest extends PHPUnit_Framework_TestCase
 
   public function test_newVersion()
   {
-    $new = new StdClass();
-    $new->body = new StdClass();
+    $new = new stdClass();
+    $new->body = new stdClass();
     $new->body->titFor = "tat";
-    $new->headers = new StdClass();
+    $new->headers = new stdClass();
     $new->headers->Etag = "\"asdfasdfasdfasdf\"";
 
     $file = $this->cache->makeFilename('/bwah');

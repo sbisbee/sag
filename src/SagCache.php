@@ -21,7 +21,7 @@ require_once("SagException.php");
  *
  * The default cache size is 1MB (one million bytes).
  *
- * Cache values are objects (StdClass for PHP storage, or JSON for external
+ * Cache values are objects (stdClass for PHP storage, or JSON for external
  * storage).
  *
  * @package Cache 
@@ -140,12 +140,12 @@ abstract class SagCache {
   }
 
   /**
-   * Returns whether or not the item may be cached. It has to be a StdClass
+   * Returns whether or not the item may be cached. It has to be a stdClass
    * that Sag would return, with a valid E-Tag, and no cache headers that tell
    * us to not cache.
    *
    * @param The item that we're trying to cache - it should be a response as a
-   * StdClass.
+   * stdClass.
    * @return bool
    */
   protected function mayCache($item) {

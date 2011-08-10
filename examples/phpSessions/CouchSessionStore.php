@@ -76,10 +76,10 @@ class CouchSessionStore
       return false;
     }
 
-    $ddoc = new StdClass();
+    $ddoc = new stdClass();
     $ddoc->_id = '_design/app';
-    $ddoc->views = new StdClass();
-    $ddoc->views->byCreateTime = new StdClass();
+    $ddoc->views = new stdClass();
+    $ddoc->views->byCreateTime = new stdClass();
     $ddoc->views->byCreateTime->map = "function(doc) { emit(doc.createdAt, null); }";
 
     try
@@ -153,7 +153,7 @@ class CouchSessionStore
       if($e->getCode() != 404)
         return false;
 
-      $doc = new StdClass();
+      $doc = new stdClass();
       $doc->_id = $id;
     }
 

@@ -65,7 +65,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_newDoc()
   {
-    $doc = new StdClass();
+    $doc = new stdClass();
     $doc->foo = 'bar';
 
     $result = $this->couch->put('1', $doc);
@@ -114,8 +114,8 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(1, sizeof($result->body->rows));
     $this->assertEquals("1", $result->body->rows[0]->id);
     
-    $validData = new StdClass();
-    $invalidPaths = array(array(), "", new StdClass(), false, true);
+    $validData = new stdClass();
+    $invalidPaths = array(array(), "", new stdClass(), false, true);
 
     foreach($invalidPaths as $v)
     {
@@ -156,7 +156,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_tempView()
   {
-    $data = new StdClass();
+    $data = new stdClass();
     $data->map = 'function(doc) { emit(doc._id, 1); }';
     $data->reduce = '_sum';
 
@@ -265,15 +265,15 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_bulk()
   {
-    $a = new StdClass();
+    $a = new stdClass();
     $a->foo = "bar";
     $a->bwah = "hi";
 
-    $b = new StdClass();
+    $b = new stdClass();
     $b->hi = "there";
     $b->lo = "fi";
 
-    $c = new StdClass();
+    $c = new stdClass();
     $c->_id = "namedDoc";
     $c->num = 123;
 
@@ -347,11 +347,11 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $designID = "bwah";
 
-    $ddoc = new StdClass();
+    $ddoc = new stdClass();
     $ddoc->_id = "_design/$designID";
     $ddoc->language = "javascript";
-    $ddoc->views = new StdClass();
-    $ddoc->views->all = new StdClass();
+    $ddoc->views = new stdClass();
+    $ddoc->views->all = new stdClass();
     $ddoc->views->all->map = "function(doc) { emit(null, doc); }";
 
     $this->assertTrue($this->couch->post($ddoc)->body->ok);
@@ -442,7 +442,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $db->setDatabase($this->couchDBName);
     $db->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
 
-    $doc = new StdClass();
+    $doc = new stdClass();
     $doc->sag = 'for couchdb';
 
     $res = $db->put('sag', $doc);
@@ -464,7 +464,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $cache = new SagFileCache('/tmp/sag');
     $this->couch->setCache($cache);
 
-    $doc = new StdClass();
+    $doc = new stdClass();
     $doc->hi = "there";
 
     $id = $this->couch->post($doc)->body->id;
@@ -480,7 +480,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(json_encode($fromDB), file_get_contents($cFileName));
 
     //now create a doc with PUT, which should cache
-    $doc = new StdClass();
+    $doc = new stdClass();
     $doc->_id = 'bwah';
     $doc->foo = 'bar';
 
@@ -557,10 +557,10 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
 
     // Test updating a ddoc and then querying for its old results
-    $ddoc = new StdClass();
+    $ddoc = new stdClass();
     $ddoc->_id = "_design/app";
-    $ddoc->views = new StdClass();
-    $ddoc->views->count = new StdClass();
+    $ddoc->views = new stdClass();
+    $ddoc->views->count = new stdClass();
     $ddoc->views->count->map = 'function(doc) { emit(null, 1); }';
     $ddoc->views->count->reduce = '_sum';
 
@@ -570,7 +570,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $beforeValue = $this->couch->get($url)->body->rows[0]->value;
 
-    $this->couch->post(new StdClass());
+    $this->couch->post(new stdClass());
 
     // Expect previous value
     $this->couch->setStaleDefault(true);

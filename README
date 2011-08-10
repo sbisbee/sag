@@ -6,7 +6,7 @@ http://www.saggingcouch.com
 
 Sag is a PHP library for working with CouchDB. It is designed to not force any
 particular programming method on its users - you just pass PHP objects, and get
-StdClass objects and Exceptions back. This makes it trivial to incorporate Sag
+stdClass objects and Exceptions back. This makes it trivial to incorporate Sag
 into your application, build different functionality on top of it, and expand
 Sag to incorporate new CouchDB functionality.
 
@@ -69,7 +69,7 @@ to send data to CouchDB that will result in errors (ex., malformed JSON). This
 is because CouchDB knows when there iss an error better than Sag. This also
 makes Sag more future proof, instead of worrying about each of CouchDB's API
 changes. Therefore, Sag will only look for PHP interface problems and issues
-that are native to PHP, such as passing an int instead of a StdClass.
+that are native to PHP, such as passing an int instead of a stdClass.
 
 All errors are floated back to your application with Exceptions. Sag does not
 catch any errors itself, allowing your application to care about them or not.
@@ -152,7 +152,7 @@ the resulting JSON from CouchDB as a string (what would have been in the body
 property if you had set decode to true). None of the HTTP info is included.
 
 If CouchDB specifies Set-Cookies, then they will be stored in $result->cookies
-as a StdClass.
+as a stdClass.
 
 Functions
 ---------
