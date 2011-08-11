@@ -1009,8 +1009,12 @@ class Sag {
 
     $isHeader = true;
 
+    $chunkParsingDone = false;
+    $chunkSize = null;
+
     // Read in the response.
     while(
+      !$chunkParsingDone &&
       !feof($sock) && 
       (
         $isHeader ||
@@ -1018,6 +1022,7 @@ class Sag {
           !$isHeader &&
           $method != 'HEAD' &&
           (
+            isset($response->headers->{'Transfer-Encoding'}) == 'chunked' ||
             !isset($response->headers->{'Content-Length'}) ||
             (
               isset($response->headers->{'Content-Length'}) &&
@@ -1043,7 +1048,13 @@ class Sag {
         $line = trim($line);
 
         if($isHeader && empty($line)) {
-          $isHeader = false; //the delim blank line
+          /*
+           * Don't parse empty lines before the initial header as being the
+           * header/body delim line.
+           */
+          if($response->headers->_HTTP->raw) {
+            $isHeader = false; //the delim blank line
+          }
         }
         else {
           if(!isset($response->headers->_HTTP->raw)) {
@@ -1072,6 +1083,47 @@ class Sag {
               } 
             }
           }
+        }
+      }
+      else if($response->headers->{'Transfer-Encoding'}) {
+        if($chunkSize === null) {
+          $chunkSize = hexdec(rtrim($line));
+
+          if(!is_int($chunkSize)) {
+            throw new SagException('Invalid chunk size: '.$line);
+          }
+        }
+        else if($chunkSize) {
+          if(strlen($line) > $chunkSize) {
+            throw new SagException('Unexpectedly large chunk on this line.');
+          }
+          else {
+            $response->body .= $line;
+
+            preg_match_all("/\r\n/", $line, $numCRLFs);
+            $numCRLFs = sizeof($numCRLFs);
+
+            $chunkSize -= strlen($line);
+
+            if($chunkSize > 0) {
+              //Do not count the CRLF if not the end of the chunk.
+              $chunkSize += ($numCRLFs * 2);
+            }
+            else {
+              /*
+               * Nothing left to this chunk, so the next link is going to be
+               * another chunk size.
+               */
+              $chunkSize = null;
+            }
+          }
+        }
+        else if($chunkSize === 0) {
+          // We are done processing all the chunks.
+          $chunkParsingDone = true;
+        }
+        else {
+          throw new SagException('Unexpected empty line.');
         }
       }
       else {
