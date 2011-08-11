@@ -893,7 +893,6 @@ class Sag {
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/0.6";
-    $headers["Connection"] = "Keep-Alive";
 
     /*
      * This prevents some unRESTful requests, such as inline attachments in
@@ -942,7 +941,8 @@ class Sag {
       $headers['Content-Length'] = strlen($data); 
     }
 
-    $buff = "$method $url HTTP/1.0\r\n";
+    $buff = "$method $url HTTP/1.1\r\n";
+
     foreach($headers as $k => $v) {
       $buff .= "$k: $v\r\n";
     }
@@ -1008,7 +1008,6 @@ class Sag {
     $response->body = '';
 
     $isHeader = true;
-    $sockInfo = stream_get_meta_data($sock);
 
     // Read in the response.
     while(
@@ -1028,13 +1027,15 @@ class Sag {
         )
       )
     ) {
+      $sockInfo = stream_get_meta_data($sock);
+
       if($sockInfo['timed_out']) {
         throw new SagException('Connection timed out while reading.');
       }
 
       $line = fgets($sock);
 
-      if(!$line && !feof($sock)) {
+      if(!$line && !$sockInfo['feof'] && !$sockInfo['timed_out']) {
         throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
       }
 
@@ -1078,8 +1079,8 @@ class Sag {
       }
     }
 
-    //We're done with the socket, so someone else can use it.
-    if($response->headers->Connection == 'Keep-Alive') {
+    // HTTP/1.1 assumes persisted connections, but proxies might close them.
+    if(strtolower($response->headers->Connection) != 'close') {
       $this->connPool[] = $sock;
     }
 
