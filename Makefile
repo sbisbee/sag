@@ -41,7 +41,7 @@ TESTS_PHPUNIT_OPTS := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
 
 # Documentation related tools and files
 DOCS_DIR := ${PREFIX}docs
-APIGEN_OPTS := -s ${SRC_DIR} -d ${DOCS_DIR} -t "Sag Documentation"
+APIGEN_OPTS := -n -s ${SRC_DIR} -d ${DOCS_DIR} -t "Sag Documentation"
 
 # Update git submodules
 update_submodules:
