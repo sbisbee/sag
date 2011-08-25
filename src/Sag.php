@@ -1087,7 +1087,7 @@ class Sag {
     if(
       $method != 'HEAD' &&
       isset($response->headers->{'Content-Length'}) &&
-      strlen($response->body) < $response->headers->{'Content-Length'}
+      strlen($response->body) != $response->headers->{'Content-Length'}
     ) {
       throw new SagException('Unexpected end of packet.');
     }
