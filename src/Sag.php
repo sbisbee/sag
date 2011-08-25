@@ -1045,6 +1045,9 @@ class Sag {
       }
 
       if($isHeader) {
+        //Parse headers
+
+        //Clean the input
         $line = trim($line);
 
         if($isHeader && empty($line)) {
@@ -1086,7 +1089,16 @@ class Sag {
         }
       }
       else if($response->headers->{'Transfer-Encoding'}) {
+        /*
+         * Parse the response's body, which is being sent in chunks. Welcome to
+         * HTTP/1.1 land.
+         *
+         * Each chunk is preceded with a size, so if we don't have a chunk size
+         * then we should be looking for one. A zero chunk size means the
+         * message is over.
+         */
         if($chunkSize === null) {
+          //Look for a chunk size
           $chunkSize = hexdec(rtrim($line));
 
           if(!is_int($chunkSize)) {
@@ -1094,6 +1106,7 @@ class Sag {
           }
         }
         else if($chunkSize) {
+          //We have a chunk size, so look for data
           if(strlen($line) > $chunkSize) {
             throw new SagException('Unexpectedly large chunk on this line.');
           }
@@ -1103,6 +1116,8 @@ class Sag {
             preg_match_all("/\r\n/", $line, $numCRLFs);
             $numCRLFs = sizeof($numCRLFs);
 
+            //Chunks can span >1 line, which PHP is going to give us one a a
+            //time.
             $chunkSize -= strlen($line);
 
             if($chunkSize > 0) {
@@ -1112,7 +1127,7 @@ class Sag {
             else {
               /*
                * Nothing left to this chunk, so the next link is going to be
-               * another chunk size.
+               * another chunk size. Or so we hope.
                */
               $chunkSize = null;
             }
@@ -1127,6 +1142,10 @@ class Sag {
         }
       }
       else {
+        /*
+         * Parse the response's body, which is being sent in one piece like in
+         * the good ol' days.
+         */
         $response->body .= $line;
       }
     }
