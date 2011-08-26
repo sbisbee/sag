@@ -1052,7 +1052,6 @@ class Sag {
             if(preg_match('(^HTTP/(?P<version>\d+\.\d+)\s+(?P<status>\d+))S', $line, $match)) {
               $response->headers->_HTTP->version = $match['version'];
               $response->headers->_HTTP->status = $match['status'];
-              $response->status = $match['status'];
             }
             else {
               throw new SagException('There was a problem while handling the HTTP protocol.'); //whoops!

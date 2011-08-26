@@ -4,6 +4,13 @@ Sag Changes
 Version 0.6.0
 -------------
 
+Breaking Changes
+
+  * The HTTP status was incorrectly being added to the root of the response
+    object in addition to where it belongs in `$resp->headers->_HTTP->status`.
+    It is now removed. Applications that were using it at the `$resp->status`
+    should fix their code to use the proper location.
+
 New Features
 
   * You can now set cookies that will be sent with every request using
