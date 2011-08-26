@@ -24,6 +24,16 @@ Fixed Bugs
     sending an Accept header for 'application/json'. Thanks to Rob Newson and
     Dale Harvey in #couchdb for helping on this. (closes #23)
 
+  * Previously an HTTP response code >=400 to a HEAD request would not throw a
+    SagCouchException because there was no error property in the message body
+    (because HEAD responses do not have bodies). Now a SagCouchException is
+    thrown as expected with the exception's code set to the HTTP response code.
+    This also creates a slight performance boost for parsing HEAD requests.
+
+  * When calling setDatabase() and specifying to create the database if it does
+    not already exist, the logic now uses a HEAD request instead of a GET. This
+    was a typo/mistake at the time, so it is getting bug status.
+
 Version 0.5.1
 -------------
 
