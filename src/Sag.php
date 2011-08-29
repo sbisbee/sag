@@ -893,7 +893,6 @@ class Sag {
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
     $headers["User-Agent"] = "Sag/0.6";
-    $headers["Connection"] = "Keep-Alive";
 
     /*
      * This prevents some unRESTful requests, such as inline attachments in
@@ -942,7 +941,8 @@ class Sag {
       $headers['Content-Length'] = strlen($data); 
     }
 
-    $buff = "$method $url HTTP/1.0\r\n";
+    $buff = "$method $url HTTP/1.1\r\n";
+
     foreach($headers as $k => $v) {
       $buff .= "$k: $v\r\n";
     }
@@ -1008,10 +1008,13 @@ class Sag {
     $response->body = '';
 
     $isHeader = true;
-    $sockInfo = stream_get_meta_data($sock);
+
+    $chunkParsingDone = false;
+    $chunkSize = null;
 
     // Read in the response.
     while(
+      !$chunkParsingDone &&
       !feof($sock) && 
       (
         $isHeader ||
@@ -1019,6 +1022,7 @@ class Sag {
           !$isHeader &&
           $method != 'HEAD' &&
           (
+            isset($response->headers->{'Transfer-Encoding'}) == 'chunked' ||
             !isset($response->headers->{'Content-Length'}) ||
             (
               isset($response->headers->{'Content-Length'}) &&
@@ -1028,21 +1032,32 @@ class Sag {
         )
       )
     ) {
+      $sockInfo = stream_get_meta_data($sock);
+
       if($sockInfo['timed_out']) {
         throw new SagException('Connection timed out while reading.');
       }
 
       $line = fgets($sock);
 
-      if(!$line && !feof($sock)) {
+      if(!$line && !$sockInfo['feof'] && !$sockInfo['timed_out']) {
         throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
       }
 
       if($isHeader) {
+        //Parse headers
+
+        //Clean the input
         $line = trim($line);
 
         if($isHeader && empty($line)) {
-          $isHeader = false; //the delim blank line
+          /*
+           * Don't parse empty lines before the initial header as being the
+           * header/body delim line.
+           */
+          if($response->headers->_HTTP->raw) {
+            $isHeader = false; //the delim blank line
+          }
         }
         else {
           if(!isset($response->headers->_HTTP->raw)) {
@@ -1072,13 +1087,70 @@ class Sag {
           }
         }
       }
+      else if($response->headers->{'Transfer-Encoding'}) {
+        /*
+         * Parse the response's body, which is being sent in chunks. Welcome to
+         * HTTP/1.1 land.
+         *
+         * Each chunk is preceded with a size, so if we don't have a chunk size
+         * then we should be looking for one. A zero chunk size means the
+         * message is over.
+         */
+        if($chunkSize === null) {
+          //Look for a chunk size
+          $chunkSize = hexdec(rtrim($line));
+
+          if(!is_int($chunkSize)) {
+            throw new SagException('Invalid chunk size: '.$line);
+          }
+        }
+        else if($chunkSize) {
+          //We have a chunk size, so look for data
+          if(strlen($line) > $chunkSize) {
+            throw new SagException('Unexpectedly large chunk on this line.');
+          }
+          else {
+            $response->body .= $line;
+
+            preg_match_all("/\r\n/", $line, $numCRLFs);
+            $numCRLFs = sizeof($numCRLFs);
+
+            //Chunks can span >1 line, which PHP is going to give us one a a
+            //time.
+            $chunkSize -= strlen($line);
+
+            if($chunkSize > 0) {
+              //Do not count the CRLF if not the end of the chunk.
+              $chunkSize += ($numCRLFs * 2);
+            }
+            else {
+              /*
+               * Nothing left to this chunk, so the next link is going to be
+               * another chunk size. Or so we hope.
+               */
+              $chunkSize = null;
+            }
+          }
+        }
+        else if($chunkSize === 0) {
+          // We are done processing all the chunks.
+          $chunkParsingDone = true;
+        }
+        else {
+          throw new SagException('Unexpected empty line.');
+        }
+      }
       else {
+        /*
+         * Parse the response's body, which is being sent in one piece like in
+         * the good ol' days.
+         */
         $response->body .= $line;
       }
     }
 
-    //We're done with the socket, so someone else can use it.
-    if($response->headers->Connection == 'Keep-Alive') {
+    // HTTP/1.1 assumes persisted connections, but proxies might close them.
+    if(strtolower($response->headers->Connection) != 'close') {
       $this->connPool[] = $sock;
     }
 
