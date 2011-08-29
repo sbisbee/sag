@@ -13,6 +13,10 @@ Breaking Changes
 
 New Features
 
+  * Sag's internals now use HTTP/1.1 instead of HTTP/1.0. This requires zero
+    code changes for your application because Sag's interface is not impacted
+    by this.
+
   * You can now set cookies that will be sent with every request using
     setCookie(), and retrieve them with getCookie().
 
