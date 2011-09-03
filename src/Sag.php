@@ -189,8 +189,10 @@ class Sag {
       unset($prevResponse);
     }
 
-    //Not caching, or we are caching but there's nothing cached yet, or our
-    //cached item is no longer good.
+    /*
+     * Not caching, or we are caching but there's nothing cached yet, or our
+     * cached item is no longer good.
+     */
     if(!$response) {
       $response = $this->procPacket('GET', $url);
     }
@@ -643,9 +645,10 @@ class Sag {
     $data->source = $src;
     $data->target = $target;
 
-    //These guys are optional, so only include them if non-default to save on
-    //packet size.
-
+    /*
+     * These guys are optional, so only include them if non-default to save on
+     * packet size.
+     */
     if($continuous) {
       $data->continuous = true;
     }
@@ -881,8 +884,10 @@ class Sag {
 
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
-    // For now we only data data as strings. Streams and other formats will be
-    // permitted later.
+    /*
+     * For now we only data data as strings. Streams and other formats will be
+     * permitted later.
+     */
     if($data && !is_string($data)) {
       throw new SagException('Unexpected data format. Please report this bug.');
     }
@@ -920,6 +925,10 @@ class Sag {
       }
     }
 
+    /*
+     * Checking this again because $headers['Cookie'] could be set in two
+     * different logic paths above.
+     */
     if($headers['Cookie']) {
       $buff = '';
 
@@ -931,8 +940,10 @@ class Sag {
       unset($buff);
     }
 
-    // JSON is our default and most used Content-Type, but others need to be
-    // specified to allow attachments.
+    /*
+     * JSON is our default and most used Content-Type, but others need to be
+     * specified to allow attachments.
+     */
     if(!isset($headers['Content-Type'])) {
       $headers['Content-Type'] = 'application/json';
     }
@@ -941,6 +952,7 @@ class Sag {
       $headers['Content-Length'] = strlen($data); 
     }
 
+    //Start building the request packet.
     $buff = "$method $url HTTP/1.1\r\n";
 
     foreach($headers as $k => $v) {
@@ -1115,8 +1127,10 @@ class Sag {
             preg_match_all("/\r\n/", $line, $numCRLFs);
             $numCRLFs = sizeof($numCRLFs);
 
-            //Chunks can span >1 line, which PHP is going to give us one a a
-            //time.
+            /*
+             * Chunks can span >1 line, which PHP is going to give us one a a
+             * time.
+             */
             $chunkSize -= strlen($line);
 
             if($chunkSize > 0) {
