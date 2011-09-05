@@ -28,6 +28,9 @@ New Features
     your PHP layer to CouchDB, making it easier to have user accounts in your
     application without rewriting user management yet again.
 
+  * Support for the server level _session object with getSession(). Thanks to
+    Tim Juravich for the original patch.
+
 Fixed Bugs
 
   * As of CouchDB 1.1.0 inline attachments are sent as multipart HTTP
