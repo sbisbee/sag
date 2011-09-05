@@ -130,6 +130,15 @@ class Sag {
   }
 
   /**
+   * Get current session information on the server with /_session.
+   *
+   * @return stdClass
+   */
+  public function getSession() {
+    return $this->procPacket('GET', '/_session');
+  }
+
+  /**
    * Sets whether Sag will decode CouchDB's JSON responses with json_decode()
    * or to simply return the JSON as a string. Defaults to true.
    *
