@@ -436,6 +436,26 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
+  public function test_getSession() {
+    //we are already logged in, so give it a shot
+    $session = $this->couch->getSession();
+
+    $this->assertEquals(200, $session->headers->_HTTP->status);
+    $this->assertTrue($session->body->ok);
+    $this->assertEquals($this->couchAdminName, $session->body->userCtx->name);
+
+    //logout and get the session again
+    $this->couch->login(null, null);
+    $session = $this->couch->getSession();
+
+    $this->assertEquals(200, $session->headers->_HTTP->status);
+    $this->assertTrue($session->body->ok);
+    $this->assertEquals(null, $session->body->userCtx->name);
+
+    //log back in
+    $this->couch->login($this->couchAdminName, $this->couchAdminPass);
+  }
+
   public function test_createDocWithSession()
   {
     $db = new Sag($this->couchIP, $this->couchPort);
