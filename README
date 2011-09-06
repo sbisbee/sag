@@ -1,7 +1,7 @@
 Sag
 ===
 
-Version 0.6.0-UNRELEASED
+Version 0.6.0
 http://www.saggingcouch.com
 
 Sag is a PHP library for working with CouchDB. It is designed to not force any
@@ -29,7 +29,11 @@ CHANGELOG                       A detailed list of all changes between
 
 LICENSE                         A copy of the license that Sag is released under.
 
+NOTICE                          Sag's copyright notice(s).
+
 README                          This file.
+
+Makefile                        Used to run unit tests, create releases, etc.
 
 examples/                       Examples of how to use Sag.
 
@@ -56,6 +60,14 @@ src/SagMemoryCache.php          Caching mechanism that uses PHP objects in
                                 memory. Reported cache sizes are only
                                 semi-accurate, but are less important than file
                                 caching.
+
+src/SagConfigurationCheck.php   A bootstrap file that Sag uses to make sure the
+                                environment will work with Sag. There is no
+                                reason you would need to call this directly,
+                                unless writing your own bootstrap scripts.
+
+src/SagUserUtils.php            A set of utilities for interacting with CouchDB
+                                users and the _users database.
 
 tests/                          The unit tests for Sag. You can ignore these
                                 files, though SagTests.php may be interesting
@@ -165,6 +177,8 @@ License
 
 Sag is released under the Apache License, version 2.0. See the file named
 LICENSE for more information.
+
+Copyright information is in the NOTICE file.
 
 More?
 -----
