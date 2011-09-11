@@ -1001,7 +1001,7 @@ class Sag {
 
           //some PHP configurations don't throw when fsockopen() fails
           if(!$sock) {
-            throw Exception($sockErrStr, $sockErrNo);
+            throw new Exception($sockErrStr, $sockErrNo);
           }
         }
         catch(Exception $e) {

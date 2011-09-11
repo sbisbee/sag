@@ -1,6 +1,16 @@
 Sag Changes
 ===========
 
+Version 0.6.1
+-------------
+
+Fixed Bugs
+
+  * Fixed a typo bug where I was trying to throw the concept of an Exception
+    instead of an instantiation. Luckily it is rare for this corner case in the
+    code to run. Thanks to Oliver Kurowski (github/a4mc) for reporting.
+    (closes #26)
+
 Version 0.6.0
 -------------
 
