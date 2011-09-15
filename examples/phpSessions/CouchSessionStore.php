@@ -211,7 +211,7 @@ class CouchSessionStore
 
       foreach($rows as $row)
       {
-        if($row->doc->createdOn + $maxLife < $now)
+        if($row->doc->createdAt + $maxLife < $now)
         {
           $row->doc->_deleted = true;
           $toDelete[] = $row->doc;
