@@ -1119,15 +1119,23 @@ class Sag {
          */
         if($chunkSize === null) {
           //Look for a chunk size
-          $chunkSize = hexdec(rtrim($line));
+          $line = rtrim($line);
 
-          if(!is_int($chunkSize)) {
-            throw new SagException('Invalid chunk size: '.$line);
+          if(!empty($line) || $line == "0") {
+            $chunkSize = hexdec($line);
+
+            if(!is_int($chunkSize)) {
+              throw new SagException('Invalid chunk size: '.$line);
+            }
           }
+        }
+        else if($chunkSize === 0) {
+          // We are done processing all the chunks.
+          $chunkParsingDone = true;
         }
         else if($chunkSize) {
           //We have a chunk size, so look for data
-          if(strlen($line) > $chunkSize) {
+          if(strlen($line) > $chunkSize && strlen($line) - 2 > $chunkSize) {
             throw new SagException('Unexpectedly large chunk on this line.');
           }
           else {
@@ -1142,11 +1150,7 @@ class Sag {
              */
             $chunkSize -= strlen($line);
 
-            if($chunkSize > 0) {
-              //Do not count the CRLF if not the end of the chunk.
-              $chunkSize += ($numCRLFs * 2);
-            }
-            else {
+            if($chunkSize <= 0) {
               /*
                * Nothing left to this chunk, so the next link is going to be
                * another chunk size. Or so we hope.
@@ -1154,10 +1158,6 @@ class Sag {
               $chunkSize = null;
             }
           }
-        }
-        else if($chunkSize === 0) {
-          // We are done processing all the chunks.
-          $chunkParsingDone = true;
         }
         else {
           throw new SagException('Unexpected empty line.');

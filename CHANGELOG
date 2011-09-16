@@ -11,6 +11,10 @@ Fixed Bugs
     code to run. Thanks to Oliver Kurowski (github/a4mc) for reporting.
     (closes #26)
 
+  * Fixed a problem with the HTTP/1.1 decoding of chunked message bodies that
+    was causing continuous change feed requests (/db/_changes?continuous=true)
+    to fail. (closes #27)
+
 Version 0.6.0
 -------------
 
