@@ -15,6 +15,10 @@ Fixed Bugs
     was causing continuous change feed requests (/db/_changes?continuous=true)
     to fail. (closes #27)
 
+  * Fixed a typo bug in examples/phpSessions, changed createdOn to createdAt.
+    Thanks to Yo-Han (github/yo-han) for finding the bug and submitting the
+    patch as a pull request. (closes #28)
+
 Version 0.6.0
 -------------
 
