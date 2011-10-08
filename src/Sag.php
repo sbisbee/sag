@@ -202,7 +202,7 @@ class Sag {
      * Not caching, or we are caching but there's nothing cached yet, or our
      * cached item is no longer good.
      */
-    if(!$response) {
+    if(!isset($response)) {
       $response = $this->procPacket('GET', $url);
     }
 
@@ -938,7 +938,7 @@ class Sag {
      * Checking this again because $headers['Cookie'] could be set in two
      * different logic paths above.
      */
-    if($headers['Cookie']) {
+    if(isset($headers['Cookie'])) {
       $buff = '';
 
       foreach($headers['Cookie'] as $k => $v) {
@@ -1108,7 +1108,7 @@ class Sag {
           }
         }
       }
-      else if($response->headers->{'Transfer-Encoding'}) {
+      else if(isset($response->headers->{'Transfer-Encoding'})) {
         /*
          * Parse the response's body, which is being sent in chunks. Welcome to
          * HTTP/1.1 land.
@@ -1173,7 +1173,7 @@ class Sag {
     }
 
     // HTTP/1.1 assumes persisted connections, but proxies might close them.
-    if(strtolower($response->headers->Connection) != 'close') {
+    if(!isset($response->headers->Connection)|| strtolower($response->headers->Connection) != 'close') {
       $this->connPool[] = $sock;
     }
 
