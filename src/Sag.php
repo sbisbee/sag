@@ -202,7 +202,7 @@ class Sag {
      * Not caching, or we are caching but there's nothing cached yet, or our
      * cached item is no longer good.
      */
-    if(!$response) {
+    if(!isset($response)) {
       $response = $this->procPacket('GET', $url);
     }
 
@@ -938,7 +938,7 @@ class Sag {
      * Checking this again because $headers['Cookie'] could be set in two
      * different logic paths above.
      */
-    if($headers['Cookie']) {
+    if(isset($headers['Cookie'])) {
       $buff = '';
 
       foreach($headers['Cookie'] as $k => $v) {
@@ -1001,7 +1001,7 @@ class Sag {
 
           //some PHP configurations don't throw when fsockopen() fails
           if(!$sock) {
-            throw Exception($sockErrStr, $sockErrNo);
+            throw new Exception($sockErrStr, $sockErrNo);
           }
         }
         catch(Exception $e) {
@@ -1076,7 +1076,7 @@ class Sag {
            * Don't parse empty lines before the initial header as being the
            * header/body delim line.
            */
-          if($response->headers->_HTTP->raw) {
+          if(isset($response->headers->_HTTP->raw)) {
             $isHeader = false; //the delim blank line
           }
         }
@@ -1108,7 +1108,7 @@ class Sag {
           }
         }
       }
-      else if($response->headers->{'Transfer-Encoding'}) {
+      else if(isset($response->headers->{'Transfer-Encoding'})) {
         /*
          * Parse the response's body, which is being sent in chunks. Welcome to
          * HTTP/1.1 land.
@@ -1119,15 +1119,23 @@ class Sag {
          */
         if($chunkSize === null) {
           //Look for a chunk size
-          $chunkSize = hexdec(rtrim($line));
+          $line = rtrim($line);
 
-          if(!is_int($chunkSize)) {
-            throw new SagException('Invalid chunk size: '.$line);
+          if(!empty($line) || $line == "0") {
+            $chunkSize = hexdec($line);
+
+            if(!is_int($chunkSize)) {
+              throw new SagException('Invalid chunk size: '.$line);
+            }
           }
+        }
+        else if($chunkSize === 0) {
+          // We are done processing all the chunks.
+          $chunkParsingDone = true;
         }
         else if($chunkSize) {
           //We have a chunk size, so look for data
-          if(strlen($line) > $chunkSize) {
+          if(strlen($line) > $chunkSize && strlen($line) - 2 > $chunkSize) {
             throw new SagException('Unexpectedly large chunk on this line.');
           }
           else {
@@ -1142,11 +1150,7 @@ class Sag {
              */
             $chunkSize -= strlen($line);
 
-            if($chunkSize > 0) {
-              //Do not count the CRLF if not the end of the chunk.
-              $chunkSize += ($numCRLFs * 2);
-            }
-            else {
+            if($chunkSize <= 0) {
               /*
                * Nothing left to this chunk, so the next link is going to be
                * another chunk size. Or so we hope.
@@ -1154,10 +1158,6 @@ class Sag {
               $chunkSize = null;
             }
           }
-        }
-        else if($chunkSize === 0) {
-          // We are done processing all the chunks.
-          $chunkParsingDone = true;
         }
         else {
           throw new SagException('Unexpected empty line.');
@@ -1173,7 +1173,7 @@ class Sag {
     }
 
     // HTTP/1.1 assumes persisted connections, but proxies might close them.
-    if(strtolower($response->headers->Connection) != 'close') {
+    if(!isset($response->headers->Connection)|| strtolower($response->headers->Connection) != 'close') {
       $this->connPool[] = $sock;
     }
 
