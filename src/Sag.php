@@ -1076,7 +1076,7 @@ class Sag {
            * Don't parse empty lines before the initial header as being the
            * header/body delim line.
            */
-          if($response->headers->_HTTP->raw) {
+          if(isset($response->headers->_HTTP->raw)) {
             $isHeader = false; //the delim blank line
           }
         }
