@@ -1,6 +1,24 @@
 Sag Changes
 ===========
 
+Version 0.6.1
+-------------
+
+Fixed Bugs
+
+  * Fixed a typo bug where I was trying to throw the concept of an Exception
+    instead of an instantiation. Luckily it is rare for this corner case in the
+    code to run. Thanks to Oliver Kurowski (github/a4mc) for reporting.
+    (closes #26)
+
+  * Fixed a problem with the HTTP/1.1 decoding of chunked message bodies that
+    was causing continuous change feed requests (/db/_changes?continuous=true)
+    to fail. (closes #27)
+
+  * Fixed a typo bug in examples/phpSessions, changed createdOn to createdAt.
+    Thanks to Yo-Han (github/yo-han) for finding the bug and submitting the
+    patch as a pull request. (closes #28)
+
 Version 0.6.0
 -------------
 
