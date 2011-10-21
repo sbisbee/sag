@@ -906,7 +906,7 @@ class Sag {
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/0.6";
+    $headers["User-Agent"] = "Sag/0.6.1";
 
     /*
      * This prevents some unRESTful requests, such as inline attachments in
