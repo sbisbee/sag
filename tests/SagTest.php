@@ -171,9 +171,9 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $json = $this->couch->get('/1')->body;
     $this->assertTrue(is_string($json));
+    $this->assertEquals(json_decode($json)->_id, '1');
 
     $this->couch->decode(true); //for the benefit of future tests
-    $this->assertEquals(json_decode($json)->_id, '1');
   }
 
   public function test_updateDoc()
