@@ -21,7 +21,6 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     );
 
     // cURL wants the headers as an array of strings, not an assoc array
-/*
     if(sizeof($headers) > 0) {
       $curlHeaders = array();
 
@@ -30,10 +29,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       }
 
       unset($headers);
-      $opts[CURLOPT_HTTPHEADER] = $headers;
+      $opts[CURLOPT_HTTPHEADER] = $curlHeaders;
     }
 
-*/
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);
