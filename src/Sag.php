@@ -498,7 +498,7 @@ class Sag {
 
       if($createIfNotFound) {
         try {
-          $result = self::procPacket('HEAD', "/{$db}");
+          self::procPacket('HEAD', "/{$db}");
         }
         catch(SagCouchException $e) {
           if($e->getCode() != 404) {

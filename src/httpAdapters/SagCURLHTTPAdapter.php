@@ -79,7 +79,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       throw new SagException('cURL returned false without providing an error.');
     }
 
-    return self::makeResult($response);
+    return self::makeResult($response, $method);
   }
 }
 ?>
