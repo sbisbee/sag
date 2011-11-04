@@ -12,6 +12,7 @@ abstract class SagHTTPAdapter {
 
   protected $host;
   protected $port;
+  protected $proto = 'http'; //http or https
 
   public function __construct($host = "127.0.0.1", $port = "5984") {
     $this->host = $host;
@@ -33,17 +34,30 @@ abstract class SagHTTPAdapter {
      */
     $json = json_decode($response->body);
 
-    if(isset($json))
-    {
+    if(isset($json)) {
       // Check for an error from CouchDB regardless of whether they want JSON
       // returned.
-      if(!empty($json->error))
+      if(!empty($json->error)) {
         throw new SagCouchException("{$json->error} ({$json->reason})", $response->headers->_HTTP->status);
+      }
 
-      $response->body = ($this->decodeResp) ? $json : $response->body;
+      if($this->decodeResp) {
+        $response->body = $json;
+      }
     }
 
     return $response;
+  }
+
+  protected function parseCookieString($cookieStr) {
+    $cookies = new stdClass();
+
+    foreach(explode('; ', $cookieStr) as $cookie) {
+      $crumbs = explode('=', $cookie);
+      $cookies->{trim($crumbs[0])} = trim($crumbs[1]);
+    }
+
+    return $cookies;
   }
 }
 ?>

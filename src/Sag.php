@@ -16,7 +16,8 @@
 require_once('SagException.php');
 require_once('SagCouchException.php');
 require_once('SagConfigurationCheck.php');
-require_once('SagNativeHTTPAdapter.php');
+require_once('httpAdapters/SagNativeHTTPAdapter.php');
+require_once('httpAdapters/SagCURLHTTPAdapter.php');
 
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
@@ -37,6 +38,9 @@ class Sag {
    */
   public static $AUTH_COOKIE = "AUTH_COOKIE";
 
+  public static $NATIVE_HTTP_ADAPTER = 'NATIVE_HTTP_ADAPTER';
+  public static $CURL_HTTP_ADAPTER = 'CURL_HTTP_ADAPTER';
+
   private $db;                          //Database name to hit.
   private $host;                        //IP or address to connect to.
   private $port;                        //Port to connect to.
@@ -45,8 +49,6 @@ class Sag {
   private $pass;                        //Password to auth with.
   private $authType;                    //One of the Sag::$AUTH_* variables
   private $authSession;                 //AuthSession cookie value from/for CouchDB
-
-  private $decodeResp = true;           //Are we decoding CouchDB's JSON?
 
   private $socketOpenTimeout;           //The seconds until socket connection timeout
   private $socketRWTimeoutSeconds;      //The seconds for socket I/O timeout
@@ -59,6 +61,7 @@ class Sag {
   private $globalCookies = array();
 
   private $httpAdapter;
+  private $httpAdapterType;
 
   /**
    * @param string $host (OPTIONAL) The host's IP or address of the Couch we're
@@ -66,27 +69,51 @@ class Sag {
    *
    * @param string $port (OPTIONAL) The host's port that Couch is listening on.
    * Defaults to '5984'.
-   *
-   * @param SagHTTPAdapter $httpAdapter (OPTIONAL) An implementation of the
-   * SagHTTPAdapter. Defaults to SagNativeHTTPAdapter.
    */
-  public function __construct($host = "127.0.0.1", $port = "5984", $httpAdapter = null)
+  public function __construct($host = "127.0.0.1", $port = "5984")
   {
     SagConfigurationCheck::run();
 
     $this->host = $host;
     $this->port = $port;
 
-    $this->httpAdapter = ($httpAdapter) ?: new SagNativeHTTPAdapter($host, $port);
+    //sets to the default by ... default
+    $this->setHTTPAdapter();
   }
 
-  /**
-   * Closes any sockets that are left open in the connection pool.
-   */
-  public function __destruct() {
-    foreach($this->connPool as $sock) {
-      @fclose($sock);
+  public function setHTTPAdapter($type = null) {
+    if(!$type) {
+      $type = self::$NATIVE_HTTP_ADAPTER;
     }
+
+    //nothing to be done
+    if($type === $this->httpAdapterType) {
+      return true;
+    }
+
+    //remember what was already set (ie., might have called decode() already)
+    if($this->httpAdapter) {
+      $prevDecode = $this->httpAdapter->decodeResp;
+    }
+
+    switch($type) {
+      case self::$NATIVE_HTTP_ADAPTER:
+        $this->httpAdapter = new SagNativeHTTPAdapter($this->host, $this->port);
+        break;
+
+      case self::$CURL_HTTP_ADAPTER:
+        $this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port);
+        break;
+
+      default:
+        throw SagException("Invalid Sag HTTP adapter specified: $type");
+    }
+
+    if($prevDecode) {
+      $this->httpAdapter->decodeResp = $prevDecode;
+    }
+
+    return $this;
   }
 
   /**
