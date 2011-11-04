@@ -239,16 +239,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
       $this->connPool[] = $sock;
     }
 
-    //Make sure we got the complete response.
-    if(
-      $method != 'HEAD' &&
-      isset($response->headers->{'Content-Length'}) &&
-      strlen($response->body) != $response->headers->{'Content-Length'}
-    ) {
-      throw new SagException('Unexpected end of packet.');
-    }
-
-    return self::makeResult($response);
+    return self::makeResult($response, $method);
   }
 }
 ?>
