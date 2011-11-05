@@ -7,7 +7,7 @@ require_once('SagHTTPAdapter.php');
  *
  * This is also the original socket code that was used in Sag.
  *
- * @version 0.6.0
+ * @version 0.7.0
  * @package HTTP
  */
 class SagNativeHTTPAdapter extends SagHTTPAdapter {

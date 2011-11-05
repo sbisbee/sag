@@ -19,7 +19,7 @@ require_once('Sag.php');
  * Provides utilities to work with and manage CouchDB users, which wraps the
  * Sag class.
  *
- * @version 0.6.0
+ * @version 0.7.0
  * @package Utils
  */
 class SagUserUtils {

@@ -25,7 +25,7 @@ require_once("SagException.php");
  * storage).
  *
  * @package Cache 
- * @version 0.6.0
+ * @version 0.7.0
  */
 abstract class SagCache {
   private $maxSize;                                     //in bytes
