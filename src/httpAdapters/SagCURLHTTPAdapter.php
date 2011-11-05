@@ -35,6 +35,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $opts[CURLOPT_POSTFIELDS] = $data;
     }
 
+    if($method == 'HEAD') {
+      $opts[CURLOPT_NOBODY] = true;
+    }
+
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);
