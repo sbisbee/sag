@@ -28,8 +28,11 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
         $curlHeaders[] = "$k: $v";
       }
 
-      unset($headers);
       $opts[CURLOPT_HTTPHEADER] = $curlHeaders;
+    }
+
+    if($data) {
+      $opts[CURLOPT_POSTFIELDS] = $data;
     }
 
     curl_setopt_array($this->ch, $opts);
