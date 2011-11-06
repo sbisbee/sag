@@ -13,16 +13,12 @@ abstract class SagHTTPAdapter {
   protected $host;
   protected $port;
   protected $proto = 'http'; //http or https
+  protected $sslCertPath;
 
   public function __construct($host = "127.0.0.1", $port = "5984") {
     $this->host = $host;
     $this->port = $port;
   }
-
-  /**
-   * Processes the packet, returning the server's response.
-   */
-  abstract public function procPacket($method, $url, $data = null, $headers = array());
 
   protected function makeResult($response, $method) {
     //Make sure we got the complete response.
@@ -85,6 +81,32 @@ abstract class SagHTTPAdapter {
     }
 
     return $cookies;
+  }
+
+  /**
+   * Processes the packet, returning the server's response.
+   */
+  abstract public function procPacket($method, $url, $data = null, $headers = array());
+
+  /**
+   * Whether to use HTTPS or not.
+   */
+  public function useSSL($use) {
+    $this->proto = 'http' . (($use) ? 's' : '');
+  }
+
+  /**
+   * Sets the location of the CA file.
+   */
+  public function setSSLCert($path) {
+    $this->sslCertPath = $path;
+  }
+
+  /**
+   * Returns whether Sag is using SSL.
+   */
+  public function usingSSL() {
+    return $this->proto === 'https';
   }
 }
 ?>

@@ -22,6 +22,20 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
       @fclose($sock);
   }
 
+  /**
+   * Native sockets does not support SSL.
+   */
+  public function useSSL($use) {
+    throw new SagException('Sag::$NATIVE_HTTP_ADAPTER does not support SSL.');
+  }
+
+  /**
+   * Native sockets does not support SSL.
+   */
+  public function setSSLCert($path) {
+    throw new SagException('Sag::$NATIVE_HTTP_ADAPTER does not support SSL.');
+  }
+
   public function procPacket($method, $url, $data = null, $headers = array()) {
     //Start building the request packet.
     $buff = "$method $url HTTP/1.1\r\n";

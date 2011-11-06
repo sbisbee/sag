@@ -927,6 +927,73 @@ class Sag {
     return ($this->globalCookies[$key]) ?: null;
   }
 
+  /**
+   * Set whether to use SSL or not.
+   *
+   * By default the host's certificate will not be verified: you must provide a
+   * certifivate to setSSLCert() to enable verification.
+   *
+   * @param bool $use Set to true to use SSL, false to not.
+   *
+   * @return Sag Returns $this.
+   *
+   * @see setSSLCert()
+   */
+  public function useSSL($use) {
+    if(!is_bool($use)) {
+      throw new SagException('Excepted a boolean, but got something else.');
+    }
+
+    if($use !== $this->usingSSL()) {
+      $this->httpAdapter->useSSL($use);
+    }
+
+    return $this;
+  }
+
+  /**
+   * Returns whether Sag is using SSL or not.
+   *
+   * @return bool true means Sag is using SSL, false means Sag is not.
+   *
+   * @see useSSL()
+   */
+  public function usingSSL() {
+    return $this->httpAdapter->usingSSL();
+  }
+
+  /**
+   * Provide a path to a file that contains one or more certificates to verify
+   * the CouchDB host with when using SSL. Only applies if you set
+   * useSSL(true).
+   *
+   * @param string $path File path to the certificate file. Pass null to unset
+   * the path.
+   *
+   * @return Sag Returns $this.
+   *
+   * @see useSSL()
+   */
+  public function setSSLCert($path) {
+    if($path !== null) {
+      if(!is_string($path) || !$path) {
+        throw new SagException('Invalid file path provided.');
+      }
+
+      if(!is_file($path)) {
+        throw new SagException('That path does not point to a file.');
+      }
+
+      if(!is_readable($path)) {
+        throw new SagException('PHP does not have read privileges with that file.');
+      }
+    }
+
+    $this->httpAdapter->setSSLCert($path);
+
+    return $this;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
     /*

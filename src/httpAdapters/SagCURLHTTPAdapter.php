@@ -47,6 +47,18 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $opts[CURLOPT_NOBODY] = true;
     }
 
+    // SSL support: don't verify unless we have a cert set
+    if($this->proto === 'https') {
+      if(!$this->sslCertPath) {
+        $opts[CURLOPT_SSL_VERIFYPEER] = false;
+      }
+      else {
+        $opts[CURLOPT_SSL_VERIFYPEER] = true;
+        $opts[CURLOPT_SSL_VERIFYHOST] = true;
+        $opts[CURLOPT_CAINFO] = $this->sslCertPath;
+      }
+    }
+
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);

@@ -718,6 +718,14 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch, $this->couch->setCache(new SagMemoryCache()));
     $this->assertEquals($this->couch, $this->couch->setStaleDefault(true));
     $this->assertEquals($this->couch, $this->couch->setCookie('a', 'b'));
+
+    try {
+      $this->assertEquals($this->couch, $this->couch->useSSL(false));
+      $this->assertEquals($this->couch, $this->couch->setSSLCert(__FILE__));
+    }
+    catch(SagException $e) {
+      //do nothing - not all http libraries support ssl
+    }
   }
 
   public function test_setAndGetCookie()
