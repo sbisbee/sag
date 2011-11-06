@@ -105,12 +105,21 @@ simply catching the Exception class.
 Networking
 ----------
 
-Sag uses sockets, so there is no dependency on other libraries such as cURL. If
-you want to monitor your application's activity on the server side (ex., if you
-are proxying requests to CouchDB through a web server), then examine the HTTP
-User-Agent header.
+Sag allows you to specify the HTTP library you want to use when communicating
+with CouchDB. The supported libraries are:
 
-SSL is currently not supported.
+  - Native sockets (Sag::$NATIVE_HTTP_ADAPTER) - used by default. Prevent
+    dependencies, such as cURL, that shared environments may not support.
+
+  - cURL (Sag::$CURL_HTTP_ADAPTER) - has functionality that native sockets do
+    not support, such as SSL.
+
+You can choose which library you want Sag to use by calling the
+setHTTPAdapter() function and passing it the appropriate variable.
+
+If you want to monitor your application's activity on the server side (ex., if
+you are proxying requests to CouchDB through a web server), then examine the
+HTTP User-Agent header.
 
 Results
 -------
