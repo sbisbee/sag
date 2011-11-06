@@ -54,6 +54,11 @@ dist: clean ${DIST_DIR} check
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
 
+lint:
+	for file in ${SRC_DIR}/*.php ${TESTS_DIR}/*.php; do \
+	  php -l "$$file"; \
+	done
+
 # Run tests with native sockets
 checkNative:
 	@echo "Testing with native sockets..."
@@ -69,16 +74,7 @@ checkCURL:
 	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR}
 
 # Run the tests
-check:
-	for file in ${SRC_DIR}/*.php ${TESTS_DIR}/*.php; do \
-	  php -l "$$file"; \
-	done
-
-	@echo ""
-	$(MAKE) checkNative
-
-	@echo ""
-	$(MAKE) checkCURL
+check: lint checkNative checkCURL
 
 # Run the native socket tests with code coverage
 checkCoverage:
