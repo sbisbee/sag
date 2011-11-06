@@ -1,0 +1,11 @@
+<phpunit>
+  <php>
+    <var name="host" value="localhost"/>
+    <var name="port" value="5984"/>
+    <var name="db" value="sag_tests"/>
+    <var name="dbReplication" value="sag_tests_replication"/>
+    <var name="adminName" value="admin"/>
+    <var name="adminPass" value="passwd"/>
+    <var name="httpAdapter" value="CURL_HTTP_ADAPTER"/>
+  </php>
+</phpunit>

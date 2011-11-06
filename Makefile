@@ -32,11 +32,16 @@ DIST_FILE_SIG := ${DIST_FILE}.sig
 
 # PHPUnit related tools and files
 TESTS_BOOTSTRAP := ${TESTS_DIR}/bootstrap.bsh
-TESTS_CONFIG := ${TESTS_DIR}/phpunitConfig.xml
 TESTS_PHP_INCLUDE_PATH := $(shell php -r 'echo ini_get("include_path");'):$(SRC_DIR)
 TESTS_COVERAGE_DIR := ${TESTS_DIR}/coverage
-TESTS_PHPUNIT_OPTS := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
-			--configuration=${TESTS_CONFIG}
+
+TESTS_CONFIG_NATIVE_SOCKETS := ${TESTS_DIR}/phpunitConfig-nativeSockets.xml
+TESTS_CONFIG_CURL := ${TESTS_DIR}/phpunitConfig-cURL.xml
+
+TESTS_PHPUNIT_OPTS_BASE := -d "include_path=${TESTS_PHP_INCLUDE_PATH}"
+
+TESTS_PHPUNIT_OPTS_NATIVE := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_NATIVE_SOCKETS}
+TESTS_PHPUNIT_OPTS_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_CURL}
 
 # PHPDocs related tools and files
 DOCS_DIR := ${PREFIX}docs
@@ -49,6 +54,20 @@ dist: clean ${DIST_DIR} check
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
 
+# Run tests with native sockets
+checkNative:
+	@echo "Testing with native sockets..."
+
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_NATIVE} ${TESTS_DIR}
+
+# Run tests with cURL
+checkCURL:
+	@echo "Testing with cURL..."
+
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR}
+
 # Run the tests
 check:
 	for file in ${SRC_DIR}/*.php ${TESTS_DIR}/*.php; do \
@@ -56,13 +75,14 @@ check:
 	done
 
 	@echo ""
+	$(MAKE) checkNative
 
-	${TESTS_BOOTSTRAP}
-	${PHPUNIT} ${TESTS_PHPUNIT_OPTS} ${TESTS_DIR}
+	@echo ""
+	$(MAKE) checkCURL
 
-# Run the tests with code coverage
+# Run the native socket tests with code coverage
 checkCoverage:
-	$(MAKE) check TESTS_PHPUNIT_OPTS="${TESTS_PHPUNIT_OPTS} --coverage-html=${TESTS_COVERAGE_DIR}"
+	$(MAKE) check TESTS_PHPUNIT_OPTS="${TESTS_PHPUNIT_OPTS_NATIVE} --coverage-html=${TESTS_COVERAGE_DIR}"
 
 # Generate documentation with PHPDocumentation
 docs:
