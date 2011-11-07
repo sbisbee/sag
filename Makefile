@@ -37,11 +37,13 @@ TESTS_COVERAGE_DIR := ${TESTS_DIR}/coverage
 
 TESTS_CONFIG_NATIVE_SOCKETS := ${TESTS_DIR}/phpunitConfig-nativeSockets.xml
 TESTS_CONFIG_CURL := ${TESTS_DIR}/phpunitConfig-cURL.xml
+TESTS_CONFIG_SSL_CURL := ${TESTS_DIR}/phpunitConfig-SSL-cURL.xml
 
 TESTS_PHPUNIT_OPTS_BASE := -d "include_path=${TESTS_PHP_INCLUDE_PATH}"
 
 TESTS_PHPUNIT_OPTS_NATIVE := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_NATIVE_SOCKETS}
 TESTS_PHPUNIT_OPTS_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_CURL}
+TESTS_PHPUNIT_OPTS_SSL_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_SSL_CURL}
 
 # PHPDocs related tools and files
 DOCS_DIR := ${PREFIX}docs
@@ -73,12 +75,22 @@ checkCURL:
 	${TESTS_BOOTSTRAP}
 	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR}
 
+# Runs tests with cURL and SSL
+checkCURL_SSL:
+	@echo "Testing with cURL + SSL..."
+
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} ${TESTS_DIR}
+
 # Run the tests
 check: lint checkNative checkCURL
 
 # Run the native socket tests with code coverage
 checkCoverage:
-	$(MAKE) check TESTS_PHPUNIT_OPTS="${TESTS_PHPUNIT_OPTS_NATIVE} --coverage-html=${TESTS_COVERAGE_DIR}"
+	$(MAKE) checkNative TESTS_PHPUNIT_OPTS_NATIVE="${TESTS_PHPUNIT_OPTS_NATIVE} --coverage-html=${TESTS_COVERAGE_DIR}"
+
+checkCoverageCURL:
+	${MAKE} checkCURL TESTS_PHPUNIT_OPTS_CURL="${TESTS_PHPUNIT_OPTS_CURL} --coverage-html=${TESTS_COVERAGE_DIR}"
 
 # Generate documentation with PHPDocumentation
 docs:
