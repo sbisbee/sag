@@ -740,4 +740,20 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couch->setCookie('foo', null);
     $this->assertEquals($this->couch->getCookie('foo'), null);
   }
+
+  public function test_ssl() {
+    $this->assertFalse($this->couch->usingSSL());
+
+    try {
+      $this->couch->useSSL('');
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertEquals($this->couch, $this->couch->useSSL(false));
+
+    $this->assertEquals($this->couch, $this->couch->useSSL(true));
+  }
 }

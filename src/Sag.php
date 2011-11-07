@@ -38,8 +38,8 @@ class Sag {
    */
   public static $AUTH_COOKIE = "AUTH_COOKIE";
 
-  public static $NATIVE_HTTP_ADAPTER = 'NATIVE_HTTP_ADAPTER';
-  public static $CURL_HTTP_ADAPTER = 'CURL_HTTP_ADAPTER';
+  public static $HTTP_NATIVE_SOCKETS = 'HTTP_NATIVE_SOCKETS';
+  public static $HTTP_CURL = 'HTTP_CURL';
 
   private $db;                          //Database name to hit.
   private $host;                        //IP or address to connect to.
@@ -83,7 +83,7 @@ class Sag {
 
   public function setHTTPAdapter($type = null) {
     if(!$type) {
-      $type = self::$NATIVE_HTTP_ADAPTER;
+      $type = self::$HTTP_NATIVE_SOCKETS;
     }
 
     //nothing to be done
@@ -97,11 +97,11 @@ class Sag {
     }
 
     switch($type) {
-      case self::$NATIVE_HTTP_ADAPTER:
+      case self::$HTTP_NATIVE_SOCKETS:
         $this->httpAdapter = new SagNativeHTTPAdapter($this->host, $this->port);
         break;
 
-      case self::$CURL_HTTP_ADAPTER:
+      case self::$HTTP_CURL:
         $this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port);
         break;
 
