@@ -486,6 +486,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     $cache = new SagFileCache('/tmp/sag');
     $this->couch->setCache($cache);
     $this->assertEquals($cache, $this->couch->getCache()); 
+
+    try {
+      // should throw
+      $this->couch->setCache(new stdClass());
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
   }
 
   public function test_getFromCache()
