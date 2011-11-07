@@ -63,6 +63,10 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->noCacheCouch->login($this->couchAdminName, $this->couchAdminPass);
   }
 
+  public function test_currentHTTPAdapter() {
+    $this->assertEquals($this->couch->currentHTTPAdapter(), $this->couchHTTPAdapter);
+  }
+
   public function test_createDB()
   {
     $result = $this->couch->createDatabase($this->couchDBName);

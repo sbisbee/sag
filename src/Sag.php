@@ -133,6 +133,16 @@ class Sag {
   }
 
   /**
+   * Returns the current HTTP adapter being used.
+   *
+   * @return string Will be equal to Sag::$HTTP_NATIVE_SOCKETS or
+   * Sag::$HTTP_CURL.
+   */
+  public function currentHTTPAdapter() {
+    return $this->httpAdapterType;
+  }
+
+  /**
    * Updates the login credentials in Sag that will be used for all further
    * communications. Pass null to both $user and $pass to turn off
    * authentication, as Sag does support blank usernames and passwords - only
