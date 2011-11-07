@@ -754,6 +754,23 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals($this->couch, $this->couch->useSSL(false));
 
-    $this->assertEquals($this->couch, $this->couch->useSSL(true));
+    /*
+     * Checks normal behavior, but also makes sure that adapters/libraries that
+     * do not support SSL throw a SagException.
+     */
+    try {
+      $this->assertEquals($this->couch, $this->couch->useSSL(true));
+    }
+    catch(SagException $e) {
+      if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
+        $this->assertTrue(true);
+
+        // do not support - DONE!
+        return;
+      }
+      else {
+        throw $e;
+      }
+    }
   }
 }
