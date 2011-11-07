@@ -8,7 +8,7 @@ New Features
 
   * The HTTP socket code was abstracted out of the core Sag class into its own
     HTTP module. It is called SagNativeHTTPAdapter and remains the default
-    transport mechanism. This allows for additional drives to be written that
+    transport mechanism. This allows for additional drivers to be written that
     leverage other underlying systems, potentially adding extra functionality.
     The SagNativeHTTPAdapter is referenced by the Sag::$NATIVE_HTTP_ADAPTER
     static public variable and can be specified with the setHTTPAdapter()
@@ -17,6 +17,12 @@ New Features
   * cURL support was added with the SagCURLHTTPAdapter. If your system has the
     cURL PHP extension installed then you tell Sag to leverage cURL by calling
     `$sag->setHTTPAdapter(Sag::$CURL_HTTP_ADAPTER)`.
+
+  * SSL is now supported if you use cURL instead of native sockets. This
+    introduces setSSL() to turn SSL on/off, and setSSLCert() to specify a
+    certificate file to verify against. Verification is only supported if you
+    provide a certificate with setSSLCert(). HTTP libraries that do not support
+    SSL (native sockets) will throw a SagException.
 
 Version 0.6.1
 -------------
