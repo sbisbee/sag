@@ -11,6 +11,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
   private $ch;
 
   public function __construct($host, $port) {
+    if(!extension_loaded('curl')) {
+      throw new SagException('Sag cannot use cURL on this system: the PHP cURL extension is not installed.');
+    }
+
     parent::__construct($host, $port);
 
     $this->ch = curl_init();
@@ -29,22 +33,37 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     );
 
     // cURL wants the headers as an array of strings, not an assoc array
-    if(sizeof($headers) > 0) {
-      $curlHeaders = array();
+    if(is_array($headers) && sizeof($headers) > 0) {
+      $opts[CURLOPT_HTTPHEADER] = array();
 
       foreach($headers as $k => $v) {
-        $curlHeaders[] = "$k: $v";
+        $opts[CURLOPT_HTTPHEADER][] = "$k: $v";
       }
-
-      $opts[CURLOPT_HTTPHEADER] = $curlHeaders;
     }
 
+    // send data through cURL's poorly named opt
     if($data) {
       $opts[CURLOPT_POSTFIELDS] = $data;
     }
 
+    // special considerations for HEAD requests
     if($method == 'HEAD') {
       $opts[CURLOPT_NOBODY] = true;
+    }
+
+    // connect timeout
+    if(is_int($this->socketOpenTimeout)) {
+      $opts[CURLOPT_CONNECTTIMEOUT] = $this->socketOpenTimeout;
+    }
+
+    // exec timeout (seconds)
+    if(is_int($this->socketRWTimeoutSeconds)) {
+      $opts[CURLOPT_TIMEOUT] = $this->socketRWTimeoutSeconds;
+    }
+
+    // exec timeout (ms)
+    if(is_int($this->socketRWTimeoutMicroseconds)) {
+      $opts[CURLOPT_TIMEOUT_MS] = $this->socketRWTimeoutMicroseconds;
     }
 
     // SSL support: don't verify unless we have a cert set
@@ -64,20 +83,20 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     $chResponse = curl_exec($this->ch);
 
     if($chResponse !== false) {
-      //prepare the response object
+      // prepare the response object
       $response = new stdClass();
       $response->headers = new stdClass();
       $response->headers->_HTTP = new stdClass();
       $response->body = '';
 
-      //split headers and body
+      // split headers and body
       list($headers, $response->body) = explode("\r\n\r\n", $chResponse);
 
-      //split up the headers
+      // split up the headers
       $headers = explode("\r\n", $headers);
 
       for($i = 0; $i < sizeof($headers); $i++) {
-        //first element will always be the HTTP status line
+        // first element will always be the HTTP status line
         if($i === 0) {
           $response->headers->_HTTP->raw = $headers[$i];
 

@@ -38,8 +38,8 @@ class Sag {
    */
   public static $AUTH_COOKIE = "AUTH_COOKIE";
 
-  public static $NATIVE_HTTP_ADAPTER = 'NATIVE_HTTP_ADAPTER';
-  public static $CURL_HTTP_ADAPTER = 'CURL_HTTP_ADAPTER';
+  public static $HTTP_NATIVE_SOCKETS = 'HTTP_NATIVE_SOCKETS';
+  public static $HTTP_CURL = 'HTTP_CURL';
 
   private $db;                          //Database name to hit.
   private $host;                        //IP or address to connect to.
@@ -49,10 +49,6 @@ class Sag {
   private $pass;                        //Password to auth with.
   private $authType;                    //One of the Sag::$AUTH_* variables
   private $authSession;                 //AuthSession cookie value from/for CouchDB
-
-  private $socketOpenTimeout;           //The seconds until socket connection timeout
-  private $socketRWTimeoutSeconds;      //The seconds for socket I/O timeout
-  private $socketRWTimeoutMicroseconds; //The microseconds for socket I/O timeout
 
   private $cache;
 
@@ -81,27 +77,39 @@ class Sag {
     $this->setHTTPAdapter();
   }
 
+  /**
+   * Set which HTTP library you want to use for communicating with CouchDB.
+   *
+   * @param string $type The type of adapter you want to use. Should be one of
+   * the Sag::$HTTP_* variables.
+   * @return Sag Returns $this.
+   *
+   * @see Sag::$HTTP_NATIVE_SOCKETS
+   * @see Sag::$HTTP_CURL
+   */
   public function setHTTPAdapter($type = null) {
     if(!$type) {
-      $type = self::$NATIVE_HTTP_ADAPTER;
+      $type = self::$HTTP_NATIVE_SOCKETS;
     }
 
-    //nothing to be done
+    // nothing to be done
     if($type === $this->httpAdapterType) {
       return true;
     }
 
-    //remember what was already set (ie., might have called decode() already)
+    // remember what was already set (ie., might have called decode() already)
     if($this->httpAdapter) {
       $prevDecode = $this->httpAdapter->decodeResp;
+      $prevTimeouts = $this->httpAdapter->getTimeouts();
     }
 
+    // the glue
     switch($type) {
-      case self::$NATIVE_HTTP_ADAPTER:
+      case self::$HTTP_NATIVE_SOCKETS:
         $this->httpAdapter = new SagNativeHTTPAdapter($this->host, $this->port);
         break;
 
-      case self::$CURL_HTTP_ADAPTER:
+      case self::$HTTP_CURL:
         $this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port);
         break;
 
@@ -109,11 +117,29 @@ class Sag {
         throw SagException("Invalid Sag HTTP adapter specified: $type");
     }
 
-    if($prevDecode) {
+    // restore previous decode value, if any
+    if(is_bool($prevDecode)) {
       $this->httpAdapter->decodeResp = $prevDecode;
     }
 
+    // restore previous timeout vlaues, if any
+    if(is_array($prevTimeouts)) {
+      $this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
+    }
+
+    $this->httpAdapterType = $type;
+
     return $this;
+  }
+
+  /**
+   * Returns the current HTTP adapter being used.
+   *
+   * @return string Will be equal to Sag::$HTTP_NATIVE_SOCKETS or
+   * Sag::$HTTP_CURL.
+   */
+  public function currentHTTPAdapter() {
+    return $this->httpAdapterType;
   }
 
   /**
@@ -489,7 +515,7 @@ class Sag {
    * @return Sag Returns $this. Throws on failure.
    */
   public function setDatabase($db, $createIfNotFound = false) {
-    if($this->db != $db) {
+    if($this->db != $db || $createIfNotFound) {
       if(!is_string($db)) {
         throw new SagException('setDatabase() expected a string.');
       }
@@ -528,10 +554,12 @@ class Sag {
    * @param string $endKey The endkey variable (valid JSON). Defaults to null.
    * @param array $keys An array of keys (strings) of the specific documents
    * you're trying to get.
+   * @param bool $descending Whether to sort the results in descending order or
+   * not.
    *
    * @return mixed
    */
-  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null) {
+  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null, $descending = false) {
     if(!$this->db) {
       throw new SagException('No database specified.');
     }
@@ -568,6 +596,14 @@ class Sag {
       }
 
       $qry[] = 'limit='.urlencode($limit);
+    }
+
+    if($descending !== false) {
+      if(!is_bool($descending)) {
+        throw new SagException('getAllDocs() expected a boolean for descending.');
+      }
+
+      $qry[] = "descending=true";
     }
 
     $qry = '?'.implode('&', $qry);
@@ -766,26 +802,22 @@ class Sag {
   }
 
   /**
-   * Sets the connection timeout on the socket. See setOpenTimeout() for
-   * settings the read/write timeout.
+   * Sets how long Sag should wait to establish a connection to CouchDB.
    *
    * @param int $seconds
    * @return Sag Returns $this.
    */
   public function setOpenTimeout($seconds) {
-    if(!is_int($seconds) || $seconds < 1) {
-      throw new Exception('setOpenTimeout() expects a positive integer.');
-    }
-
-    $this->socketOpenTimeout = $seconds;
+    //the adapter will take care of the validation for us
+    $this->httpAdapter->setOpenTimeout($seconds);
 
     return $this;
   }
 
   /**
-   * Sets the read/write timeout period on the socket to the sum of seconds and
-   * microseconds. If not set, then the default_socket_timeout setting is used
-   * from your php.ini config.
+   * How long Sag should wait to execute a request with CouchDB. If not set,
+   * then either default_socket_timeout from your php.ini or cURL's defaults
+   * are used depending on which adapter you're using.
    *
    * Use setOpenTimeout() to set the timeout on opening the socket.
    *
@@ -794,24 +826,7 @@ class Sag {
    * @return Sag Returns $this.
    */
   public function setRWTimeout($seconds, $microseconds = 0) {
-    if(!is_int($microseconds) || $microseconds < 0) {
-      throw new SagException('setRWTimeout() expects $microseconds to be an integer >= 0.');
-    }
-
-    //TODO make this better, including checking $microseconds
-    //$seconds can be 0 if $microseconds > 0
-    if(
-      !is_int($seconds) ||
-      (
-        (!$microseconds && $seconds < 1) ||
-        ($microseconds && $seconds < 0)
-      )
-    ) {
-      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
-    }
-
-    $this->socketRWTimeoutSeconds = $seconds;
-    $this->socketRWTimeoutMicroseconds = $microseconds;
+    $this->httpAdapter->setRWTimeout($seconds, $microseconds);
 
     return $this;
   }

@@ -26,14 +26,14 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
    * Native sockets does not support SSL.
    */
   public function useSSL($use) {
-    throw new SagException('Sag::$NATIVE_HTTP_ADAPTER does not support SSL.');
+    throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
   }
 
   /**
    * Native sockets does not support SSL.
    */
   public function setSSLCert($path) {
-    throw new SagException('Sag::$NATIVE_HTTP_ADAPTER does not support SSL.');
+    throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
   }
 
   public function procPacket($method, $url, $data = null, $headers = array()) {
@@ -75,13 +75,18 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
             $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
           }
 
-          //some PHP configurations don't throw when fsockopen() fails
+          /*
+           * Some PHP configurations don't throw when fsockopen() fails, so we
+           * will try to do it for them. We are using an Exception instead of a
+           * SagException so that the catch-block grabs it and formats the
+           * message.
+           */
           if(!$sock) {
             throw new Exception($sockErrStr, $sockErrNo);
           }
         }
         catch(Exception $e) {
-          throw new SagException('Was unable to fsockopen() a new socket: '.$e->getMessage());
+          throw new SagException('Was unable to fsockopen() a new socket: ' . $e->getMessage());
         }
       }
     }

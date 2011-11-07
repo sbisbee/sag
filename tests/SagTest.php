@@ -26,6 +26,8 @@ class SagTest extends PHPUnit_Framework_TestCase
   protected $couchDBName;
   protected $couchAdminName;
   protected $couchAdminPass;
+  protected $couchHTTPAdapter;
+  protected $couchSSL;
 
   protected $couch;
   protected $session_couch;
@@ -59,6 +61,10 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->noCacheCouch->useSSL($this->couchSSL);
     $this->noCacheCouch->setDatabase($this->couchDBName);
     $this->noCacheCouch->login($this->couchAdminName, $this->couchAdminPass);
+  }
+
+  public function test_currentHTTPAdapter() {
+    $this->assertEquals($this->couch->currentHTTPAdapter(), $this->couchHTTPAdapter);
   }
 
   public function test_createDB()
@@ -206,7 +212,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(isset($resDefaults->body->rows[0]->value));
     $this->assertFalse(isset($resDefaults->body->rows[0]->doc));
 
-    $resAllWithDocs = $this->couch->getAllDocs(true, null, '[]', '"~~~~~~~~~"');
+    $resDescending = $this->couch->getAllDocs(true, null, '[]', '""', null, true);
+    $this->assertEquals('1', end($resDescending->body->rows)->id);
+
+    try {
+      // should throw
+      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass());
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $resAllWithDocs = $this->couch->getAllDocs(true, null, '[]', '"~~~~~~~~~~~"');
     $this->assertTrue(is_array($resAllWithDocs->body->rows));
     $this->assertTrue(isset($resAllWithDocs->body->rows[0]->value));
     $this->assertTrue(isset($resAllWithDocs->body->rows[0]->doc));
@@ -486,6 +504,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     $cache = new SagFileCache('/tmp/sag');
     $this->couch->setCache($cache);
     $this->assertEquals($cache, $this->couch->getCache()); 
+
+    try {
+      // should throw
+      $this->couch->setCache(new stdClass());
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
   }
 
   public function test_getFromCache()
@@ -576,7 +603,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     try
     {
       //We want this to throw an exception
-
       $this->couch->setStaleDefault(123);
       $this->assertTrue(false);
     }
@@ -614,30 +640,6 @@ class SagTest extends PHPUnit_Framework_TestCase
   {
     $this->assertTrue($this->couch->deleteDatabase($this->couchDBName)->body->ok);
   }
-
-/*
-  public function test_connectionFailure()
-  {
-    $badCouch = new Sag('example.com');
-    $badCouch->setOpenTimeout(1);
-
-    try
-    {
-      $badCouch->setDatabase('bwah');
-      $badCouch->get('/asdf');
-      $this->assertTrue(false); //shouldn't reach this line
-    }
-    catch(SagException $e)
-    {
-      $this->assertTrue(true);
-    }
-    catch(Exception $e)
-    {
-      //Wrong type of exception
-      $this->assertTrue(false);
-    }
-  }
-*/
 
   public function test_timeoutRWValues()
   {
@@ -705,6 +707,21 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couch->deleteDatabase($dbName);
 
     $this->assertFalse(in_array($dbName, $this->couch->getAllDatabases()->body));
+
+    /*
+     * The database is still set internally in Sag's memory but it was also
+     * deleted. If we call setDatabase() again with the same db name and tell
+     * Sag to also create the database, then it should be created and still
+     * have the same internal state.
+     *
+     * See https://github.com/sbisbee/sag/issues/33
+     */
+    $this->couch->setDatabase($dbName, true);
+    $this->assertEquals($this->couch->currentDatabase(), $dbName);
+    $this->assertEquals($this->couch->get('/')->body->db_name, $dbName);
+
+    $this->couch->deleteDatabase($dbName);
+    $this->assertFalse(in_array($dbName, $this->couch->getAllDatabases()->body));
   }
 
   public function test_urlEncodingDatabaseName()
@@ -732,12 +749,133 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
-  public function test_setAndGetCookie()
-  {
+  public function test_setAndGetCookie() {
     $this->couch->setCookie('foo', 'bar');
     $this->assertEquals($this->couch->getCookie('foo'), 'bar');
 
     $this->couch->setCookie('foo', null);
     $this->assertEquals($this->couch->getCookie('foo'), null);
+
+    try {
+      // should throw
+      $this->couch->setCookie(false, 'bar');
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    try {
+      // should throw
+      $this->couch->setCookie('foo', true);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
   }
+
+  public function test_setSSL() {
+    $this->assertFalse($this->couch->usingSSL());
+
+    try {
+      $this->couch->useSSL('');
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertEquals($this->couch, $this->couch->useSSL(false));
+
+    /*
+     * Checks normal behavior, but also makes sure that adapters/libraries that
+     * do not support SSL throw a SagException.
+     */
+    try {
+      $this->assertEquals($this->couch, $this->couch->useSSL(true));
+    }
+    catch(SagException $e) {
+      if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
+        $this->assertTrue(true);
+
+        // do not support - DONE!
+        return;
+      }
+      else {
+        throw $e;
+      }
+    }
+  }
+
+  public function test_usingSSL() {
+    $this->assertTrue(is_bool($this->couch->usingSSL()));
+  }
+
+  public function test_setSSLCert() {
+    if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
+      return;
+    }
+
+    // should not throw or error: adapter should just quietly turn off ssl verification
+    $this->couch->setSSLCert(null);
+
+    try {
+      // should throw
+      $this->couch->setSSLCert(false);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $file = '/tmp/sag/asdf';
+
+    $this->assertFalse(is_file($file));
+
+    try {
+      // should throw
+      $this->couch->setSSLCert($file);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertTrue(touch($file));
+
+    $this->assertTrue(chmod($file, 0));
+
+    try {
+      // should throw
+      $this->couch->setSSLCert($file);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertTrue(chmod($file, 0600));
+
+    // should not throw
+    $this->couch->setSSLCert($file);
+
+    // clean up
+    unlink($file);
+  }
+
+  public function test_connectionFailure() {
+    $badCouch = new Sag('example.com');
+    $badCouch->setOpenTimeout(1);
+
+    try {
+      $badCouch->setDatabase('bwah');
+      $badCouch->get('/asdf');
+      $this->assertTrue(false); //shouldn't reach this line
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+  }
+
 }
