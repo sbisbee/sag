@@ -127,6 +127,8 @@ class Sag {
       $this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
     }
 
+    $this->httpAdapterType = $type;
+
     return $this;
   }
 
