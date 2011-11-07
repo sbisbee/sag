@@ -766,26 +766,22 @@ class Sag {
   }
 
   /**
-   * Sets the connection timeout on the socket. See setOpenTimeout() for
-   * settings the read/write timeout.
+   * Sets how long Sag should wait to establish a connection to CouchDB.
    *
    * @param int $seconds
    * @return Sag Returns $this.
    */
   public function setOpenTimeout($seconds) {
-    if(!is_int($seconds) || $seconds < 1) {
-      throw new Exception('setOpenTimeout() expects a positive integer.');
-    }
-
-    $this->socketOpenTimeout = $seconds;
+    //the adapter will take care of the validation for us
+    $this->httpAdapter->setOpenTimeout($seconds);
 
     return $this;
   }
 
   /**
-   * Sets the read/write timeout period on the socket to the sum of seconds and
-   * microseconds. If not set, then the default_socket_timeout setting is used
-   * from your php.ini config.
+   * How long Sag should wait to execute a request with CouchDB. If not set,
+   * then either default_socket_timeout from your php.ini or cURL's defaults
+   * are used depending on which adapter you're using.
    *
    * Use setOpenTimeout() to set the timeout on opening the socket.
    *
@@ -794,24 +790,7 @@ class Sag {
    * @return Sag Returns $this.
    */
   public function setRWTimeout($seconds, $microseconds = 0) {
-    if(!is_int($microseconds) || $microseconds < 0) {
-      throw new SagException('setRWTimeout() expects $microseconds to be an integer >= 0.');
-    }
-
-    //TODO make this better, including checking $microseconds
-    //$seconds can be 0 if $microseconds > 0
-    if(
-      !is_int($seconds) ||
-      (
-        (!$microseconds && $seconds < 1) ||
-        ($microseconds && $seconds < 0)
-      )
-    ) {
-      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
-    }
-
-    $this->socketRWTimeoutSeconds = $seconds;
-    $this->socketRWTimeoutMicroseconds = $microseconds;
+    $this->httpAdapter->setRWTimeout($seconds, $microseconds);
 
     return $this;
   }

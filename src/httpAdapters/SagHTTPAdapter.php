@@ -15,6 +15,10 @@ abstract class SagHTTPAdapter {
   protected $proto = 'http'; //http or https
   protected $sslCertPath;
 
+  protected $socketOpenTimeout;
+  protected $socketRWTimeoutSeconds;
+  protected $socketRWTimeoutMicroseconds;
+
   public function __construct($host = "127.0.0.1", $port = "5984") {
     $this->host = $host;
     $this->port = $port;
@@ -107,6 +111,46 @@ abstract class SagHTTPAdapter {
    */
   public function usingSSL() {
     return $this->proto === 'https';
+  }
+
+  /**
+   * Sets how long Sag should wait to establish a connection to CouchDB.
+   *
+   * @param int $seconds
+   */
+  public function setOpenTimeout($seconds) {
+    if(!is_int($seconds) || $seconds < 1) {
+      throw new SagException('setOpenTimeout() expects a positive integer.');
+    }
+
+    $this->socketOpenTimeout = $seconds;
+  }
+
+  /**
+   * Set how long we should wait for an HTTP request to be executed.
+   *
+   * @param int $seconds The number of seconds.
+   * @param int $microseconds The number of microseconds.
+   */
+  public function setRWTimeout($seconds, $microseconds) {
+    if(!is_int($microseconds) || $microseconds < 0) {
+      throw new SagException('setRWTimeout() expects $microseconds to be an integer >= 0.');
+    }
+
+    //TODO make this better, including checking $microseconds
+    //$seconds can be 0 if $microseconds > 0
+    if(
+      !is_int($seconds) ||
+      (
+        (!$microseconds && $seconds < 1) ||
+        ($microseconds && $seconds < 0)
+      )
+    ) {
+      throw new SagException('setRWTimeout() expects $seconds to be a positive integer.');
+    }
+
+    $this->socketRWTimeoutSeconds = $seconds;
+    $this->socketRWTimeoutMicroseconds = $microseconds;
   }
 }
 ?>
