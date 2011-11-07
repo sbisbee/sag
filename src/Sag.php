@@ -549,7 +549,7 @@ class Sag {
    *
    * @return mixed
    */
-  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null) {
+  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null, $descending = false) {
     if(!$this->db) {
       throw new SagException('No database specified.');
     }
@@ -586,6 +586,14 @@ class Sag {
       }
 
       $qry[] = 'limit='.urlencode($limit);
+    }
+
+    if($descending !== false) {
+      if(!is_bool($descending)) {
+        throw new SagException('getAllDocs() expected a boolean for descending.');
+      }
+
+      $qry[] = "descending=true";
     }
 
     $qry = '?'.implode('&', $qry);
