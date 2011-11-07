@@ -81,21 +81,33 @@ class Sag {
     $this->setHTTPAdapter();
   }
 
+  /**
+   * Set which HTTP library you want to use for communicating with CouchDB.
+   *
+   * @param string $type The type of adapter you want to use. Should be one of
+   * the Sag::$HTTP_* variables.
+   * @return Sag Returns $this.
+   *
+   * @see Sag::$HTTP_NATIVE_SOCKETS
+   * @see Sag::$HTTP_CURL
+   */
   public function setHTTPAdapter($type = null) {
     if(!$type) {
       $type = self::$HTTP_NATIVE_SOCKETS;
     }
 
-    //nothing to be done
+    // nothing to be done
     if($type === $this->httpAdapterType) {
       return true;
     }
 
-    //remember what was already set (ie., might have called decode() already)
+    // remember what was already set (ie., might have called decode() already)
     if($this->httpAdapter) {
       $prevDecode = $this->httpAdapter->decodeResp;
+      $prevTimeouts = $this->httpAdapter->getTimeouts();
     }
 
+    // the glue
     switch($type) {
       case self::$HTTP_NATIVE_SOCKETS:
         $this->httpAdapter = new SagNativeHTTPAdapter($this->host, $this->port);
@@ -109,8 +121,14 @@ class Sag {
         throw SagException("Invalid Sag HTTP adapter specified: $type");
     }
 
-    if($prevDecode) {
+    // restore previous decode value, if any
+    if(is_bool($prevDecode)) {
       $this->httpAdapter->decodeResp = $prevDecode;
+    }
+
+    // restore previous timeout vlaues, if any
+    if(is_array($prevTimeouts)) {
+      $this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
     }
 
     return $this;

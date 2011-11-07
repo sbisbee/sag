@@ -152,5 +152,54 @@ abstract class SagHTTPAdapter {
     $this->socketRWTimeoutSeconds = $seconds;
     $this->socketRWTimeoutMicroseconds = $microseconds;
   }
+
+  /**
+   * Returns an associative array of the currently set timeout values.
+   *
+   * @return array An associative array with the keys 'open', 'rwSeconds', and
+   * 'rwMicroseconds'.
+   *
+   * @see setTimeoutsFromArray()
+   */
+  public function getTimeouts() {
+    return array(
+      'open' => $this->socketOpenTimeout,
+      'rwSeconds' => $this->socketRWTimeoutSeconds,
+      'rwMicroseconds' => $this->socketRWTimeoutMicroseconds
+    );
+  }
+
+  /**
+   * A utility function that sets the different timeout values based on an
+   * associative array.
+   *
+   * @param array $arr An associative array with the keys 'open', 'rwSeconds',
+   * and 'rwMicroseconds'.
+   *
+   * @see getTimeouts()
+   */
+  public function setTimeoutsFromArray($arr) {
+    /*
+     * Validation is lax in here because this should only ever be used with
+     * getTimeouts() return values. If people are using it by hand then there
+     * might be something wrong with the API.
+     */
+    if(!is_array($arr)) {
+      throw SagException('Expected an array and got something else.');
+    }
+
+    if(is_int($arr['open'])) {
+      $this->setOpenTimeout($arr['open']);
+    }
+
+    if(is_int($arr['rwSeconds'])) {
+      if(is_int($arr['rwMicroseconds'])) {
+        $this->setRWTimeout($arr['rwSeconds'], $arr['rwMicroseconds']);
+      }
+      else {
+        $this->setRWTimeout($arr['rwSeconds']);
+      }
+    }
+  }
 }
 ?>
