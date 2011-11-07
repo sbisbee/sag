@@ -546,6 +546,8 @@ class Sag {
    * @param string $endKey The endkey variable (valid JSON). Defaults to null.
    * @param array $keys An array of keys (strings) of the specific documents
    * you're trying to get.
+   * @param bool $descending Whether to sort the results in descending order or
+   * not.
    *
    * @return mixed
    */
