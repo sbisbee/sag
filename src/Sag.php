@@ -50,10 +50,6 @@ class Sag {
   private $authType;                    //One of the Sag::$AUTH_* variables
   private $authSession;                 //AuthSession cookie value from/for CouchDB
 
-  private $socketOpenTimeout;           //The seconds until socket connection timeout
-  private $socketRWTimeoutSeconds;      //The seconds for socket I/O timeout
-  private $socketRWTimeoutMicroseconds; //The microseconds for socket I/O timeout
-
   private $cache;
 
   private $staleDefault;                //Whether or not to use ?stale=ok on all design doc calls
