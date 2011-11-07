@@ -741,7 +741,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch->getCookie('foo'), null);
   }
 
-  public function test_ssl() {
+  public function test_setSSL() {
     $this->assertFalse($this->couch->usingSSL());
 
     try {
@@ -772,5 +772,61 @@ class SagTest extends PHPUnit_Framework_TestCase
         throw $e;
       }
     }
+  }
+
+  public function test_usingSSL() {
+    $this->assertTrue(is_bool($this->couch->usingSSL()));
+  }
+
+  public function test_setSSLCert() {
+    if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
+      return;
+    }
+
+    // should not throw or error: adapter should just quietly turn off ssl verification
+    $this->couch->setSSLCert(null);
+
+    try {
+      // should throw
+      $this->couch->setSSLCert(false);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $file = '/tmp/sag/asdf';
+
+    $this->assertFalse(is_file($file));
+
+    try {
+      // should throw
+      $this->couch->setSSLCert($file);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertTrue(touch($file));
+
+    $this->assertTrue(chmod($file, 0));
+
+    try {
+      // should throw
+      $this->couch->setSSLCert($file);
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
+    $this->assertTrue(chmod($file, 0600));
+
+    // should not throw
+    $this->couch->setSSLCert($file);
+
+    // clean up
+    unlink($file);
   }
 }
