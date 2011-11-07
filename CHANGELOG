@@ -12,6 +12,7 @@ New Features
     different HTTP libraries, potentially adding extra functionality. The
     SagNativeHTTPAdapter is referenced by the Sag::$HTTP_NATIVE_SOCKETS static
     public variable and can be specified with the setHTTPAdapter() function.
+    (closes #12)
 
   * cURL can now be used when communicating with CouchDB, allowing for
     additional functionality. If your system has the cURL PHP extension
