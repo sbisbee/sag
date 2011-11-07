@@ -12,12 +12,13 @@ abstract class SagHTTPAdapter {
 
   protected $host;
   protected $port;
+
   protected $proto = 'http'; //http or https
   protected $sslCertPath;
 
-  protected $socketOpenTimeout;
-  protected $socketRWTimeoutSeconds;
-  protected $socketRWTimeoutMicroseconds;
+  protected $socketOpenTimeout;                 //The seconds until socket connection timeout
+  protected $socketRWTimeoutSeconds;            //The seconds for socket I/O timeout
+  protected $socketRWTimeoutMicroseconds;       //The microseconds for socket I/O timeout
 
   public function __construct($host = "127.0.0.1", $port = "5984") {
     $this->host = $host;
