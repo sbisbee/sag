@@ -25,6 +25,9 @@ New Features
     SSL (ie., native sockets) will throw a SagException if you call an SSL
     function.
 
+  * You can now tell getAllDocs() to sort in descending order. Thanks to cygal
+    (github/cygal) for the patch and pull request. (closes #31)
+
 Version 0.6.1
 -------------
 

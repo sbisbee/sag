@@ -209,6 +209,15 @@ class SagTest extends PHPUnit_Framework_TestCase
     $resDescending = $this->couch->getAllDocs(true, null, '[]', '""', null, true);
     $this->assertEquals('1', end($resDescending->body->rows)->id);
 
+    try {
+      // should throw
+      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass());
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+
     $resAllWithDocs = $this->couch->getAllDocs(true, null, '[]', '"~~~~~~~~~~~"');
     $this->assertTrue(is_array($resAllWithDocs->body->rows));
     $this->assertTrue(isset($resAllWithDocs->body->rows[0]->value));
@@ -588,7 +597,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     try
     {
       //We want this to throw an exception
-
       $this->couch->setStaleDefault(123);
       $this->assertTrue(false);
     }
