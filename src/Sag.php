@@ -507,7 +507,7 @@ class Sag {
    * @return Sag Returns $this. Throws on failure.
    */
   public function setDatabase($db, $createIfNotFound = false) {
-    if($this->db != $db) {
+    if($this->db != $db || $createIfNotFound) {
       if(!is_string($db)) {
         throw new SagException('setDatabase() expected a string.');
       }

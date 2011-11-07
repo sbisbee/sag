@@ -28,6 +28,14 @@ New Features
   * You can now tell getAllDocs() to sort in descending order. Thanks to cygal
     (github/cygal) for the patch and pull request. (closes #31)
 
+Fixed Bugs
+
+  * If you set the database name and then set it again with the same value, but
+    also specify to create the database if it doesn't exist, Sag was previously
+    not checking to see if it should create the database. This is not fixed:
+    even if you specify the currentDatabase() value as the name the check will
+    still run. (closes #33)
+
 Version 0.6.1
 -------------
 

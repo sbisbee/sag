@@ -725,6 +725,21 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couch->deleteDatabase($dbName);
 
     $this->assertFalse(in_array($dbName, $this->couch->getAllDatabases()->body));
+
+    /*
+     * The database is still set internally in Sag's memory but it was also
+     * deleted. If we call setDatabase() again with the same db name and tell
+     * Sag to also create the database, then it should be created and still
+     * have the same internal state.
+     *
+     * See https://github.com/sbisbee/sag/issues/33
+     */
+    $this->couch->setDatabase($dbName, true);
+    $this->assertEquals($this->couch->currentDatabase(), $dbName);
+    $this->assertEquals($this->couch->get('/')->body->db_name, $dbName);
+
+    $this->couch->deleteDatabase($dbName);
+    $this->assertFalse(in_array($dbName, $this->couch->getAllDatabases()->body));
   }
 
   public function test_urlEncodingDatabaseName()
