@@ -33,14 +33,12 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     );
 
     // cURL wants the headers as an array of strings, not an assoc array
-    if(sizeof($headers) > 0) {
-      $curlHeaders = array();
+    if(is_array($headers) && sizeof($headers) > 0) {
+      $opts[CURLOPT_HTTPHEADER] = array();
 
       foreach($headers as $k => $v) {
-        $curlHeaders[] = "$k: $v";
+        $opts[CURLOPT_HTTPHEADER][] = "$k: $v";
       }
-
-      $opts[CURLOPT_HTTPHEADER] = $curlHeaders;
     }
 
     // send data through cURL's poorly named opt
