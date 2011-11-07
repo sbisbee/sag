@@ -641,30 +641,6 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->deleteDatabase($this->couchDBName)->body->ok);
   }
 
-/*
-  public function test_connectionFailure()
-  {
-    $badCouch = new Sag('example.com');
-    $badCouch->setOpenTimeout(1);
-
-    try
-    {
-      $badCouch->setDatabase('bwah');
-      $badCouch->get('/asdf');
-      $this->assertTrue(false); //shouldn't reach this line
-    }
-    catch(SagException $e)
-    {
-      $this->assertTrue(true);
-    }
-    catch(Exception $e)
-    {
-      //Wrong type of exception
-      $this->assertTrue(false);
-    }
-  }
-*/
-
   public function test_timeoutRWValues()
   {
     //should NOT throw on positive seconds
@@ -887,4 +863,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     // clean up
     unlink($file);
   }
+
+  public function test_connectionFailure() {
+    $badCouch = new Sag('example.com');
+    $badCouch->setOpenTimeout(1);
+
+    try {
+      $badCouch->setDatabase('bwah');
+      $badCouch->get('/asdf');
+      $this->assertTrue(false); //shouldn't reach this line
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
+  }
+
 }
