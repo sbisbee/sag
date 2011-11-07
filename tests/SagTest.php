@@ -26,6 +26,8 @@ class SagTest extends PHPUnit_Framework_TestCase
   protected $couchDBName;
   protected $couchAdminName;
   protected $couchAdminPass;
+  protected $couchHTTPAdapter;
+  protected $couchSSL;
 
   protected $couch;
   protected $session_couch;
