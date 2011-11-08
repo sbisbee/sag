@@ -4,11 +4,10 @@
  * you more advanced features, like SSL supports, with the cost of an
  * additional dependency that your shared hosting environment might now have.
  *
- * @version 0.7.0
+ * @version 0.7.1
  * @package HTTP
  */
-class SagCURLHTTPAdapter extends SagHTTPAdapter
-{
+class SagCURLHTTPAdapter extends SagHTTPAdapter {
 	//*************************************************************************
 	//* Private Members
 	//*************************************************************************
@@ -24,7 +23,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	/**
 	 * @var array The base curl options
 	 */
-	protected $_baseCurlOptions = array(
+	protected $_baseCurlOptions = array (
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_HEADER => true,
 		CURLOPT_RETURNTRANSFER => true,
@@ -39,10 +38,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	 * @param $host
 	 * @param $port
 	 */
-	public function __construct( $host, $port )
-	{
-		if ( !extension_loaded( 'curl' ) )
-		{
+	public function __construct( $host, $port ) {
+		if ( !extension_loaded( 'curl' ) ) {
 			throw new \SagException( 'Sag cannot use cURL on this system: the PHP cURL extension is not installed.' );
 		}
 
@@ -55,10 +52,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	/**
 	 * Resets CURL, re-initializes and gets a new handle
 	 */
-	public function reset()
-	{
-		if ( null !== $this->_curlHandle )
-		{
+	public function reset() {
+		if ( null !== $this->_curlHandle ) {
 			@curl_close( $this->_curlHandle );
 			$this->_curlHandle = null;
 		}
@@ -74,11 +69,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	 * @return mixed
 	 * @throws \SagException
 	 */
-	public function procPacket( $method, $url, $payload = null, $headers = array() )
-	{
+	public function procPacket( $method, $url, $payload = null, $headers = array () ) {
 		$_haveStatus = false;
 		$_response = null;
-		$_chunks = array();
+		$_chunks = array ();
 
 		//	Set our CURL options
 		curl_setopt_array(
@@ -87,10 +81,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		);
 
 		//	Make the call
-		if ( false === ( $_curlResponse = curl_exec( $this->_curlHandle ) ) )
-		{
-			if ( curl_errno( $this->_curlHandle ) )
-			{
+		if ( false === ( $_curlResponse = curl_exec( $this->_curlHandle ) ) ) {
+			if ( curl_errno( $this->_curlHandle ) ) {
 				throw new SagException(
 					'cURL error #' . curl_errno( $this->_curlHandle ) . ': ' . curl_error( $this->_curlHandle ),
 					curl_errno( $this->_curlHandle )
@@ -107,8 +99,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		{
 			$_parts = explode( "\r\n", $_chunk );
 
-			if ( is_array( $_parts ) && !empty( $_parts ) && false !== stripos( $_parts[0], 'HTTP/1.1 100 Continue' ) )
-			{
+			if ( is_array( $_parts ) && !empty( $_parts ) && false !== stripos( $_parts[0], 'HTTP/1.1 100 Continue' )
+			) {
 				//	This is a continue header, skip it completely!
 				continue;
 			}
@@ -117,8 +109,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		}
 
 		//	Now, deal with the response
-		if ( empty( $_chunks ) )
-		{
+		if ( empty( $_chunks ) ) {
 			throw new \SagException( 'Invalid response received from server: ' . $_curlResponse, 500 );
 		}
 
@@ -129,8 +120,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		//	Parse out the headers
 		foreach ( explode( "\r\n", $_chunks[0] ) as $_header )
 		{
-			if ( false === $_haveStatus )
-			{
+			if ( false === $_haveStatus ) {
 				$_response->request = new \stdClass();
 				$_response->request->method = $method;
 				$_response->request->url = $url;
@@ -153,8 +143,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 			$_parts = explode( ':', $_header, 2 );
 			$_response->headers->{$_parts[0]} = trim( $_parts[1] );
 
-			if ( 'set-cookie' == strtolower( trim( $_parts[0] ) ) )
-			{
+			if ( 'set-cookie' == strtolower( trim( $_parts[0] ) ) ) {
 				$_response->cookies = $this->parseCookieString( $_parts[1] );
 			}
 
@@ -164,8 +153,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		unset( $_chunks );
 
 		//	Clean up body if this was a HEAD
-		if ( 'HEAD' == $method && isset( $_response->body ) && empty( $_response->body ) )
-		{
+		if ( 'HEAD' == $method && isset( $_response->body ) && empty( $_response->body ) ) {
 			$_response->body = null;
 		}
 
@@ -183,10 +171,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	 * @param array|null $headers
 	 * @return array
 	 */
-	protected function _buildCurlOptions( $method, $url, $payload = null, array $headers = null )
-	{
-		if ( null === $this->_curlHandle )
-		{
+	protected function _buildCurlOptions( $method, $url, $payload = null, array $headers = null ) {
+		if ( null === $this->_curlHandle ) {
 			$this->reset();
 		}
 
@@ -218,8 +204,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 				break;
 
 			case 'HEAD':
-				if ( false === $this->_suppressHeadBody )
-				{
+				if ( false === $this->_suppressHeadBody ) {
 					$_curlOptions[CURLOPT_CUSTOMREQUEST] = 'HEAD';
 				}
 				else
@@ -231,16 +216,14 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 			default:
 				throw new \SagException( 'Invalid or unsupported method "' . $method . '" requested.' );
 		}
-		
+
 		//	Add in any headers
-		if ( !empty( $headers ) )
-		{
-			$_headers = array();
+		if ( !empty( $headers ) ) {
+			$_headers = array ();
 
 			foreach ( $headers as $_key => $_header )
 			{
-				if ( is_numeric( $_key ) )
-				{
+				if ( is_numeric( $_key ) ) {
 					$_headers[] = $_header;
 				}
 				else
@@ -253,34 +236,28 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 		}
 
 		//	Set the data if any
-		if ( null !== $payload )
-		{
+		if ( null !== $payload ) {
 			$_curlOptions[CURLOPT_POSTFIELDS] = $payload;
 		}
 
 		//	Connect timeout
-		if ( null !== $this->socketOpenTimeout )
-		{
+		if ( null !== $this->socketOpenTimeout ) {
 			$_curlOptions[CURLOPT_CONNECTTIMEOUT] = $this->socketOpenTimeout;
 		}
 
 		//	Exec timeout (seconds)
-		if ( null !== $this->socketRWTimeoutSeconds )
-		{
+		if ( null !== $this->socketRWTimeoutSeconds ) {
 			$_curlOptions[CURLOPT_TIMEOUT] = $this->socketRWTimeoutSeconds;
 		}
 
 		//	Exec timeout (ms)
-		if ( null !== $this->socketRWTimeoutMicroseconds )
-		{
+		if ( null !== $this->socketRWTimeoutMicroseconds ) {
 			$_curlOptions[CURLOPT_TIMEOUT_MS] = $this->socketRWTimeoutMicroseconds;
 		}
 
 		//	SSL support: don't verify unless we have a cert set
-		if ( 'https' == $this->proto )
-		{
-			if ( null === $this->sslCertPath )
-			{
+		if ( 'https' == $this->proto ) {
+			if ( null === $this->sslCertPath ) {
 				$_curlOptions[CURLOPT_SSL_VERIFYPEER] = false;
 			}
 			else
@@ -301,24 +278,21 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter
 	/**
 	 * @return array
 	 */
-	public function getResponseHeaders()
-	{
+	public function getResponseHeaders() {
 		return $this->_responseHeaders;
 	}
 
 	/**
 	 * @return \resource
 	 */
-	public function getCurlHandle()
-	{
+	public function getCurlHandle() {
 		return $this->_curlHandle;
 	}
 
 	/**
 	 * @return array
 	 */
-	public function getBaseCurlOptions()
-	{
+	public function getBaseCurlOptions() {
 		return $this->_baseCurlOptions;
 	}
 

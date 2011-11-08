@@ -7,8 +7,7 @@
  * @version 0.7.1
  * @package HTTP
  */
-abstract class SagHTTPAdapter
-{
+abstract class SagHTTPAdapter {
 	//*************************************************************************
 	//* Private Members
 	//*************************************************************************
@@ -58,8 +57,7 @@ abstract class SagHTTPAdapter
 	 * @param string $host
 	 * @param string $port
 	 */
-	public function __construct( $host = '127.0.0.1', $port = '5984' )
-	{
+	public function __construct( $host = '127.0.0.1', $port = '5984' ) {
 		$this->host = $host;
 		$this->port = $port;
 	}
@@ -70,10 +68,8 @@ abstract class SagHTTPAdapter
 	 * @return \stdClass
 	 * @throws SagCouchException|SagException
 	 */
-	protected function makeResult( $response, $method )
-	{
-		if ( 'HEAD' == $method )
-		{
+	protected function makeResult( $response, $method ) {
+		if ( 'HEAD' == $method ) {
 			/**
 			 * HEAD requests can return an HTTP response code >= 400, meaning that there
 			 * was a CouchDB error, but we don't get a $response->body->error because
@@ -83,8 +79,7 @@ abstract class SagHTTPAdapter
 			 * json_decode() on undefined can take longer than calling it on a JSON
 			 * string. So no need to run any of the $_jsonResponse code.
 			 */
-			if ( $response->headers->_HTTP->status >= 400 )
-			{
+			if ( $response->headers->_HTTP->status >= 400 ) {
 				throw new SagCouchException( 'HTTP/CouchDB error without message body', $response->headers->_HTTP->status );
 			}
 
@@ -93,8 +88,9 @@ abstract class SagHTTPAdapter
 		}
 
 		//	Make sure we have entire response
-		if ( isset( $response->headers->{'Content-Length'} ) && strlen( $response->body ) != $response->headers->{'Content-Length'} )
-		{
+		if ( isset( $response->headers->{'Content-Length'} ) &&
+			strlen( $response->body ) != $response->headers->{'Content-Length'}
+		) {
 			throw new SagException( 'Content length does not match size of received body.' );
 		}
 
@@ -104,14 +100,13 @@ abstract class SagHTTPAdapter
 		 * (ex., a picture or plain text). Don't be fooled by storing a PHP string in an
 		 * attachment as text/plain and then expecting it to be parsed properly by json_decode().
 		 */
-		if ( false !== ( $_jsonResponse = json_decode( $response->body ) ) )
-		{
+		if ( false !== ( $_jsonResponse = json_decode( $response->body ) ) ) {
 			/**
 			 * Check for an error from CouchDB regardless of whether they want JSON returned.
 			 */
-			if ( !empty( $_jsonResponse->error ) )
-			{
-				throw new SagCouchException( $_jsonResponse->error . ' (' . $_jsonResponse->reason . ')"', $response->headers->_HTTP->status );
+			if ( !empty( $_jsonResponse->error ) ) {
+				throw new SagCouchException(
+					$_jsonResponse->error . ' (' . $_jsonResponse->reason . ')"', $response->headers->_HTTP->status );
 			}
 
 			$response->body = ( $this->decodeResp ? $_jsonResponse : $response->body );
@@ -124,8 +119,7 @@ abstract class SagHTTPAdapter
 	 * @param string $cookieHeader
 	 * @return \stdClass
 	 */
-	protected function parseCookieString( $cookieHeader )
-	{
+	protected function parseCookieString( $cookieHeader ) {
 		$_cookies = new \stdClass();
 
 		foreach ( explode( '; ', $cookieHeader ) as $_cookie )
@@ -145,7 +139,7 @@ abstract class SagHTTPAdapter
 	 * @param mixed|null $data
 	 * @param array $headers
 	 */
-	abstract public function procPacket( $method, $url, $data = null, $headers = array() );
+	abstract public function procPacket( $method, $url, $data = null, $headers = array () );
 
 	//*************************************************************************
 	//* Properties
@@ -156,8 +150,7 @@ abstract class SagHTTPAdapter
 	 *
 	 * @param boolean $use
 	 */
-	public function useSSL( $use = false )
-	{
+	public function useSSL( $use = false ) {
 		$this->proto = 'http' . ( ( $use ) ? 's' : '' );
 	}
 
@@ -166,8 +159,7 @@ abstract class SagHTTPAdapter
 	 *
 	 * @param $path
 	 */
-	public function setSSLCert( $path = null )
-	{
+	public function setSSLCert( $path = null ) {
 		$this->sslCertPath = $path;
 	}
 
@@ -176,8 +168,7 @@ abstract class SagHTTPAdapter
 	 *
 	 * @return bool
 	 */
-	public function usingSSL()
-	{
+	public function usingSSL() {
 		return ( 'https' == $this->proto );
 	}
 
@@ -186,10 +177,8 @@ abstract class SagHTTPAdapter
 	 *
 	 * @param int $seconds
 	 */
-	public function setOpenTimeout( $seconds )
-	{
-		if ( !is_int( $seconds ) || $seconds < 1 )
-		{
+	public function setOpenTimeout( $seconds ) {
+		if ( !is_int( $seconds ) || $seconds < 1 ) {
 			throw new SagException( 'setOpenTimeout() expects a positive integer.' );
 		}
 
@@ -202,18 +191,15 @@ abstract class SagHTTPAdapter
 	 * @param int $seconds The number of seconds.
 	 * @param int $microseconds The number of microseconds.
 	 */
-	public function setRWTimeout( $seconds, $microseconds = 0 )
-	{
-		if ( !is_int( $microseconds ) || $microseconds < 0 )
-		{
+	public function setRWTimeout( $seconds, $microseconds = 0 ) {
+		if ( !is_int( $microseconds ) || $microseconds < 0 ) {
 			throw new SagException( 'setRWTimeout() expects $microseconds to be an integer >= 0.' );
 		}
 
 		//TODO make this better, including checking $microseconds
 		//$seconds can be 0 if $microseconds > 0
 		if ( !is_int( $seconds ) || ( ( !$microseconds && $seconds < 1 ) || ( $microseconds && $seconds < 0 ) )
-		)
-		{
+		) {
 			throw new SagException( 'setRWTimeout() expects $seconds to be a positive integer.' );
 		}
 
@@ -229,9 +215,8 @@ abstract class SagHTTPAdapter
 	 *
 	 * @see setTimeoutsFromArray()
 	 */
-	public function getTimeouts()
-	{
-		return array(
+	public function getTimeouts() {
+		return array (
 			'open' => $this->socketOpenTimeout,
 			'rwSeconds' => $this->socketRWTimeoutSeconds,
 			'rwMicroseconds' => $this->socketRWTimeoutMicroseconds
@@ -247,27 +232,22 @@ abstract class SagHTTPAdapter
 	 *
 	 * @see getTimeouts()
 	 */
-	public function setTimeoutsFromArray( $arr )
-	{
+	public function setTimeoutsFromArray( $arr ) {
 		/**
 		 * Validation is lax in here because this should only ever be used with
 		 * getTimeouts() return values. If people are using it by hand then there
 		 * might be something wrong with the API.
 		 */
-		if ( !is_array( $arr ) )
-		{
+		if ( !is_array( $arr ) ) {
 			throw new SagException( 'Expected an array and got something else.' );
 		}
 
-		if ( is_int( $arr['open'] ) )
-		{
+		if ( is_int( $arr['open'] ) ) {
 			$this->setOpenTimeout( $arr['open'] );
 		}
 
-		if ( is_int( $arr['rwSeconds'] ) )
-		{
-			if ( is_int( $arr['rwMicroseconds'] ) )
-			{
+		if ( is_int( $arr['rwSeconds'] ) ) {
+			if ( is_int( $arr['rwMicroseconds'] ) ) {
 				$this->setRWTimeout( $arr['rwSeconds'], $arr['rwMicroseconds'] );
 			}
 			else
@@ -281,8 +261,7 @@ abstract class SagHTTPAdapter
 	 * @param boolean $suppressHeadBody
 	 * @return \SagHTTPAdapter
 	 */
-	public function setSuppressHeadBody( $suppressHeadBody )
-	{
+	public function setSuppressHeadBody( $suppressHeadBody ) {
 		$this->_suppressHeadBody = $suppressHeadBody;
 		return $this;
 	}
@@ -290,8 +269,7 @@ abstract class SagHTTPAdapter
 	/**
 	 * @return boolean
 	 */
-	public function getSuppressHeadBody()
-	{
+	public function getSuppressHeadBody() {
 		return $this->_suppressHeadBody;
 	}
 
