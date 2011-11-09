@@ -66,21 +66,21 @@ checkNative:
 	@echo "Testing with native sockets..."
 
 	${TESTS_BOOTSTRAP}
-	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_NATIVE} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
+	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_NATIVE} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
 
 # Run tests with cURL
 checkCURL:
 	@echo "Testing with cURL..."
 
 	${TESTS_BOOTSTRAP}
-	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
+	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
 
 # Runs tests with cURL and SSL
 checkCURL_SSL:
 	@echo "Testing with cURL + SSL..."
 
 	${TESTS_BOOTSTRAP}
-	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
+	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} ${TESTS_DIR} || echo '(xxxx)====( (>_<) )====> OMG YOUR FAILING TESTS KILLED KENNY!'
 
 # Run the tests
 check: lint checkNative checkCURL
