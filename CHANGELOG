@@ -1,6 +1,15 @@
 Sag Changes
 ===========
 
+Version 0.7.1
+-------------
+
+Fixed Bugs
+
+  * The cURL HTTP library was choking on a HTTP/1.1 Continue header. Only some
+    installations were running into this problem, depending on their cURL
+    configuration and version.
+
 Version 0.7.0
 -------------
 
