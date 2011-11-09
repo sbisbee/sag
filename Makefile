@@ -24,11 +24,15 @@ FILES := ${PREFIX}CHANGELOG ${PREFIX}LICENSE ${PREFIX}NOTICE ${PREFIX}README
 PHPDOC := phpdoc
 PHPUNIT := phpunit
 GPG := gpg
+MD5SUM := md5sum
+SHA1SUM := sha1sum
 
 # Distribution locations
 DIST_DIR := ${PREFIX}sag-${VERSION}
 DIST_FILE := ${DIST_DIR}.tar.gz
 DIST_FILE_SIG := ${DIST_FILE}.sig
+DIST_FILE_SHA1 := ${DIST_FILE}.sha
+DIST_FILE_MD5 := ${DIST_FILE}.md5
 
 # PHPUnit related tools and files
 TESTS_BOOTSTRAP := ${TESTS_DIR}/bootstrap.bsh
@@ -55,6 +59,9 @@ dist: clean ${DIST_DIR}
 
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
+
+	${SHA1SUM} ${DIST_FILE} > ${DIST_FILE_SHA1}
+	${MD5SUM} ${DIST_FILE} > ${DIST_FILE_MD5}
 
 lint:
 	for file in ${SRC_DIR}/*.php ${TESTS_DIR}/*.php; do \
@@ -104,7 +111,8 @@ sign: dist
 # Remove all distribution and other build files
 clean:
 	rm -rf ${DIST_DIR} ${DIST_FILE} ${DIST_FILE_SIG} \
-		${TESTS_COVERAGE_DIR} ${DOCS_DIR}
+		${TESTS_COVERAGE_DIR} ${DOCS_DIR} ${DIST_FILE_MD5} \
+		${DIST_FILE_SHA1}
   
 # Create the distribution directory that will be archived
 ${DIST_DIR}:
