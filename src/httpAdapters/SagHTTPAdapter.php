@@ -25,6 +25,14 @@ abstract class SagHTTPAdapter {
     $this->port = $port;
   }
 
+  /**
+   * Used by the concrete HTTP adapters, this abstracts out the generic task of
+   * turning strings from the net into response objects.
+   *
+   * @param string $response The body of the HTTP packet.
+   * @param string $method The request's HTTP method ("HEAD", etc.).
+   * @returns stdClass The response object.
+   */
   protected function makeResult($response, $method) {
     //Make sure we got the complete response.
     if(
@@ -77,6 +85,14 @@ abstract class SagHTTPAdapter {
     return $response;
   }
 
+  /**
+   * A utility function for the concrete adapters to turn the HTTP Cookie
+   * header's value into an object (map).
+   *
+   * @param string $cookieStr The HTTP Cookie header value (not including the
+   * "Cookie: " key.
+   * @returns stdClass An object mapping cookie name to cookie value.
+   */
   protected function parseCookieString($cookieStr) {
     $cookies = new stdClass();
 
@@ -90,11 +106,23 @@ abstract class SagHTTPAdapter {
 
   /**
    * Processes the packet, returning the server's response.
+   *
+   * @param string $method The HTTP method for the request (ex., "HEAD").
+   * @param string $url The URL to hit, not including the host info (ex.,
+   * "/_all_docs").
+   * @param string $data A serialized version of any data that needs to be sent
+   * in the packet's body.
+   * @param array $headers An associative array of headers where the keys are
+   * the header names.
+   * @returns stdClass The response object created by makeResponse().
+   * @see makeResponse()
    */
   abstract public function procPacket($method, $url, $data = null, $headers = array());
 
   /**
    * Whether to use HTTPS or not.
+   *
+   * @param bool $use Whether to use HTTPS or not.
    */
   public function useSSL($use) {
     $this->proto = 'http' . (($use) ? 's' : '');
@@ -102,6 +130,8 @@ abstract class SagHTTPAdapter {
 
   /**
    * Sets the location of the CA file.
+   *
+   * @param mixed $path The absolute path to the CA file, or null to unset.
    */
   public function setSSLCert($path) {
     $this->sslCertPath = $path;
@@ -109,6 +139,8 @@ abstract class SagHTTPAdapter {
 
   /**
    * Returns whether Sag is using SSL.
+   *
+   * @returns bool Returns true if the adapter is using SSL, else false.
    */
   public function usingSSL() {
     return $this->proto === 'https';
@@ -117,7 +149,7 @@ abstract class SagHTTPAdapter {
   /**
    * Sets how long Sag should wait to establish a connection to CouchDB.
    *
-   * @param int $seconds
+   * @param int $seconds The number of seconds.
    */
   public function setOpenTimeout($seconds) {
     if(!is_int($seconds) || $seconds < 1) {
