@@ -50,7 +50,7 @@ DOCS_DIR := ${PREFIX}docs
 PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} -o HTML:Smarty:PHP -dn Core -ti "Sag Documentation"
 
 # Build the distribution
-dist: clean ${DIST_DIR} check
+dist: clean ${DIST_DIR}
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
