@@ -1,6 +1,4 @@
 <?php
-require_once('SagHTTPAdapter.php');
-
 /**
  * Uses native PHP sockets to communicate with CouchDB. This means zero new
  * dependencies for your application.
