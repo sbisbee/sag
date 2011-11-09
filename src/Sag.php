@@ -38,7 +38,18 @@ class Sag {
    */
   public static $AUTH_COOKIE = "AUTH_COOKIE";
 
+  /**
+   * @var string Used to identify SagNativeHTTPAdapter by setHTTPAdapter() and
+   * company.
+   * @static
+   */
   public static $HTTP_NATIVE_SOCKETS = 'HTTP_NATIVE_SOCKETS';
+
+  /**
+   * @var string Used to identify SagCURLHTTPAdapter by setHTTPAdapter() and
+   * company.
+   * @static
+   */
   public static $HTTP_CURL = 'HTTP_CURL';
 
   private $db;                          //Database name to hit.
