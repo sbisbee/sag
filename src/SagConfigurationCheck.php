@@ -19,7 +19,7 @@
  * a user-level notice message to inform the client of Sag's preferred
  * configuration.
  *
- * @version 0.7.0
+ * @version 0.7.1
  * @package Core
  */
 class SagConfigurationCheck {
