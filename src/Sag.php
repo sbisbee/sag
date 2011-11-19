@@ -16,6 +16,7 @@
 require_once('SagException.php');
 require_once('SagCouchException.php');
 require_once('SagConfigurationCheck.php');
+require_once('httpAdapters/SagHTTPAdapter.php');
 require_once('httpAdapters/SagNativeHTTPAdapter.php');
 require_once('httpAdapters/SagCURLHTTPAdapter.php');
 
@@ -109,6 +110,8 @@ class Sag {
     }
 
     // remember what was already set (ie., might have called decode() already)
+    $prevDecode = null;
+    $prevTimeouts = null;
     if($this->httpAdapter) {
       $prevDecode = $this->httpAdapter->decodeResp;
       $prevTimeouts = $this->httpAdapter->getTimeouts();
@@ -129,12 +132,12 @@ class Sag {
     }
 
     // restore previous decode value, if any
-    if(is_bool($prevDecode)) {
+    if($prevDecode != null && is_bool($prevDecode)) {
       $this->httpAdapter->decodeResp = $prevDecode;
     }
 
     // restore previous timeout vlaues, if any
-    if(is_array($prevTimeouts)) {
+    if($prevTimeouts != null && is_array($prevTimeouts)) {
       $this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
     }
 
@@ -1035,7 +1038,7 @@ class Sag {
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/0.7.1";
+    $headers["User-Agent"] = "Sag/0.7.0";
 
     /*
      * This prevents some unRESTful requests, such as inline attachments in
@@ -1067,7 +1070,7 @@ class Sag {
      * Checking this again because $headers['Cookie'] could be set in two
      * different logic paths above.
      */
-    if($headers['Cookie']) {
+    if(isset($headers['Cookie'])) {
       $buff = '';
 
       foreach($headers['Cookie'] as $k => $v) {
