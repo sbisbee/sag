@@ -88,20 +88,21 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $response->headers = new stdClass();
       $response->headers->_HTTP = new stdClass();
       $response->body = '';
-
-      // split headers and body
-      list($continue, $headers, $response->body) = explode("\r\n\r\n", $chResponse);
-
+      
+      // Split the response
+      $split = explode("\r\n\r\n", $chResponse);
+      
       /*
        * It doesn't always happen, but it seems that we will sometimes get a
        * Continue header that will screw parsing up.
        */
-      if(!$response->body) {
-        $response->body = $headers;
-        $headers = $continue;
+      if(2 == count($split)) {
+        list($headers, $response->body) = $split;
       }
-
-      unset($continue);
+      else {
+        list($continue, $headers, $response->body) = $split;
+        unset($continue);
+      }
 
       // split up the headers
       $headers = explode("\r\n", $headers);

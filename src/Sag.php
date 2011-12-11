@@ -16,6 +16,7 @@
 require_once('SagException.php');
 require_once('SagCouchException.php');
 require_once('SagConfigurationCheck.php');
+require_once('httpAdapters/SagHTTPAdapter.php');
 require_once('httpAdapters/SagNativeHTTPAdapter.php');
 require_once('httpAdapters/SagCURLHTTPAdapter.php');
 
@@ -76,8 +77,12 @@ class Sag {
    *
    * @param string $port (OPTIONAL) The host's port that Couch is listening on.
    * Defaults to '5984'.
+   * 
+   * @param string $http_adapter_type (OPTIONAL) the Sag HTTP adapter to use, can
+   * be either HTTP_NATIVE_SOCKETS or HTTP_CURL.
+   * Defaults to HTTP_NATIVE_SOCKETS
    */
-  public function __construct($host = "127.0.0.1", $port = "5984")
+  public function __construct($host = "127.0.0.1", $port = "5984", $http_adapter_type = "HTTP_NATIVE_SOCKETS")
   {
     SagConfigurationCheck::run();
 
@@ -85,7 +90,7 @@ class Sag {
     $this->port = $port;
 
     //sets to the default by ... default
-    $this->setHTTPAdapter();
+    $this->setHTTPAdapter($http_adapter_type);
   }
 
   /**
@@ -125,16 +130,16 @@ class Sag {
         break;
 
       default:
-        throw SagException("Invalid Sag HTTP adapter specified: $type");
+        throw new SagException("Invalid Sag HTTP adapter specified: $type");
     }
 
     // restore previous decode value, if any
-    if(is_bool($prevDecode)) {
+    if(isset($prevDecode) && is_bool($prevDecode)) {
       $this->httpAdapter->decodeResp = $prevDecode;
     }
 
     // restore previous timeout vlaues, if any
-    if(is_array($prevTimeouts)) {
+    if(isset($prevTimeouts) && is_array($prevTimeouts)) {
       $this->httpAdapter->setTimeoutsFromArray($prevTimeouts);
     }
 
@@ -1067,7 +1072,7 @@ class Sag {
      * Checking this again because $headers['Cookie'] could be set in two
      * different logic paths above.
      */
-    if($headers['Cookie']) {
+    if(isset($headers['Cookie']) && $headers['Cookie']) {
       $buff = '';
 
       foreach($headers['Cookie'] as $k => $v) {
