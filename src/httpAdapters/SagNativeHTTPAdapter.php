@@ -8,6 +8,8 @@
  * @version 0.7.1
  * @package HTTP
  */
+require_once('SagHTTPAdapter.php');
+
 class SagNativeHTTPAdapter extends SagHTTPAdapter {
   private $connPool = array();          //Connection pool
 
