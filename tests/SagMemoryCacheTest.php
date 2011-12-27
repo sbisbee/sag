@@ -27,8 +27,6 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
   public function test_createAndGet()
   {
-    $prevSize = $this->cache->getUsage();
-
     $url = '/bwah';
 
     $item = new stdClass();
@@ -96,8 +94,6 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
   public function test_clear()
   {
-    $this->assertEquals(0, $this->cache->getUsage());
-    
     $item = new stdClass();
     $item->body = new stdClass();
     $item->body->foo = "bar";
@@ -106,56 +102,20 @@ class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
 
     $this->cache->set('/123', $item);
     
-    $size = $this->cache->getUsage();
-    $this->assertTrue(is_int($size) && $size > 0);
-
     $this->assertTrue($this->cache->clear());
 
-    $this->assertEquals(0, $this->cache->getUsage());
+    $this->assertEquals($this->cache->get('/123'), null);
   }
 
-  public function test_defaultSizes()
+  public function test_memoryMath()
   {
-    //defaults
-    $this->assertEquals(1000000, $this->cache->getSize());
-    $this->assertEquals(0, $this->cache->getUsage());
-  }
-
-  public function test_memoryMathOnSet()
-  {
-    $item = new stdClass();
-    $item->body = new stdClass();
-    $item->body->foo = "bar";
-    $item->headers = new stdClass();
-    $item->headers->Etag = "\"asdfasfsadfsadf\"";
-
-    $this->cache->set('/bwah', $item);
-
-    $size = $preSize = $serialized = 1;
-    $preSize = memory_get_usage();
-    $serialized = json_encode($item);
-    $size = memory_get_usage() - $preSize;
-
-    $this->assertEquals(memory_get_usage() - $preSize, $this->cache->getUsage());
-  }
-
-  public function test_memoryMathOnRemove()
-  {
-    $this->assertEquals(0, $this->cache->getUsage());
-
-    $item = new stdClass();
-    $item->body = new stdClass();
-    $item->body->foo = "bar";
-    $item->headers = new stdClass();
-    $item->headers->Etag = "\"asdfasfsadfsadf\"";
-
-    $url = '/bwah';
-
-    $this->cache->set($url, $item);
-    $this->assertNotEquals(0, $this->cache->getUsage());
-
-    $this->cache->remove($url);
-    $this->assertEquals(32, $this->cache->getUsage());
+    try {
+      $this->cache->getUsage();
+      $this->assertTrue(false);
+    }
+    catch(SagException $e) {
+      $this->assertTrue(true);
+    }
   }
 
   public function test_cacheBadBody()

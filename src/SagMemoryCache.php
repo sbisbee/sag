@@ -20,8 +20,9 @@ require_once('SagException.php');
  * Stores cached items in PHP's memory as serialized JSON, which was
  * benchmarked as being faster than serliaze() and clone.
  *
- * Memory sizes will not be exact because of how PHP allocates and cleans
- * memory.
+ * Cache sizing is not supported with this caching mechanism. This is because
+ * PHP is not accurate at reporting memory allocation and it does not make
+ * sense to increase latency to implement a broken feature.
  *
  * @package Cache 
  * @version 0.7.1
@@ -49,13 +50,7 @@ class SagMemoryCache extends SagCache {
       self::remove($url);
     }
 
-    $serialized = $this->cache[$url] = $prevSize = $itemSize = 1; //for more accurate math
-    $prevSize = memory_get_usage();
-    $serialized = json_encode($item);
-    $itemSize = memory_get_usage() - $prevSize;
-    self::addToSize($itemSize);
-
-    $this->cache[$url] = $serialized;
+    $this->cache[$url] = json_encode($item);
 
     return (isset($oldCopy) && is_object($oldCopy)) ? $oldCopy : true;
   }
@@ -65,13 +60,7 @@ class SagMemoryCache extends SagCache {
   }
 
   public function remove($url) {
-    $prevSize = $removedSize = 1;
-    $prevSize = memory_get_usage();
-
     unset($this->cache[$url]);
-
-    $removedSize = memory_get_usage() - $prevSize;
-    self::addToSize($removedSize);
 
     return true;
   }
@@ -79,8 +68,20 @@ class SagMemoryCache extends SagCache {
   public function clear() {
     unset($this->cache);
     $this->cache = array();
-    self::addToSize(-(self::getUsage()));
+
     return true;
+  }
+
+  public function setSize($bytes) {
+    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+  }
+
+  public function getSize() {
+    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
+  }
+
+  public function getUsage() {
+    throw new SagException('Cache sizes are not supported in SagMemoryCache - caches have infinite size.');
   }
 } 
 ?>
