@@ -696,7 +696,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_setDatabaseAndCreate()
   {
-    $dbName = 'bwah';
+    $dbName = 'bwah2222';
 
     $this->assertFalse(in_array($dbName, $this->couch->getAllDatabases()->body));
 
