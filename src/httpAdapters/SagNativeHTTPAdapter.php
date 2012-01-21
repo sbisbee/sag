@@ -140,7 +140,22 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
         throw new SagException('Connection timed out while reading.');
       }
 
-      $line = fgets($sock);
+      /*
+       * We cannot be promised that all responses will have a newline - ie.,
+       * attachments. So when we're not dealing with headers (which will always
+       * have newlines) or chunked encoding (which is just special), we should
+       * give fgets() a length to read or else it will keep listening for bytes
+       * until the socket times out.
+       *
+       * And we can't use a ternary because fgets() wants an int or undefined.
+       */
+      if(!$isHeader && $response->headers->{'Transfer-Encoding'} !== 'chunked') {
+        //the +1 is because fgets() reads (length - 1) bytes
+        $line = fgets($sock, $response->headers->{'Content-Length'} - strlen($response->body) + 1);
+      }
+      else {
+        $line = fgets($sock);
+      }
 
       if(!$line && !$sockInfo['feof'] && !$sockInfo['timed_out']) {
         throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
