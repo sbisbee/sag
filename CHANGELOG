@@ -1,6 +1,33 @@
 Sag Changes
 ===========
 
+Version 0.8.0
+-------------
+
+New Features
+
+  * Support for setPathPrefix() from Sag-JS v0.1.0. Allows you to prepend all
+    URLs with a string, which is especially useful when going through a proxy.
+
+Fixed Bugs
+
+  * SagNativeHTTPAdapter now supports and follows Location headers. (closes
+    #37)
+
+  * SagNativeHTTPAdapter's fgets() call no longer hangs on large responses that
+    are not chunked encoded. This was fixed by providing a line length. Thanks
+    to skyshard (github/skyshard) for helping with the debug. (closes #41)
+
+  * Sag no longer uses ternary short hand that was introduced in PHP 5.3, so
+    now PHP 5.2 will run without errors. Thanks to Jim Tittsler (github/jimt)
+    for reporting and submitting the patch. (closes #43)
+
+  * Disabled cache sizing for SagMemoryCache due to PHP's memory monitoring
+    being unreliable. The memory cache is no longer capped by Sag. (closes #22)
+
+  * Fixing an issue where the SagHTTPAdapter class's file wasn't being required
+    properly, causing class not found exceptions.
+
 Version 0.7.1
 -------------
 
