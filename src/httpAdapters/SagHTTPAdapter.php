@@ -114,10 +114,14 @@ abstract class SagHTTPAdapter {
    * in the packet's body.
    * @param array $headers An associative array of headers where the keys are
    * the header names.
+   * @param mixed $specialHost Uses the provided host for this packet only -
+   * does not change the adapter's global host setting.
+   * @param mixed $specialPort Uses the provided port for this packet only -
+   * does not change the adapter's global port setting.
    * @returns stdClass The response object created by makeResponse().
    * @see makeResponse()
    */
-  abstract public function procPacket($method, $url, $data = null, $headers = array());
+  abstract public function procPacket($method, $url, $data = null, $headers = array(), $specialHost = null, $specialPort = null);
 
   /**
    * Whether to use HTTPS or not.

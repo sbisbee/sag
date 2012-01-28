@@ -36,7 +36,18 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
   }
 
-  public function procPacket($method, $url, $data = null, $headers = array()) {
+  public function procPacket($method, $url, $data = null, $headers = array(), $specialHost = null, $specialPort = null) {
+    if(is_string($specialHost) || is_string($specialPort)) {
+      $host = ($specialHost) ? $specialHost : $this->host;
+      $port = ($specialPort) ? $specialPort : $this->port;
+
+      $headers['Host'] = "$host:$port";
+    }
+    else {
+      $host = $this->host;
+      $port = $this->port;
+    }
+
     //Start building the request packet.
     $buff = "$method $url HTTP/1.1\r\n";
 
@@ -69,10 +80,10 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
         try {
           //these calls should throw on error
           if($this->socketOpenTimeout) {
-            $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+            $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
           }
           else {
-            $sock = fsockopen($this->host, $this->port, $sockErrNo, $sockErrStr);
+            $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr);
           }
 
           /*
@@ -92,7 +103,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     }
 
     if(!$sock) {
-      throw new SagException("Error connecting to {$this->host}:{$this->port} - $sockErrStr ($sockErrNo).");
+      throw new SagException("Error connecting to {$host}:{$port} - $sockErrStr ($sockErrNo).");
     }
 
     // Send the packet.
@@ -191,15 +202,33 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           }
           else {
             $line = explode(':', $line, 2);
-            $response->headers->$line[0] = ltrim($line[1]);
+            $response->headers->$line[0] = $line[1] = ltrim($line[1]);
 
-            if($line[0] == 'Set-Cookie') {
-              $response->cookies = new stdClass();
+            switch($line[0]) {
+              case 'Set-Cookie':
+                $response->cookies = new stdClass();
 
-              foreach(explode('; ', $line[1]) as $cookie) {
-                $crumbs = explode('=', $cookie);
-                $response->cookies->{trim($crumbs[0])} = trim($crumbs[1]);
-              } 
+                foreach(explode('; ', $line[1]) as $cookie) {
+                  $crumbs = explode('=', $cookie);
+                  $response->cookies->{trim($crumbs[0])} = trim($crumbs[1]);
+                } 
+
+                break;
+
+              case 'Location':
+                $line[1] = parse_url($line[1]);
+
+                return $this->procPacket(
+                  $method,
+                  $line[1]['path'],
+                  $data,
+                  $headers,
+                  $line[1]['host'],
+                  $line[1]['port']
+                );
+
+                //not really needed ... whatevs
+                break;
             }
           }
         }
