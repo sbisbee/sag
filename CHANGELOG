@@ -11,6 +11,9 @@ New Features
 
 Fixed Bugs
 
+  * Fixing the error_reporting check's bitwise math for proper notification.
+    (closes #39)
+
   * SagNativeHTTPAdapter now supports and follows Location headers. (closes
     #37)
 
