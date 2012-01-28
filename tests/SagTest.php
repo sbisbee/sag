@@ -63,6 +63,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->noCacheCouch->login($this->couchAdminName, $this->couchAdminPass);
   }
 
+  public function test_setPathPrefix() {
+    $this->assertEquals($this->couch->setPathPrefix('db'), $this->couch);
+    $this->assertEquals('db', $this->couch->getPathPrefix());
+    $this->assertEquals($this->couch->setPathPrefix(''), $this->couch);
+  }
+
   public function test_currentHTTPAdapter() {
     $this->assertEquals($this->couch->currentHTTPAdapter(), $this->couchHTTPAdapter);
   }

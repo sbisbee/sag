@@ -55,6 +55,7 @@ class Sag {
   private $db;                          //Database name to hit.
   private $host;                        //IP or address to connect to.
   private $port;                        //Port to connect to.
+  private $pathPrefix = '';             //Prepended to URLs.
 
   private $user;                        //Username to auth with.
   private $pass;                        //Password to auth with.
@@ -1020,6 +1021,20 @@ class Sag {
     return $this;
   }
 
+  public function setPathPrefix($path) {
+    if(!is_string($path)) {
+      throw new SagException('Invalid URL path prefix - must be a string.');
+    }
+
+    $this->pathPrefix = $path;
+
+    return $this;
+  }
+
+  public function getPathPrefix() {
+    return $this->pathPrefix;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
     /*
@@ -1028,6 +1043,10 @@ class Sag {
      */
     if($data && !is_string($data)) {
       throw new SagException('Unexpected data format. Please report this bug.');
+    }
+
+    if($this->pathPrefix && is_string($this->pathPrefix)) {
+      $url = $this->pathPrefix . $url;
     }
 
     // Do some string replacing for HTTP sanity.
