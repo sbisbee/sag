@@ -31,7 +31,7 @@ abstract class SagHTTPAdapter {
    *
    * @param string $response The body of the HTTP packet.
    * @param string $method The request's HTTP method ("HEAD", etc.).
-   * @returns stdClass The response object.
+   * @return stdClass The response object.
    */
   protected function makeResult($response, $method) {
     //Make sure we got the complete response.
@@ -91,7 +91,7 @@ abstract class SagHTTPAdapter {
    *
    * @param string $cookieStr The HTTP Cookie header value (not including the
    * "Cookie: " key.
-   * @returns stdClass An object mapping cookie name to cookie value.
+   * @return stdClass An object mapping cookie name to cookie value.
    */
   protected function parseCookieString($cookieStr) {
     $cookies = new stdClass();
@@ -144,7 +144,7 @@ abstract class SagHTTPAdapter {
   /**
    * Returns whether Sag is using SSL.
    *
-   * @returns bool Returns true if the adapter is using SSL, else false.
+   * @return bool Returns true if the adapter is using SSL, else false.
    */
   public function usingSSL() {
     return $this->proto === 'https';
@@ -234,7 +234,7 @@ abstract class SagHTTPAdapter {
         $this->setRWTimeout($arr['rwSeconds'], $arr['rwMicroseconds']);
       }
       else {
-        $this->setRWTimeout($arr['rwSeconds']);
+        $this->setRWTimeout($arr['rwSeconds'], 0);
       }
     }
   }

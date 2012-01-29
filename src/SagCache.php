@@ -144,7 +144,7 @@ abstract class SagCache {
    * that Sag would return, with a valid E-Tag, and no cache headers that tell
    * us to not cache.
    *
-   * @param The item that we're trying to cache - it should be a response as a
+   * @param object $item The item that we're trying to cache - it should be a response as a
    * stdClass.
    * @return bool
    */

@@ -108,7 +108,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       // split up the headers
       $headers = explode("\r\n", $headers);
 
-      for($i = 0; $i < sizeof($headers); $i++) {
+      for($i = 0, $len = sizeof($headers); $i < $len; $i++) {
         // first element will always be the HTTP status line
         if($i === 0) {
           $response->headers->_HTTP->raw = $headers[$i];
