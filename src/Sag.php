@@ -476,9 +476,9 @@ class Sag {
    * If you are using a SagCache and are copying to an existing destination,
    * then the result will be cached (ie., what's copied to the /$destID URL).
    *
-   * @param string The _id of the document you're copying.
-   * @param string The _id of the document you're copying to.
-   * @param string The _rev of the document you're copying to. Defaults to
+   * @param string $srcID The _id of the document you're copying.
+   * @param string $dstID The _id of the document you're copying to.
+   * @param string $dstRev The _rev of the document you're copying to. Defaults to
    * null.
    *
    * @return mixed
@@ -648,7 +648,7 @@ class Sag {
    * Uses CouchDB to generate IDs.
    *
    * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
-   * @returns mixed
+   * @return mixed
    */
   public function generateIDs($num = 10) {
     if(!is_int($num) || $num < 0) {
@@ -946,6 +946,7 @@ class Sag {
   /**
    * Returns the global cookie as set in setCookie().
    *
+   * @param string $key The cookie's key.
    * @return String The cookie's value or null if not set.
    *
    * @see setCookie()
@@ -958,7 +959,7 @@ class Sag {
    * Set whether to use SSL or not.
    *
    * By default the host's certificate will not be verified: you must provide a
-   * certifivate to setSSLCert() to enable verification.
+   * certificate to setSSLCert() to enable verification.
    *
    * @param bool $use Set to true to use SSL, false to not.
    *

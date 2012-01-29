@@ -137,7 +137,7 @@ class CouchSessionStore
    * the session's createdAt timestamp to time(), pushing out when it will
    * expire and be garbage collected.
    *
-   * @param string $id The sesion ID.
+   * @param string $id The session ID.
    * @param string $data The serialized data to store.
    * @return bool Whether or not the operation was successful.
    */

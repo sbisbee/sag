@@ -246,7 +246,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           //Look for a chunk size
           $line = rtrim($line);
 
-          if(!empty($line) || $line == "0") {
+          if(!empty($line) || $line == '0') {
             $chunkSize = hexdec($line);
 
             if(!is_int($chunkSize)) {
