@@ -44,8 +44,8 @@ catch(Exception $e) {
       ?>
       <form method="post" action="./index.php">
         <input type="hidden" name="login" value="1"/>
-        <label for="username">Name</label> <input type="text" name="username"/><br/>
-        <label for="password">Password</label> <input type="password" name="password"/><br/>
+        <label for="username">Name</label> <input type="text" name="username" id="username"/><br/>
+        <label for="password">Password</label> <input type="password" name="password" id="password"/><br/>
         <input type="submit" value="Login"/>
       </form>
       <?php
