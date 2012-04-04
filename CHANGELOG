@@ -31,6 +31,10 @@ Fixed Bugs
   * Fixing an issue where the SagHTTPAdapter class's file wasn't being required
     properly, causing class not found exceptions.
 
+  * No longer redirecting when the server returns a Location header with a 2xx
+    response. We now only do that redirect on a 3xx header. (Thanks to Greg
+    Nacu for reporting.)
+
 Version 0.7.1
 -------------
 

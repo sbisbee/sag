@@ -216,18 +216,20 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
                 break;
 
               case 'Location':
-                $line[1] = parse_url($line[1]);
+                //only follow Location header on 3xx status codes
+                if($response->headers->_HTTP->status >= 300 && $response->headers->_HTTP->status < 400) {
+                  $line[1] = parse_url($line[1]);
 
-                return $this->procPacket(
-                  $method,
-                  $line[1]['path'],
-                  $data,
-                  $headers,
-                  $line[1]['host'],
-                  $line[1]['port']
-                );
+                  return $this->procPacket(
+                    $method,
+                    $line[1]['path'],
+                    $data,
+                    $headers,
+                    $line[1]['host'],
+                    $line[1]['port']
+                  );
+                }
 
-                //not really needed ... whatevs
                 break;
             }
           }
