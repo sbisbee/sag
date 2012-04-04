@@ -61,11 +61,6 @@ src/SagMemoryCache.php          Caching mechanism that uses PHP objects in
                                 semi-accurate, but are less important than file
                                 caching.
 
-src/SagConfigurationCheck.php   A bootstrap file that Sag uses to make sure the
-                                environment will work with Sag. There is no
-                                reason you would need to call this directly,
-                                unless writing your own bootstrap scripts.
-
 src/SagUserUtils.php            A set of utilities for interacting with CouchDB
                                 users and the _users database.
 

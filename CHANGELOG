@@ -4,15 +4,19 @@ Sag Changes
 Version 0.8.0
 -------------
 
+Breaking Changes
+
+  * We no longer check the PHP install's configuration for a our supported
+    error_reporting level. This is because too many different types of installs
+    were causing false positives and false negatives, needlessly breaking
+    installs. (closes #39)
+
 New Features
 
   * Support for setPathPrefix() from Sag-JS v0.1.0. Allows you to prepend all
     URLs with a string, which is especially useful when going through a proxy.
 
 Fixed Bugs
-
-  * Fixing the error_reporting check's bitwise math for proper notification.
-    (closes #39)
 
   * SagNativeHTTPAdapter now supports and follows Location headers. (closes
     #37)

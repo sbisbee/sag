@@ -15,7 +15,6 @@
 
 require_once('SagException.php');
 require_once('SagCouchException.php');
-require_once('SagConfigurationCheck.php');
 require_once('httpAdapters/SagNativeHTTPAdapter.php');
 require_once('httpAdapters/SagCURLHTTPAdapter.php');
 
@@ -80,8 +79,6 @@ class Sag {
    */
   public function __construct($host = "127.0.0.1", $port = "5984")
   {
-    SagConfigurationCheck::run();
-
     $this->host = $host;
     $this->port = $port;
 
