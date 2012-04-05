@@ -531,11 +531,12 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $id = $this->couch->post($doc)->body->id;
     
-    //doc creation is not cached
+    //doc creation with POST is not cached (vs PUT)
     $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/$id");
     $this->assertFalse(is_file($cFileName));
 
     $fromDB = $this->couch->get("/$id");
+    $this->assertEquals($fromDB->headers->_HTTP->status, 200);
 
     //should now be cached
     $this->assertTrue(is_file($cFileName));
