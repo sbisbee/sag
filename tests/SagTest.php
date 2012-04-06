@@ -344,10 +344,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     try
     {
       //Provide a valid filter function that does not exist.
-      $r = $this->couch->replicate($this->couchDBName, $newDB, false, true, "test");
-      var_dump($r);
-      
-      $this->assertTrue($r->body->ok);
+      $this->assertTrue($this->couch->replicate($this->couchDBName, $newDB, false, true, "test")->body->ok);
       $this->assertFalse(true); //should not get this far
     }
     catch(SagCouchException $e)
