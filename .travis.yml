@@ -7,5 +7,6 @@ php:
 before_script:
   - curl -X PUT localhost:5984/_config/admins/admin -d '"passwd"'
   - mkdir /tmp/sag
+  - phpunit --version
 
 script: make checkNative
