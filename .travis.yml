@@ -8,6 +8,7 @@ php:
 before_script:
   - curl -X PUT localhost:5984/_config/admins/admin -d '"passwd"'
   - mkdir /tmp/sag
+  - curl localhost:5984
   - phpunit --version
 
 script: make check
