@@ -10,4 +10,4 @@ before_script:
   - mkdir /tmp/sag
   - phpunit --version
 
-script: make checkNative
+script: make check
