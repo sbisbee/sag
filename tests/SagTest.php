@@ -34,13 +34,13 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function setUp()
   {
-    $this->couchIP = ($GLOBALS['host']) ?: '127.0.0.1';
-    $this->couchPort = ($GLOBALS['port']) ?: '5984';
-    $this->couchDBName = ($GLOBALS['db']) ?: 'sag_tests';
-    $this->couchAdminName = ($GLOBALS['adminName']) ?: 'admin';
-    $this->couchAdminPass = ($GLOBALS['adminPass']) ?: 'passwd';
+    $this->couchIP = ($GLOBALS['host']) ? $GLOBALS['host'] : '127.0.0.1';
+    $this->couchPort = ($GLOBALS['port']) ? $GLOBALS['port'] : '5984';
+    $this->couchDBName = ($GLOBALS['db']) ? $GLOBALS['db'] : 'sag_tests';
+    $this->couchAdminName = ($GLOBALS['adminName']) ? $GLOBALS['adminName'] : 'admin';
+    $this->couchAdminPass = ($GLOBALS['adminPass']) ? $GLOBALS['adminPass'] : 'passwd';
     $this->couchHTTPAdapter = $GLOBALS['httpAdapter'];
-    $this->couchSSL = ($GLOBALS['ssl']) ?: false;
+    $this->couchSSL = ($GLOBALS['ssl']) ? $GLOBALS['ssl'] : false;
 
     $this->couch = new Sag($this->couchIP, $this->couchPort);
     $this->couch->setHTTPAdapter($this->couchHTTPAdapter);
@@ -326,7 +326,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_replication()
   {
-    $newDB = ($GLOBALS['dbReplication']) ?: 'sag_tests_replication';
+    $newDB = ($GLOBALS['dbReplication']) ? $GLOBALS['dbReplication'] : 'sag_tests_replication';
 
     // Basic
     $this->assertFalse(in_array($newDB, $this->couch->getAllDatabases()->body));
