@@ -15,7 +15,6 @@
 
 // See the README in tests/ for information on running and writing these tests.
 
-require_once('PHPUnit/Framework.php');
 require_once('Sag.php');
 require_once('SagFileCache.php');
 require_once('SagMemoryCache.php');

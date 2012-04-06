@@ -13,7 +13,6 @@
    limitations under the License.
 */
 
-require_once('PHPUnit/Framework.php');
 require_once('SagMemoryCache.php');
 
 class SagMemoryCacheTest extends PHPUnit_Framework_TestCase
