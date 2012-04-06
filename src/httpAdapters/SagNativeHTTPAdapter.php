@@ -169,6 +169,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
       }
 
       if(!$line && !$sockInfo['feof'] && !$sockInfo['timed_out']) {
+var_dump($response);
         throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
       }
 
