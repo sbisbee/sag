@@ -90,9 +90,21 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $response->headers = new stdClass();
       $response->headers->_HTTP = new stdClass();
       $response->body = '';
-
+	 $pattern = '!(.+?)\r\n\r\n(.+?)(\r\n\r\n(.+))!ms';
+	 if(preg_match($pattern, $chResponse, $matches)) {
+		if(preg_match('!^HTTP/\d\.\d \d+ Continue!', $matches[1])) {
+			$continue = $matches[1];
+			$headers = $matches[2];
+		 	$response->body = $matches[4];
+		} else {
+			$headers = $matches[1];
+		 	$response->body = $matches[2].$matches[3];
+		}
+		 unset($matches);
+	 } else {
       // split headers and body
       list($continue, $headers, $response->body) = explode("\r\n\r\n", $chResponse);
+	 }
 
       /*
        * It doesn't always happen, but it seems that we will sometimes get a
