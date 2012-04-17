@@ -1,0 +1,20 @@
+{
+    "name": "sag/sag",
+    "type": "library",
+    "description": "A simple but powerful PHP library for talking to CouchDB.",
+    "homepage": "http://www.saggingcouch.com/",
+    "license": "Apache",
+    "authors": [
+        {
+            "name": "Sam Bisbee",
+            "email": "sam@sbisbee.com",
+            "homepage": "http://www.sbisbee.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.0"
+    },
+    "autoload": {
+        "classmap": ["src/"]
+    }
+}
