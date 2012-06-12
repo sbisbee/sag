@@ -73,7 +73,7 @@ Error Handling
 
 Sag's paradigm of simplicity is carried into its error handling by allowing you
 to send data to CouchDB that will result in errors (ex., malformed JSON). This
-is because CouchDB knows when there iss an error better than Sag. This also
+is because CouchDB knows when there is an error better than Sag. This also
 makes Sag more future proof, instead of worrying about each of CouchDB's API
 changes. Therefore, Sag will only look for PHP interface problems and issues
 that are native to PHP, such as passing an int instead of a stdClass.
