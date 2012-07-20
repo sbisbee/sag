@@ -135,11 +135,11 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           !$isHeader &&
           $method != 'HEAD' &&
           (
-            isset($response->headers->{'Transfer-Encoding'}) == 'chunked' ||
-            !isset($response->headers->{'Content-Length'}) ||
+            isset($response->headers->{'transfer-encoding'}) == 'chunked' ||
+            !isset($response->headers->{'content-length'}) ||
             (
-              isset($response->headers->{'Content-Length'}) &&
-              strlen($response->body) < $response->headers->{'Content-Length'}
+              isset($response->headers->{'content-length'}) &&
+              strlen($response->body) < $response->headers->{'content-length'}
             )
           )
         )
@@ -160,9 +160,9 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
        *
        * And we can't use a ternary because fgets() wants an int or undefined.
        */
-      if(!$isHeader && $response->headers->{'Transfer-Encoding'} !== 'chunked') {
+      if(!$isHeader && $response->headers->{'transfer-encoding'} !== 'chunked') {
         //the +1 is because fgets() reads (length - 1) bytes
-        $line = fgets($sock, $response->headers->{'Content-Length'} - strlen($response->body) + 1);
+        $line = fgets($sock, $response->headers->{'content-length'} - strlen($response->body) + 1);
       }
       else {
         $line = fgets($sock);
@@ -202,10 +202,11 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           }
           else {
             $line = explode(':', $line, 2);
+            $line[0] = strtolower($line[0]);
             $response->headers->$line[0] = $line[1] = ltrim($line[1]);
 
             switch($line[0]) {
-              case 'Set-Cookie':
+              case 'set-cookie':
                 $response->cookies = new stdClass();
 
                 foreach(explode('; ', $line[1]) as $cookie) {
@@ -215,7 +216,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
 
                 break;
 
-              case 'Location':
+              case 'location':
                 //only follow Location header on 3xx status codes
                 if($response->headers->_HTTP->status >= 300 && $response->headers->_HTTP->status < 400) {
                   $line[1] = parse_url($line[1]);
@@ -235,7 +236,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           }
         }
       }
-      else if($response->headers->{'Transfer-Encoding'}) {
+      else if($response->headers->{'transfer-encoding'}) {
         /*
          * Parse the response's body, which is being sent in chunks. Welcome to
          * HTTP/1.1 land.
@@ -300,7 +301,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     }
 
     // HTTP/1.1 assumes persisted connections, but proxies might close them.
-    if(strtolower($response->headers->Connection) != 'close') {
+    if(strtolower($response->headers->connection) != 'close') {
       $this->connPool[] = $sock;
     }
 

@@ -153,8 +153,8 @@ abstract class SagCache {
       isset($item) && 
       is_object($item) && 
       isset($item->headers) &&
-      is_string($item->headers->Etag) &&
-      !empty($item->headers->Etag) &&
+      is_string($item->headers->etag) &&
+      !empty($item->headers->etag) &&
       isset($item->body) &&
       is_object($item->body)
     );

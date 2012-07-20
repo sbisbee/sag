@@ -534,6 +534,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $cFileName = $cache->makeFilename("/{$this->couch->currentDatabase()}/$id");
     $this->assertFalse(is_file($cFileName));
 
+    //get the file, putting it in the cache
     $fromDB = $this->couch->get("/$id");
     $this->assertEquals($fromDB->headers->_HTTP->status, 200);
 

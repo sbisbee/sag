@@ -6,6 +6,13 @@ Version 0.8.0
 
 Breaking Changes
 
+  * Header keys are automatically lower cased now, whereas they previously kept
+    their capitalization. Unfortunately different API endpoints would sometimes
+    capitalize header names different (ex., Etag vs. ETag). Additionally,
+    BigCouch and Cloudant sometimes have different header capitalization. So,
+    whereas previously you might have done `$response->headers->Cookie` you
+    must now do `$response->headers->cookie`.
+
   * We no longer check the PHP install's configuration for a our supported
     error_reporting level. This is because too many different types of installs
     were causing false positives and false negatives, needlessly breaking

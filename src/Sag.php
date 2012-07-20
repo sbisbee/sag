@@ -257,10 +257,13 @@ class Sag {
       $prevResponse = $this->cache->get($url);
 
       if($prevResponse) {
-        $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->Etag));
+        $response = $this->procPacket('GET', $url, null, array('If-None-Match' => $prevResponse->headers->etag));
 
         if($response->headers->_HTTP->status == 304) {
-          return $prevResponse; //cache hit
+          //cache hit
+          $response->fromCache = true;
+
+          return $prevResponse;
         }
       
         $this->cache->remove($url); 
