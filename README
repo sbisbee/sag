@@ -1,7 +1,7 @@
 Sag
 ===
 
-Version 0.7.1
+Version 0.8.0-UNRELEASED
 http://www.saggingcouch.com
 
 Sag is a PHP library for working with CouchDB. It is designed to not force any
