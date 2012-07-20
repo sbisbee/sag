@@ -203,7 +203,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $doc->foo = 'foo';
 
     //...send it...
-    $this->assertTrue($this->couch->post($doc)->body->ok);
+    $this->assertTrue($this->couch->put($doc->_id, $doc)->body->ok);
 
     //...and get it again
     $this->assertEquals($this->couch->get('/1')->body->foo, 'foo');
