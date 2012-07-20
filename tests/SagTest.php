@@ -217,7 +217,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(isset($resDefaults->body->rows[0]->value));
     $this->assertFalse(isset($resDefaults->body->rows[0]->doc));
 
-    $resDescending = $this->couch->getAllDocs(true, null, '[]', '""', null, true);
+    $resDescending = $this->couch->getAllDocs(true, null, '{}', '1', null, true);
     $this->assertEquals('1', end($resDescending->body->rows)->id);
 
     try {
