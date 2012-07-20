@@ -13,12 +13,19 @@ Sag to incorporate new CouchDB functionality.
 Compatability
 -------------
 
-Each Sag release is tested with an automated testing suite against CouchDB
-1.0.x and 1.1.x, and PHP 5.3.x. Lower versions of CouchDB 0.11.x and 0.10.x,
-and PHP 5.2.x will likely work with Sag, but they are not officially supported,
-so your mileage may vary.
+Each Sag release is tested with an automated testing suite against all the
+combinations of:
 
-If you are running pre-1.0.1 CouchDB or pre-5.3 PHP, then you probably want to
+  - PHP 5.3.x
+
+  - CouchDB 1.2.x
+
+  - Cloudant
+
+Lower versions of CouchDB (0.11.x, 1.0.x, and 1.1.x) and PHP 5.2.x will likely
+work with Sag, but they are not officially supported, so your mileage may vary.
+
+If you are running pre-1.2.1 CouchDB or pre-5.3 PHP, then you probably want to
 look into updating your environment.
 
 Contents

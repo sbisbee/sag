@@ -11,9 +11,13 @@ Breaking Changes
     were causing false positives and false negatives, needlessly breaking
     installs. (closes #39)
 
+  * Added official support for CouchDB 1.2.x.
+
+  * Dropped official support for CouchDB 1.1.x.
+
 New Features
 
-  * Support for setPathPrefix() from Sag-JS v0.1.0. Allows you to prepend all
+  * Support for setPathPrefix() from Sag-JS v0.3.0. Allows you to prepend all
     URLs with a string, which is especially useful when going through a proxy.
 
 Fixed Bugs
