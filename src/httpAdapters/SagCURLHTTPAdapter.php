@@ -30,6 +30,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       CURLOPT_FOLLOWLOCATION => true,
       CURLOPT_HEADER => true,
       CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_NOBODY => false,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => $method
     );
