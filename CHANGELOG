@@ -50,6 +50,11 @@ Fixed Bugs
     response. We now only do that redirect on a 3xx header. (Thanks to Greg
     Nacu for reporting.)
 
+  * We now prevent cURL from sending a "Expect: 100-continue" header, as our
+    parsing code doesn't support HTTP/1.1's Continue. See
+    https://github.com/sbisbee/sag/pull/51 for a discussion. (Thanks to Greg
+    Nacu for reporting and working on this issue.)
+
 Version 0.7.1
 -------------
 
