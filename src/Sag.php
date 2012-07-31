@@ -1049,6 +1049,18 @@ class Sag {
       $url = $this->pathPrefix . $url;
     }
 
+    // Filter the use of the Expect header since we don't support Continue headers.
+    if(strtolower($headers['expect']) === '100-continue' || strtolower($headers['Expect']) === '100-continue') {
+      throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
+    }
+    else if(!$headers['expect'] && !$headers['Expect']) {
+      /*
+       * PHP cURL will set the Expect header to 100-continue if we don't set it
+       * ourselves. See https://github.com/sbisbee/sag/pull/51
+       */
+      $headers['Expect'] = ' '; //1 char string, so it's == to true
+    }
+
     // Do some string replacing for HTTP sanity.
     $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
