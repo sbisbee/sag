@@ -118,6 +118,26 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
+  public function test_twoPosts() {
+    $docs = array(
+      array("one" => "bwah"),
+      array("two" => "bwah")
+    );
+
+    $this->assertTrue($this->couch->post($docs[0])->body->ok);
+
+    $resp = $this->couch->post($docs[1]);
+    $this->assertTrue($resp->body->ok);
+
+    /*
+     * Make sure the fields didn't get appended:
+     * http://uk3.php.net/manual/en/function.curl-setopt-array.php#104369
+     */
+    $resp = $this->couch->get($resp->body->id);
+    $this->assertEquals($resp->body->two, $docs[1]['two']);
+    $this->assertNotEquals($resp->body->one, $docs[0]['one']);
+  }
+
   public function test_getID()
   {
     $result = $this->couch->get('/1');
