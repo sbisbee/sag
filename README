@@ -25,7 +25,7 @@ combinations of:
 Lower versions of CouchDB (0.11.x, 1.0.x, and 1.1.x) and PHP 5.2.x will likely
 work with Sag, but they are not officially supported, so your mileage may vary.
 
-If you are running pre-1.2.1 CouchDB or pre-5.3 PHP, then you probably want to
+If you are running pre-1.2.x CouchDB or pre-5.3 PHP, then you probably want to
 look into updating your environment.
 
 Contents
