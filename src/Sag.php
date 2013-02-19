@@ -107,6 +107,8 @@ class Sag {
     }
 
     // remember what was already set (ie., might have called decode() already)
+    $prevDecode = null;
+    $prevTimeouts = null;
     if($this->httpAdapter) {
       $prevDecode = $this->httpAdapter->decodeResp;
       $prevTimeouts = $this->httpAdapter->getTimeouts();
@@ -252,6 +254,7 @@ class Sag {
       $url = self::setURLParameter($url, 'stale', 'ok');
     }
 
+    $response = null;
     //Deal with cached items
     if($this->cache) {
       $prevResponse = $this->cache->get($url);
@@ -1049,6 +1052,12 @@ class Sag {
       $url = $this->pathPrefix . $url;
     }
 
+    if(!isset($headers['expect'])) {
+        $headers['expect'] = null;
+    }
+    if(!isset($headers['Expect'])) {
+        $headers['Expect'] = null;
+    }
     // Filter the use of the Expect header since we don't support Continue headers.
     if(strtolower($headers['expect']) === '100-continue' || strtolower($headers['Expect']) === '100-continue') {
       throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
@@ -1084,6 +1093,9 @@ class Sag {
       $headers['X-CouchDB-WWW-Authenticate'] = 'Cookie';
     }
 
+    if(!isset($headers['Cookie'])) {
+        $headers['Cookie'] = null;
+    }
     if(is_array($this->globalCookies) && sizeof($this->globalCookies)) {
       //might have been set before by auth handling
       if($headers['Cookie']) {
