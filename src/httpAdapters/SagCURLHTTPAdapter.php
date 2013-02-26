@@ -4,7 +4,7 @@
  * you more advanced features, like SSL supports, with the cost of an
  * additional dependency that your shared hosting environment might now have. 
  *
- * @version 0.7.1
+ * @version 0.8.0
  * @package HTTP
  */
 require_once('SagHTTPAdapter.php');

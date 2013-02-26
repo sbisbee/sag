@@ -25,7 +25,7 @@ require_once('SagException.php');
  * sense to increase latency to implement a broken feature.
  *
  * @package Cache 
- * @version 0.7.1
+ * @version 0.8.0
  */
 class SagMemoryCache extends SagCache {
   private $cache;

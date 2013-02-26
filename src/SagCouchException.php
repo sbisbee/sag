@@ -21,7 +21,7 @@
  * if the requested document isn't found, then the code would be set to "404"
  * (string).
  *
- * @version 0.7.1
+ * @version 0.8.0
  * @package Core
  */
 class SagCouchException extends Exception {
