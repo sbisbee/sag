@@ -52,7 +52,7 @@ TESTS_PHPUNIT_OPTS_SSL_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TEST
 
 # PHPDocs related tools and files
 DOCS_DIR := ${PREFIX}docs
-PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} -o HTML:Smarty:PHP -dn Core -ti "Sag Documentation"
+PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} --title "Sag Documentation" --defaultpackagename "Core" --template "abstract"
 
 # Build the distribution
 dist: clean ${DIST_DIR}
