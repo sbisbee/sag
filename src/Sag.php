@@ -98,7 +98,7 @@ class Sag {
    */
   public function setHTTPAdapter($type = null) {
     if(!$type) {
-      $type = self::$HTTP_NATIVE_SOCKETS;
+      $type = extension_loaded("curl") ? self::$HTTP_CURL : self::$HTTP_NATIVE_SOCKETS;
     }
 
     // nothing to be done
