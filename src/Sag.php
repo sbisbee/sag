@@ -107,6 +107,8 @@ class Sag {
     }
 
     // remember what was already set (ie., might have called decode() already)
+    $prevDecode = null;
+    $prevTimeouts = null;
     if($this->httpAdapter) {
       $prevDecode = $this->httpAdapter->decodeResp;
       $prevTimeouts = $this->httpAdapter->getTimeouts();
@@ -253,6 +255,7 @@ class Sag {
     }
 
     //Deal with cached items
+    $response = null;
     if($this->cache) {
       $prevResponse = $this->cache->get($url);
 
@@ -1050,15 +1053,17 @@ class Sag {
     }
 
     // Filter the use of the Expect header since we don't support Continue headers.
-    if(strtolower($headers['expect']) === '100-continue' || strtolower($headers['Expect']) === '100-continue') {
-      throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
-    }
-    else if(!$headers['expect'] && !$headers['Expect']) {
-      /*
+    $headers['Expect'] = isset($headers['Expect']) ? $headers['Expect'] : null; 
+    if(!$headers['Expect']){
+        /*
        * PHP cURL will set the Expect header to 100-continue if we don't set it
        * ourselves. See https://github.com/sbisbee/sag/pull/51
        */
-      $headers['Expect'] = ' '; //1 char string, so it's == to true
+        $headers['Expect'] = isset($headers['expect']) ? $headers['expect'] : ' '; //1 char string, so it's == to true
+    }
+                              
+    if(strtolower($headers['Expect']) === '100-continue') {
+      throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
     }
 
     // Do some string replacing for HTTP sanity.
@@ -1098,7 +1103,7 @@ class Sag {
      * Checking this again because $headers['Cookie'] could be set in two
      * different logic paths above.
      */
-    if($headers['Cookie']) {
+    if(!empty($headers['Cookie'])) {
       $buff = '';
 
       foreach($headers['Cookie'] as $k => $v) {
