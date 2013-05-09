@@ -1059,7 +1059,7 @@ class Sag {
        * PHP cURL will set the Expect header to 100-continue if we don't set it
        * ourselves. See https://github.com/sbisbee/sag/pull/51
        */
-        $headers['Expect'] = isset($headers['expect']) ? $headers['expect'] : ' '; //1 char string, so it's == to true
+        $headers['Expect'] = (isset($headers['expect']) && $headers['expect']) ? $headers['expect'] : ' '; //1 char string, so it's == to true
     }
                               
     if(strtolower($headers['Expect']) === '100-continue') {
