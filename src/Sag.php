@@ -108,7 +108,8 @@ class Sag {
 
     // remember what was already set (ie., might have called decode() already)
     if($this->httpAdapter) {
-      $prevDecode = $this->httpAdapter->decodeResp;
+      $prevDecode = $this->httpAdapter->decodeResp;      
+      $prevDecodeAssoc = $this->httpAdapter->decodeRespAssoc;
       $prevTimeouts = $this->httpAdapter->getTimeouts();
     }
 
@@ -129,6 +130,7 @@ class Sag {
     // restore previous decode value, if any
     if(is_bool($prevDecode)) {
       $this->httpAdapter->decodeResp = $prevDecode;
+      $this->httpAdapter->decodeRespAssoc = $prevDecodeAssoc;
     }
 
     // restore previous timeout vlaues, if any
@@ -214,14 +216,16 @@ class Sag {
    * or to simply return the JSON as a string. Defaults to true.
    *
    * @param bool $decode True to decode, false to not decode.
+   * @param bool $assoc When True, all objects in the response body will be converted into associative arrays.
    * @return Sag Returns $this.
    */
-  public function decode($decode) {
+  public function decode($decode, $assoc=false) {
     if(!is_bool($decode)) {
       throw new SagException('decode() expected a boolean');
     }
 
     $this->httpAdapter->decodeResp = $decode;
+    $this->httpAdapter->decodeRespAssoc = $assoc;
 
     return $this;
   }
@@ -381,10 +385,13 @@ class Sag {
      */
     if($this->cache && $response->body->ok) {
       if(is_string($data)) {
-        $data = json_decode($data);
+        $data = json_decode($data, $this->httpAdapter->decodeRespAssoc);
       }
 
-      $data->_rev = $response->body->rev;
+      if($this->httpAdapter->decodeRespAssoc)
+        $data->_rev = $response->body['rev'];
+      else
+        $data->_rev = $response->body->rev;
 
       $toCache = clone $response;
       $toCache->body = $data;
@@ -530,6 +537,7 @@ class Sag {
     if($this->db != $db || $createIfNotFound) {
       if(!is_string($db)) {
         throw new SagException('setDatabase() expected a string.');
+
       }
 
       $db = urlencode($db);
