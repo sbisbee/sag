@@ -1054,8 +1054,6 @@ class Sag {
 
     // Filter the use of the Expect header since we don't support Continue headers.
 
-
-
     if(strtolower(isset($headers['expect']) ? $headers['expect'] : null) === '100-continue' || strtolower(isset($headers['Expect']) ? $headers['Expect'] : null) === '100-continue') {
       throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
     }
