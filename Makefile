@@ -44,7 +44,8 @@ TESTS_CONFIG_CURL := ${TESTS_DIR}/phpunitConfig-cURL.xml
 TESTS_CONFIG_SSL_CURL := ${TESTS_DIR}/phpunitConfig-SSL-cURL.xml
 
 TESTS_PHPUNIT_OPTS_BASE := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
-                            -d "error_reporting=\"E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR\""
+                            --strict --process-isolation \
+                            -d "error_reporting=\"E_ALL & E_STRICT\""
 
 TESTS_PHPUNIT_OPTS_NATIVE := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_NATIVE_SOCKETS}
 TESTS_PHPUNIT_OPTS_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_CURL}
