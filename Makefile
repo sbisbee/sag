@@ -14,11 +14,11 @@
 VERSION := $(shell sed --expression '/^Version /!d' --expression 's/^Version //' README)
 
 # Main directories and files
-PREFIX :=
-SRC_DIR := ${PREFIX}src
-TESTS_DIR := ${PREFIX}tests
-EXAMPLES_DIR := ${PREFIX}examples
-FILES := ${PREFIX}CHANGELOG ${PREFIX}LICENSE ${PREFIX}NOTICE ${PREFIX}README
+PREFIX := .
+SRC_DIR := ${PREFIX}/src
+TESTS_DIR := ${PREFIX}/tests
+EXAMPLES_DIR := ${PREFIX}/examples
+FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE ${PREFIX}/README
 
 # Main binaries
 PHPDOC := phpdoc
@@ -28,7 +28,7 @@ MD5SUM := md5sum
 SHA1SUM := sha1sum
 
 # Distribution locations
-DIST_DIR := ${PREFIX}sag-${VERSION}
+DIST_DIR := ${PREFIX}/sag-${VERSION}
 DIST_FILE := ${DIST_DIR}.tar.gz
 DIST_FILE_SIG := ${DIST_FILE}.sig
 DIST_FILE_SHA1 := ${DIST_FILE}.sha
@@ -51,7 +51,7 @@ TESTS_PHPUNIT_OPTS_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CO
 TESTS_PHPUNIT_OPTS_SSL_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_SSL_CURL}
 
 # PHPDocs related tools and files
-DOCS_DIR := ${PREFIX}docs
+DOCS_DIR := ${PREFIX}/docs
 PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} --title "Sag Documentation" --defaultpackagename "Core" --template "abstract"
 
 # Build the distribution
