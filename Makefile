@@ -100,6 +100,9 @@ checkCoverage:
 checkCoverageCURL:
 	${MAKE} checkCURL TESTS_PHPUNIT_OPTS_CURL="${TESTS_PHPUNIT_OPTS_CURL} --coverage-html=${TESTS_COVERAGE_DIR}"
 
+checkCoverageCURL_SSL:
+	${MAKE} checkCURL_SSL TESTS_PHPUNIT_OPTS_CURL="${TESTS_PHPUNIT_OPTS_SSL_CURL} --coverage-html=${TESTS_COVERAGE_DIR}"
+
 # Generate documentation with PHPDocumentation
 docs:
 	rm -rf ${DOCS_DIR}
