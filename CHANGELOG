@@ -4,6 +4,11 @@ Sag Changes
 Version 0.8.1
 -------------
 
+Breaking Changes
+
+  * Default to cURL HTTP adapter instead of the native PHP implementation. The
+    cURL adapter is faster, more stable, and supports SSL.
+
 Fixed Bugs
 
   * Fixed response parsing bug in the cURL HTTP adapter for when HTTP bodies
