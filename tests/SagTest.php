@@ -492,17 +492,9 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($data, $this->couch->get("/$docID/$name")->body);
   }
 
-  public function test_createSession()
-  {
-    try
-    {
-      $this->session_couch->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
-    }
-    catch(Exception $e)
-    {
-      //should not happen - FAIL
-      $this->assertTrue(false);
-    }
+  public function test_createSession() {
+    $resp = $this->session_couch->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
+    $this->assertTrue(is_string($resp->body), 'Got a string back');
   }
 
   public function test_getSession() {
@@ -525,8 +517,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couch->login($this->couchAdminName, $this->couchAdminPass);
   }
 
-  public function test_createDocWithSession()
-  {
+  public function test_createDocWithSession() {
     $db = new Sag($this->couchIP, $this->couchPort);
     $db->setDatabase($this->couchDBName);
     $db->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);

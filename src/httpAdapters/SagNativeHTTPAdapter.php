@@ -16,10 +16,10 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
   /**
    * Closes any sockets that are left open in the connection pool.
    */
-  public function __destruct()
-  {
-    foreach($this->connPool as $sock)
+  public function __destruct() {
+    foreach($this->connPool as $sock) {
       @fclose($sock);
+    }
   }
 
   /**

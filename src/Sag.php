@@ -191,12 +191,21 @@ class Sag {
         $user = urlencode($user);
         $pass = urlencode($pass);
 
-        $res = $this->procPacket('POST', '/_session', "name=$user&password=$pass", array('Content-Type' => 'application/x-www-form-urlencoded'));
+        $res = $this->procPacket(
+          'POST',
+          '/_session',
+          sprintf('name=%s&password=%s', $user, $pass),
+          array('Content-Type' => 'application/x-www-form-urlencoded')
+        );
+
         $this->authSession = $res->cookies->AuthSession;
+
         return $this->authSession;
+
         break;
     }
 
+    //should never reach this line
     throw new SagException("Unknown auth type for login().");
   }
 
