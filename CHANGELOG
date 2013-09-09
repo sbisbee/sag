@@ -1,6 +1,15 @@
 Sag Changes
 ===========
 
+Version 0.8.1
+-------------
+
+Fixed Bugs
+
+  * Fixed response parsing bug in the cURL HTTP adapter for when HTTP bodies
+    are received that have empty lines. For example, if a view returns zero
+    results there is an empty line in the JSON that is returned. (closes #72)
+
 Version 0.8.0
 -------------
 
