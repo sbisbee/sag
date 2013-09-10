@@ -218,8 +218,12 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $result = $this->couch->get('/_design/app/_view/none');
 
+    $this->assertTrue(is_object($result->headers), 'Parsed headers');
+    $this->assertTrue(is_object($result->headers->_HTTP), 'Parsed first line');
+    $this->assertEqual($result->headers->_HTTP->status, 200, 'HTTP status code');
     $this->assertTrue(is_object($result->body), 'Make sure we parsed the JSON object properly');
-    $this->assertTrue(is_array($result->body->rows));
+    $this->assertTrue(is_array($result->body->rows), 'Rows is an array');
+    $this->assertEqual(sizeof($result->body->rows), 0, 'Empty rows array');
   }
 
   public function test_getIDNoDecode()
