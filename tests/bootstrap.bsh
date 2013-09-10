@@ -51,6 +51,12 @@ php -v | grep '^PHP 5.[2345]' > /dev/null
 echo -n "Checking for the /tmp/sag/ directory..."
 [ -d "/tmp/sag/" ] && success || failure
 
+# Check for running CouchDB
+((numSteps++))
+echo -n "Checking for running CouchDB at localhost:5984..."
+curl -s http://localhost:5984 > /dev/null
+[ $? -eq 0 ] && success || failure
+
 # Check CouchDB credentials
 ((numSteps++))
 echo -n "Checking for admin:passwd credentials..."
