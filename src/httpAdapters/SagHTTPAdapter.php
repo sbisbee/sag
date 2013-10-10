@@ -9,7 +9,8 @@
  */
 abstract class SagHTTPAdapter {
   public $decodeResp = true;
-
+  public $decodeRespAssoc = false;
+  
   protected $host;
   protected $port;
 
@@ -67,7 +68,7 @@ abstract class SagHTTPAdapter {
        * attachment as text/plain and then expecting it to be parsed by
        * json_decode().
        */
-      $json = json_decode($response->body);
+      $json = json_decode($response->body, $this->decodeRespAssoc);
 
       if(isset($json)) {
         /*
