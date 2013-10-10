@@ -224,6 +224,9 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_object($result->body), 'Make sure we parsed the JSON object properly');
     $this->assertTrue(is_array($result->body->rows), 'Rows is an array');
     $this->assertEqual(sizeof($result->body->rows), 0, 'Empty rows array');
+
+    // delete design doc for future use
+    $this->couch->delete('/_design/app', $ddocResult->body->rev);
   }
 
   public function test_getIDNoDecode()
