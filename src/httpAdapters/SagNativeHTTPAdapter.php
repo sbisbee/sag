@@ -207,13 +207,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
 
             switch($line[0]) {
               case 'set-cookie':
-                $response->cookies = new stdClass();
-
-                foreach(explode('; ', $line[1]) as $cookie) {
-                  $crumbs = explode('=', $cookie);
-                  $response->cookies->{trim($crumbs[0])} = trim($crumbs[1]);
-                } 
-
+                $response->cookies = $this->parseCookieString($line[1]);
                 break;
 
               case 'location':
