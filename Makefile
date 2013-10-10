@@ -11,7 +11,7 @@
 # limitations under the License.
 
 # Determine version number from README (will include "-UNRELEASED")
-VERSION := $(shell sed --expression '/^Version /!d' --expression 's/^Version //' README)
+VERSION := $(shell sed -e '/^Version /!d' -e 's/^Version //' README)
 
 # Main directories and files
 PREFIX := .
