@@ -44,7 +44,7 @@ TESTS_CONFIG_CURL := ${TESTS_DIR}/phpunitConfig-cURL.xml
 TESTS_CONFIG_SSL_CURL := ${TESTS_DIR}/phpunitConfig-SSL-cURL.xml
 
 TESTS_PHPUNIT_OPTS_BASE := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
-                            --strict --process-isolation \
+                            --verbose --strict --process-isolation \
                             -d "error_reporting=\"E_ALL & E_STRICT\""
 
 TESTS_PHPUNIT_OPTS_NATIVE := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_NATIVE_SOCKETS}
