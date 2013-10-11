@@ -12,7 +12,8 @@
     }
   ],
   "require": {
-    "php": ">=5.2.0"
+    "php": ">=5.2.0",
+    "guzzle/guzzle": "3.7.*"
   },
   "suggest": {
     "lib-curl": "*"

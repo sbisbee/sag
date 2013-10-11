@@ -91,6 +91,14 @@ checkCURL_SSL:
 	${TESTS_BOOTSTRAP}
 	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} ${TESTS_DIR}
 
+# Run tests with cURL
+checkGuzzle:
+	@echo "Testing with GuzzlePHP..."
+
+	${TESTS_BOOTSTRAP}
+	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} ${TESTS_DIR}
+
+
 # Run the tests
 check: lint checkNative checkCURL
 
