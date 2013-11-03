@@ -1,5 +1,5 @@
 {
-  "name": "sag/sag",
+  "name": "sbisbee/sag",
   "type": "library",
   "description": "A simple but powerful PHP library for talking to CouchDB.",
   "homepage": "http://www.saggingcouch.com/",
