@@ -92,7 +92,7 @@ checkCURL_SSL:
 	@${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} ${TESTS_DIR}
 
 # Run the tests
-check: lint checkNative checkCURL
+check: lint checkNative checkCURL checkCURL_SSL
 
 # Run the native socket tests with code coverage
 checkCoverage:
