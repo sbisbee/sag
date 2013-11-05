@@ -114,7 +114,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
           $line[0] = strtolower($line[0]);
           $response->headers->$line[0] = ltrim($line[1]);
 
-          if($line[0] == 'Set-Cookie') {
+          if($line[0] == 'set-cookie') {
             $response->cookies = $this->parseCookieString($line[1]);
           }
         }

@@ -40,7 +40,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->couchAdminName = ($GLOBALS['adminName']) ? $GLOBALS['adminName'] : 'admin';
     $this->couchAdminPass = ($GLOBALS['adminPass']) ? $GLOBALS['adminPass'] : 'passwd';
     $this->couchHTTPAdapter = $GLOBALS['httpAdapter'];
-    $this->couchSSL = ($GLOBALS['ssl']) ? $GLOBALS['ssl'] : false;
+    $this->couchSSL = (isset($GLOBALS['ssl'])) ? $GLOBALS['ssl'] : false;
 
     $this->couch = new Sag($this->couchIP, $this->couchPort);
     $this->couch->setHTTPAdapter($this->couchHTTPAdapter);
@@ -135,7 +135,7 @@ class SagTest extends PHPUnit_Framework_TestCase
      */
     $resp = $this->couch->get($resp->body->id);
     $this->assertEquals($resp->body->two, $docs[1]['two']);
-    $this->assertNotEquals($resp->body->one, $docs[0]['one']);
+    $this->assertFalse(isset($resp->body->one));
   }
 
   public function test_getID()
@@ -220,10 +220,13 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     $this->assertTrue(is_object($result->headers), 'Parsed headers');
     $this->assertTrue(is_object($result->headers->_HTTP), 'Parsed first line');
-    $this->assertEqual($result->headers->_HTTP->status, 200, 'HTTP status code');
+    $this->assertEquals($result->headers->_HTTP->status, 200, 'HTTP status code');
     $this->assertTrue(is_object($result->body), 'Make sure we parsed the JSON object properly');
     $this->assertTrue(is_array($result->body->rows), 'Rows is an array');
-    $this->assertEqual(sizeof($result->body->rows), 0, 'Empty rows array');
+    $this->assertEquals(sizeof($result->body->rows), 0, 'Empty rows array');
+
+    // delete design doc for future use
+    $this->couch->delete('/_design/app', $ddocResult->body->rev);
   }
 
   public function test_getIDNoDecode()
@@ -498,7 +501,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_createSession() {
     $resp = $this->session_couch->login($this->couchAdminName, $this->couchAdminPass, Sag::$AUTH_COOKIE);
-    $this->assertTrue(is_string($resp->body), 'Got a string back');
+    $this->assertTrue(is_string($resp), 'Got a string back');
   }
 
   public function test_getSession() {

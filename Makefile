@@ -11,7 +11,7 @@
 # limitations under the License.
 
 # Determine version number from README (will include "-UNRELEASED")
-VERSION := $(shell sed --expression '/^Version /!d' --expression 's/^Version //' README)
+VERSION := $(shell sed -e '/^Version /!d' -e 's/^Version //' README)
 
 # Main directories and files
 PREFIX := .
@@ -44,7 +44,7 @@ TESTS_CONFIG_CURL := ${TESTS_DIR}/phpunitConfig-cURL.xml
 TESTS_CONFIG_SSL_CURL := ${TESTS_DIR}/phpunitConfig-SSL-cURL.xml
 
 TESTS_PHPUNIT_OPTS_BASE := -d "include_path=${TESTS_PHP_INCLUDE_PATH}" \
-                            --strict --process-isolation \
+                            --verbose --strict --process-isolation \
                             -d "error_reporting=\"E_ALL & E_STRICT\""
 
 TESTS_PHPUNIT_OPTS_NATIVE := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TESTS_CONFIG_NATIVE_SOCKETS}

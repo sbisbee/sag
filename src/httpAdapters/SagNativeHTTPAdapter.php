@@ -160,7 +160,8 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
        *
        * And we can't use a ternary because fgets() wants an int or undefined.
        */
-      if(!$isHeader && $response->headers->{'transfer-encoding'} !== 'chunked') {
+      if(!$isHeader && !empty($response->headers->{'transfer-encoding'})
+        && $response->headers->{'transfer-encoding'} !== 'chunked') {
         //the +1 is because fgets() reads (length - 1) bytes
         $line = fgets($sock, $response->headers->{'content-length'} - strlen($response->body) + 1);
       }
@@ -207,13 +208,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
 
             switch($line[0]) {
               case 'set-cookie':
-                $response->cookies = new stdClass();
-
-                foreach(explode('; ', $line[1]) as $cookie) {
-                  $crumbs = explode('=', $cookie);
-                  $response->cookies->{trim($crumbs[0])} = trim($crumbs[1]);
-                } 
-
+                $response->cookies = $this->parseCookieString($line[1]);
                 break;
 
               case 'location':
@@ -236,7 +231,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           }
         }
       }
-      else if($response->headers->{'transfer-encoding'}) {
+      else if(!empty($response->headers->{'transfer-encoding'})) {
         /*
          * Parse the response's body, which is being sent in chunks. Welcome to
          * HTTP/1.1 land.
@@ -301,7 +296,8 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     }
 
     // HTTP/1.1 assumes persisted connections, but proxies might close them.
-    if(strtolower($response->headers->connection) != 'close') {
+    if(!empty($response->headers->connection)
+      && strtolower($response->headers->connection) != 'close') {
       $this->connPool[] = $sock;
     }
 

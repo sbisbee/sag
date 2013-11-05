@@ -1,0 +1,111 @@
+Contributing to Sag
+===================
+
+First off - you rock! Community contributions are so awesome and have resulted
+in some awesome features landing in Sag.
+
+This guide is meant to make it as easy as possible to contribute your code to
+Sag.
+
+Sending the Contribution
+------------------------
+
+1. Fork the Sag project. If you have a GitHub account this is very easy: just
+hit "fork" on the Sag page and you will get your own repo. 
+http://help.github.com/fork-a-repo/
+
+2. Every feature or bug fix should be in its own branch. Ideally the branch
+name will be related to what you're contributing (iss-32, newFeatureName,
+etc.).
+
+3. Make your commits to the branch atomic so that there is a clearly defined
+commit for each change you make. For example, if you're writing a function in
+Sag.php that relies on new functionality in SagHTTPAdapter.php, make one commit
+for the SagHTTPAdapter.php work and then commit your work in Sag.php. This is
+just git best practices.
+
+4. **Write tests!** One of the reasons Sag is so popular and good is that we
+use an automated testing framework to prevent regressions, check for
+compatibility against new versions of CouchDB, etc. **Your contribution will
+not be accepted without supporting tests.**
+
+5. Your code is not complete until you run `make check` in Sag's root
+directory. Your code will not land in Sag if it breaks tests.
+
+6. Once your work is done issue a pull request to the Sag project. 
+http://help.github.com/send-pull-requests/
+
+Code Style Guide
+----------------
+
+It is good form to follow a project's coding style when contributing. Do not 
+take it upon yourself to rewrite every comment, drop in or delete white spaces
+all over the place, etc.
+
+- No hard tabs. Please set your editor to use 2 space soft tabs.
+
+- There is never any reason to use globals or goto statements.
+
+- Don't use single letter variable names. The exception to this rule is if you
+  are iterating over an array or object and use `$i`.
+
+- Use camel case, not underscores. That's why we have `usingSSL()` instead of
+  `using_ssl()`.
+
+- Put curly braces on the same line as the function definition, loop statement, 
+  etc.
+
+Example:
+
+    function sillyArraySearch($arr, $val) {
+      foreach($arr as $k => $v) {
+        if($v == $val) {
+          return true;
+        }
+      }
+    }
+
+- We use phpdocs to generate documentation. Therefore every function should 
+  have a properly formatted comment block with parameter and return
+  information.
+
+Example comment for the above sillyArraySearch function:
+
+    /**
+     * This is a naive example of how to search an array for a given value.
+     *
+     * @param array $arr The array to search.
+     * @param mixed $val The value that we are searching for.
+     * @return bool Returns true if the array contains the value, else false.
+     */
+
+- When considering multiple values for a single variable use a switch instead
+  of multiple if/else-if blocks. This makes it crystal clear that all of your
+  logic centers around the value of one variable.
+
+What not to do:
+
+    if($foo == 'bwah') {
+      //...
+    }
+    elseif($foo == 1) {
+      //...
+    }
+    else {
+      throw SagException('Unexpected value for $foo.');
+    }
+
+What you should do:
+
+    switch($foo) {
+      case 'bwah':
+        //...
+        break;
+
+      case 1:
+        //...
+        break;
+
+      default:
+        throw SagException('Unexpected value for $foo.');
+    }

@@ -98,6 +98,9 @@ abstract class SagHTTPAdapter {
 
     foreach(explode('; ', $cookieStr) as $cookie) {
       $crumbs = explode('=', $cookie);
+      if(!isset($crumbs[1])) {
+        $crumbs[1] = '';
+      }
       $cookies->{trim($crumbs[0])} = trim($crumbs[1]);
     }
 
