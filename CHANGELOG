@@ -19,6 +19,8 @@ Fixed Bugs
     are received that have empty lines. For example, if a view returns zero
     results there is an empty line in the JSON that is returned. (closes #72)
 
+  * Fixed parsing of set-cookie header to be case insensitive.
+
 Version 0.8.0
 -------------
 
