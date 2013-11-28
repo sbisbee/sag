@@ -36,12 +36,12 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
   }
 
-  public function procPacket($method, $url, $data = null, $headers = array(), $specialHost = null, $specialPort = null) {
+  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
     if(is_string($specialHost) || is_string($specialPort)) {
       $host = ($specialHost) ? $specialHost : $this->host;
       $port = ($specialPort) ? $specialPort : $this->port;
 
-      $headers['Host'] = "$host:$port";
+      $reqHeaders['Host'] = "$host:$port";
     }
     else {
       $host = $this->host;
@@ -51,7 +51,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     //Start building the request packet.
     $buff = "$method $url HTTP/1.1\r\n";
 
-    foreach($headers as $k => $v) {
+    foreach($reqHeaders as $k => $v) {
       $buff .= "$k: $v\r\n";
     }
 
@@ -220,7 +220,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
                     $method,
                     $line[1]['path'],
                     $data,
-                    $headers,
+                    $reqHeaders,
                     $line[1]['host'],
                     $line[1]['port']
                   );
