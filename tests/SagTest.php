@@ -818,8 +818,6 @@ class SagTest extends PHPUnit_Framework_TestCase
   }
 
   public function test_setSSL() {
-    $this->assertFalse($this->couch->usingSSL());
-
     try {
       $this->couch->useSSL('');
       $this->assertTrue(false);
