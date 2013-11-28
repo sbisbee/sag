@@ -27,7 +27,7 @@ require_once('SagException.php');
  * I/O operations.
  *
  * @package Cache 
- * @version 0.8.0
+ * @version %VERSION%
  */
 class SagFileCache extends SagCache {
   private static $fileExt = ".sag";

@@ -59,6 +59,8 @@ PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} --title "Sag Documentation" --defaul
 dist: clean ${DIST_DIR}
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
+	find "${DIST_DIR}" -name "*.php" -exec sed -i -e "s/%VERSION%/${VERSION}/g" {} \;
+
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
 

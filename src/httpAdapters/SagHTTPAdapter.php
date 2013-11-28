@@ -4,7 +4,7 @@
  * allowing for different drivers to be used thereby controling your project's
  * dependencies.
  *
- * @version 0.8.0
+ * @version %VERSION%
  * @package HTTP
  */
 abstract class SagHTTPAdapter {

@@ -17,7 +17,7 @@
  * This exception is thrown when Sag has an internal error, such as an invalid
  * type being passed to a function.
  *
- * @version 0.8.0
+ * @version %VERSION%
  * @package Core
  */
 class SagException extends Exception {
