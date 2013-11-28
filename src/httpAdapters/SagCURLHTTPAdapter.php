@@ -12,6 +12,8 @@ require_once('SagHTTPAdapter.php');
 class SagCURLHTTPAdapter extends SagHTTPAdapter {
   private $ch;
 
+  private $followLocation; //whether cURL is allowed to follow redirects
+
   public function __construct($host, $port) {
     if(!extension_loaded('curl')) {
       throw new SagException('Sag cannot use cURL on this system: the PHP cURL extension is not installed.');
@@ -19,15 +21,22 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     parent::__construct($host, $port);
 
+    /*
+     * PHP doesn't like it if you tell cURL to follow location headers when
+     * open_basedir is set in PHP's configuration. Only check to see if it's
+     * set once so we don't ini_get() on every request.
+     */
+    $this->followLocation = !ini_get('open_basedir');
+
     $this->ch = curl_init();
   }
 
-  public function procPacket($method, $url, $data = null, $headers = array(), $specialHost = null, $specialPort = null) {
+  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
     // the base cURL options
     $opts = array(
       CURLOPT_URL => "{$this->proto}://{$this->host}:{$this->port}{$url}",
       CURLOPT_PORT => $this->port,
-      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_FOLLOWLOCATION => $this->followLocation,
       CURLOPT_HEADER => true,
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_NOBODY => false,
@@ -36,10 +45,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     );
 
     // cURL wants the headers as an array of strings, not an assoc array
-    if(is_array($headers) && sizeof($headers) > 0) {
+    if(is_array($reqHeaders) && sizeof($reqHeaders) > 0) {
       $opts[CURLOPT_HTTPHEADER] = array();
 
-      foreach($headers as $k => $v) {
+      foreach($reqHeaders as $k => $v) {
         $opts[CURLOPT_HTTPHEADER][] = "$k: $v";
       }
     }
@@ -93,24 +102,24 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $response->body = '';
 
       // split headers and body
-      list($headers, $response->body) = explode("\r\n\r\n", $chResponse, 2);
+      list($respHeaders, $response->body) = explode("\r\n\r\n", $chResponse, 2);
 
       // split up the headers
-      $headers = explode("\r\n", $headers);
+      $respHeaders = explode("\r\n", $respHeaders);
 
-      for($i = 0; $i < sizeof($headers); $i++) {
+      for($i = 0; $i < sizeof($respHeaders); $i++) {
         // first element will always be the HTTP status line
         if($i === 0) {
-          $response->headers->_HTTP->raw = $headers[$i];
+          $response->headers->_HTTP->raw = $respHeaders[$i];
 
-          preg_match('(^HTTP/(?P<version>\d+\.\d+)\s+(?P<status>\d+))S', $headers[$i], $match);
+          preg_match('(^HTTP/(?P<version>\d+\.\d+)\s+(?P<status>\d+))S', $respHeaders[$i], $match);
 
           $response->headers->_HTTP->version = $match['version'];
           $response->headers->_HTTP->status = $match['status'];
           $response->status = $match['status'];
         }
         else {
-          $line = explode(':', $headers[$i], 2);
+          $line = explode(':', $respHeaders[$i], 2);
           $line[0] = strtolower($line[0]);
           $response->headers->$line[0] = ltrim($line[1]);
 
@@ -127,7 +136,61 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       throw new SagException('cURL returned false without providing an error.');
     }
 
+    // in the event cURL can't follow and we got a Location header w/ a 3xx
+    if(!$this->followLocation &&
+        isset($response->headers->location) &&
+        $response->status >= 300 &&
+        $response->status < 400
+    ) {
+      $parts = parse_url($response->headers->location);
+
+      if(empty($parts['path'])) {
+        $parts['path'] = '/';
+      }
+
+      $adapter = $this->makeFollowAdapter($parts);
+
+      // we want the old headers (ex., Auth), but might need a new Host
+      if(isset($parts['host'])) {
+        $reqHeaders['Host'] = $parts['host'];
+
+        if(isset($parts['port'])) {
+          $reqHeaders['Host'] .= ':' . $parts['port'];
+        }
+      }
+
+      return $adapter->procPacket($method, $parts['path'], $data, $reqHeaders);
+    }
+
     return self::makeResult($response, $method);
+  }
+
+  /**
+   * Used when we need to create a new adapter to follow a redirect because
+   * cURL can't.
+   *
+   * @param array $parts Return value from url_parts() for the location header.
+   */
+  private function makeFollowAdapter($parts) {
+    // re-use $this if we just got a path or the host/proto info matches
+    if(empty($parts['host']) ||
+        ($parts['host'] == $this->host &&
+          $parts['port'] == $this->port &&
+          $parts['scheme'] == $this->proto
+        )
+    ) {
+      return $this;
+    }
+
+    if(empty($parts['port'])) {
+      $parts['port'] = ($parts['scheme'] == 'https') ? 443 : 5984;
+    }
+
+    $adapter = new SagCURLHTTPAdapter($parts['host'], $parts['port']);
+    $adapter->useSSL($parts['scheme'] == 'https');
+    $adapter->setTimeoutsFromArray($this->getTimeouts());
+
+    return $adapter;
   }
 }
 ?>
