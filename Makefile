@@ -96,15 +96,26 @@ checkCURL_SSL:
 # Run the tests
 check: lint checkNative checkCURL checkCURL_SSL
 
-# Run the native socket tests with code coverage
-checkCoverage:
-	$(MAKE) checkNative TESTS_PHPUNIT_OPTS_NATIVE="${TESTS_PHPUNIT_OPTS_NATIVE} --coverage-html=${TESTS_COVERAGE_DIR}"
+checkCoverageNative:
+	@echo "Testing with native sockets and producing coverage..."
+
+	rm -rf ${TESTS_COVERAGE_DIR}
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_NATIVE} --coverage-html="${TESTS_COVERAGE_DIR}" ${TESTS_DIR}
 
 checkCoverageCURL:
-	${MAKE} checkCURL TESTS_PHPUNIT_OPTS_CURL="${TESTS_PHPUNIT_OPTS_CURL} --coverage-html=${TESTS_COVERAGE_DIR}"
+	@echo "Testing with cURL and producing coverage..."
+
+	rm -rf ${TESTS_COVERAGE_DIR}
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_CURL} --coverage-html="${TESTS_COVERAGE_DIR}" ${TESTS_DIR}
 
 checkCoverageCURL_SSL:
-	${MAKE} checkCURL_SSL TESTS_PHPUNIT_OPTS_CURL="${TESTS_PHPUNIT_OPTS_SSL_CURL} --coverage-html=${TESTS_COVERAGE_DIR}"
+	@echo "Testing with cURL+SSL and producing coverage..."
+
+	rm -rf ${TESTS_COVERAGE_DIR}
+	${TESTS_BOOTSTRAP}
+	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} --coverage-html="${TESTS_COVERAGE_DIR}" ${TESTS_DIR}
 
 # Generate documentation with PHPDocumentation
 docs:
