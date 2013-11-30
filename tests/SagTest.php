@@ -148,6 +148,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($result->body->_id, $this->couch->get('1')->body->_id);
   }
 
+  public function test_bothStatusSet() {
+    $result = $this->couch->get('/1');
+    $this->assertTrue(is_string($result->headers->_HTTP->status));
+    $this->assertEquals($result->status, $result->headers->_HTTP->status);
+  }
+
   public function test_postAllDocs()
   {
     $result = $this->couch->post(array('keys' => array('1')), '/_all_docs');

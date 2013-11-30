@@ -129,35 +129,34 @@ Results
 When you have told Sag to decode CouchDB's responses (the default setting),
 they are stored in an object, breaking out the HTTP header lines and data. For
 example, running `print_r($sag->get('/1'));` (where '/1' is the location of a
-document) would give you something like this.
+document) would give you something like this:
 
 ``
-stdClass Object
 (
     [headers] => stdClass Object
         (
             [_HTTP] => stdClass Object
                 (
-                    [raw] => HTTP/1.0 200 OK
-                    [version] => 1.0
+                    [raw] => HTTP/1.1 200 OK
+                    [version] => 1.1
                     [status] => 200
                 )
 
-            [Server] =>  CouchDB/0.10.0 (Erlang OTP/R13B)
-            [Etag] =>  "1-4c6114c65e295552ab1019e2b046b10e"
-            [Date] =>  Mon, 12 Apr 2010 23:01:39 GMT
-            [Content-Type] =>  text/plain;charset=utf-8
-            [Content-Length] =>  68
-            [Cache-Control] =>  must-revalidate
+            [server] => CouchDB/1.5.0 (Erlang OTP/R15B01)
+            [etag] => "1-967a00dff5e02add41819138abb3284d"
+            [date] => Sat, 30 Nov 2013 20:39:43 GMT
+            [content-type] => application/json
+            [content-length] => 87
+            [cache-control] => must-revalidate
         )
 
     [body] => stdClass Object
         (
-            [_id] => 1
-            [_rev] => 1-4c6114c65e295552ab1019e2b046b10e
-            [foo] => bar
+            [_id] => 7c23517e0faa1af2786d27e2ae095552
+            [_rev] => 1-967a00dff5e02add41819138abb3284d
         )
 
+    [status] => 200
 )
 ''
 
@@ -165,10 +164,15 @@ HTTP protocol information is stored in $result->headers, its headers broken out
 as entries in the headers array - the "_HTTP" array element holds the basic
 HTTP information in raw form ($result->headers->_HTTP->raw), and then broken
 out into HTTP version number ($result->headers->_HTTP->version) and status code
-($result->headers->_HTTP->status).
+($result->headers->_HTTP->status). The status code is also stored at the top of
+the response object ($result->status).
 
 The $result->body property holds the raw data from CouchDB, which you can have
 Sag automatically decode into PHP objects with json_decode().
+
+The $result->body property holds the response body (usually JSON), which Sag
+will automatically decode with json_decode() when the content-type is
+'application/json'.
 
 If you've told Sag to not decode CouchDB's responses, then it'll only return
 the resulting JSON from CouchDB as a string (what would have been in the body
