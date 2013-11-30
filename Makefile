@@ -10,15 +10,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Determine version number from README (will include "-UNRELEASED")
-VERSION := $(shell sed -e '/^Version /!d' -e 's/^Version //' README)
-
 # Main directories and files
 PREFIX := .
 SRC_DIR := ${PREFIX}/src
 TESTS_DIR := ${PREFIX}/tests
 EXAMPLES_DIR := ${PREFIX}/examples
-FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE ${PREFIX}/README
+FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE \
+          ${PREFIX}/README ${PREFIX}/VERSION
+
+# Grab the version we're building
+VERSION := $(shell cat "${PREFIX}/VERSION")
 
 # Main binaries
 PHPDOC := phpdoc
@@ -60,6 +61,7 @@ dist: clean ${DIST_DIR}
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
 	find "${DIST_DIR}" -name "*.php" -exec sed -i -e "s/%VERSION%/${VERSION}/g" {} \;
+	sed -i -e "s/%VERSION%/${VERSION}/g" "${DIST_DIR}/README"
 
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
