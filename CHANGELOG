@@ -11,7 +11,8 @@ Breaking Changes
 
 New Features
 
-  * Support for PHP's strict mode.
+  * Support for PHP's strict mode. Strict mode is now turned on by default in
+    PHP as of v5.4.
 
 Fixed Bugs
 
@@ -19,7 +20,10 @@ Fixed Bugs
     are received that have empty lines. For example, if a view returns zero
     results there is an empty line in the JSON that is returned. (closes #72)
 
-  * Fixed parsing of set-cookie header to be case insensitive.
+  * Fixed parsing of set-cookie header to be case insensitive. (closes #77)
+
+  * Fixed following redirects with the cURL HTTP adapter if PHP's open_basedir
+    php.ini variable is set. (closes #78)
 
 Version 0.8.0
 -------------
