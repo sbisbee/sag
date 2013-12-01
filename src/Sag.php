@@ -660,7 +660,7 @@ class Sag {
    * Uses CouchDB to generate IDs.
    *
    * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
-   * @returns mixed
+   * @return mixed
    */
   public function generateIDs($num = 10) {
     if(!is_int($num) || $num < 0) {
