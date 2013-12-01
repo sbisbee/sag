@@ -170,6 +170,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
    * cURL can't.
    *
    * @param array $parts Return value from url_parts() for the location header.
+   * @return SagCURLHTTPAdapter Returns $this if talking to the same server
+   * with the same protocol, otherwise creates a new instance.
    */
   private function makeFollowAdapter($parts) {
     // re-use $this if we just got a path or the host/proto info matches
