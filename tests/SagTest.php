@@ -860,6 +860,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
   public function test_setSSLCert() {
     if($this->couchHTTPAdapter === Sag::$HTTP_NATIVE_SOCKETS) {
+      $this->markTestSkipped('Sag in native sockets mode - skipping SSL test.');
       return;
     }
 
