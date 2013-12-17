@@ -24,7 +24,6 @@ ADD ./sag.tar /root/sag/
 
 # Prep for the tests
 RUN mkdir /tmp/sag
-RUN echo "127.0.0.1\tlocalhost" > /etc/hosts
 RUN echo "[admins]\nadmin = passwd" > /usr/local/etc/couchdb/local.d/sag.ini
 ADD ./run.sh /root/run.sh
 
