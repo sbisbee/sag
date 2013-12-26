@@ -1,4 +1,4 @@
-DOCKER := sudo docker
+DOCKER := docker
 
 all: latest
 
