@@ -120,46 +120,39 @@ class SagFileCache extends SagCache {
 
   public function remove($url) {
     $target = $this->makeFilename($url);
-
-    if(!is_file($target)) {
-      return true;
-    }
-
-    if(!is_writable($target)) {
-      throw new SagException("Not able to read the cache file at $target - please check its permissions.");
-    }
-
-    $oldSize = filesize($target);
-    $suc = @unlink($target);
-
-    if(!$suc) {
-      return false;
-    }
-
-    self::addToSize(-$oldSize);
-    return $suc;
+    return self::removeFile($target);
   }
 
   public function clear() {
     $part = false;
 
     foreach(glob($this->fsLocation."/*".self::$fileExt) as $file) {
-      if(is_writable($file)) {
-        $oldSize = filesize($file);
-
-        if(@unlink($file)) {
-          self::addToSize(-$oldSize);
-        }
-        else {
-          $part = true; //this should really never run
-        }
-      }
-      else {
+      if(!self::removeFile($file)) {
         $part = true;
       }
     } 
 
     return !$part;
+  }
+
+  private function removeFile($path) {
+    if(!is_file($path)) {
+      return true;
+    }
+
+    $size = filesize($path);
+
+    if(!unlink($path)) {
+      if(!is_writable($path)) {
+        throw new SagException("Not able to read the cache file at $path - please check its permissions.");
+      }
+
+      return false;
+    }
+
+    self::addToSize(-$size);
+
+    return true;
   }
 } 
 ?>
