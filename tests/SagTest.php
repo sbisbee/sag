@@ -877,11 +877,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
 
     $file = '/tmp/sag/asdf';
+    @unlink($file); //just in case previous run was bad
 
     $this->assertFalse(is_file($file));
 
     try {
-      // should throw
+      // should throw (file doesn't exist)
       $this->couch->setSSLCert($file);
       $this->assertTrue(false);
     }
@@ -890,22 +891,7 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
 
     $this->assertTrue(touch($file));
-
-    $this->assertTrue(chmod($file, 0));
-
-    try {
-      // should throw
-      $this->couch->setSSLCert($file);
-      $this->assertTrue(false);
-    }
-    catch(SagException $e) {
-      $this->assertTrue(true);
-    }
-
-    $this->assertTrue(chmod($file, 0600));
-
-    // should not throw
-    $this->couch->setSSLCert($file);
+    $this->assertInstanceOf('Sag', $this->couch->setSSLCert($file));
 
     // clean up
     unlink($file);
