@@ -3,7 +3,7 @@ DOCKER := docker
 all: latest
 
 sag.tar:
-	cd ../.. && tar cvvf sag.tar .
+	cd ../.. && tar -cvvf sag.tar .
 	mv ../../sag.tar .
 
 latest: sag.tar
