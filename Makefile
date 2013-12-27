@@ -98,6 +98,10 @@ checkCURL_SSL:
 # Run the tests
 check: lint checkNative checkCURL checkCURL_SSL
 
+checkDocker:
+	make -C ${TESTS_DIR}/docker
+	docker run sbisbee/sag-php-tests
+
 checkCoverageNative:
 	@echo "Testing with native sockets and producing coverage..."
 
