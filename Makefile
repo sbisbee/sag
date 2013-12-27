@@ -16,7 +16,7 @@ SRC_DIR := ${PREFIX}/src
 TESTS_DIR := ${PREFIX}/tests
 EXAMPLES_DIR := ${PREFIX}/examples
 FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE \
-          ${PREFIX}/README ${PREFIX}/VERSION
+          ${PREFIX}/README ${PREFIX}/VERSION ${PREFIX}/Makefile
 
 # Grab the version we're building
 VERSION := $(shell cat "${PREFIX}/VERSION")
@@ -56,8 +56,14 @@ TESTS_PHPUNIT_OPTS_SSL_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TEST
 DOCS_DIR := ${PREFIX}/docs
 PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} --title "Sag Documentation" --defaultpackagename "Core" --template "abstract"
 
+all: dist
+
 # Build the distribution
-dist: clean ${DIST_DIR}
+dist: ${DIST_FILE} ${DIST_FILE_SHA1} ${DIST_FILE_MD5}
+  
+${DIST_FILE}: ${SRC_DIR} ${EXAMPLES_DIR} ${FILES}
+	test -d ${DIST_DIR} || mkdir -p ${DIST_DIR}
+
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
 	find "${DIST_DIR}" -name "*.php" -exec sed -i -e "s/%VERSION%/${VERSION}/g" {} \;
@@ -66,7 +72,10 @@ dist: clean ${DIST_DIR}
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
 
+${DIST_FILE_SHA1}: ${DIST_FILE}
 	${SHA1SUM} ${DIST_FILE} > ${DIST_FILE_SHA1}
+
+${DIST_FILE_MD5}: ${DIST_FILE}
 	${MD5SUM} ${DIST_FILE} > ${DIST_FILE_MD5}
 
 lint:
@@ -125,7 +134,8 @@ docs:
 	${PHPDOC} ${PHPDOC_OPTS}
 
 # Sign the distribution
-sign: dist
+sign: dist ${DIST_FILE_SIG}
+${DIST_FILE_SIG}:
 	${GPG} --output ${DIST_FILE_SIG} --detach-sig ${DIST_FILE}
 
 # Remove all distribution and other build files
@@ -133,7 +143,6 @@ clean:
 	rm -rf ${DIST_DIR} ${DIST_FILE} ${DIST_FILE_SIG} \
 		${TESTS_COVERAGE_DIR} ${DOCS_DIR} ${DIST_FILE_MD5} \
 		${DIST_FILE_SHA1}
-  
-# Create the distribution directory that will be archived
-${DIST_DIR}:
-	mkdir -p ${DIST_DIR}
+
+.PHONY: dist sign clean docs lint check checkNative checkCURL checkCURL_SSL \
+          checkCoverageNative checkCoverageCURL checkCoverageCURL_SSL
