@@ -136,17 +136,9 @@ class SagFileCache extends SagCache {
   }
 
   private function removeFile($path) {
-    if(!is_file($path)) {
-      return true;
-    }
-
     $size = filesize($path);
 
     if(!unlink($path)) {
-      if(!is_writable($path)) {
-        throw new SagException("Not able to read the cache file at $path - please check its permissions.");
-      }
-
       return false;
     }
 
