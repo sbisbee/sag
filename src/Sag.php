@@ -454,10 +454,15 @@ class Sag {
    * can be JSON strings, objects, or arrays.
    * @param bool $allOrNothing Whether to treat the transactions as "all or
    * nothing" or not. Defaults to false.
+   * @param int $batchSize If set to a positive integer, the $docs array will
+   * be split into batches of max size $batchSize and one bulk HTTP request
+   * will be done per batch. The return value will be an array of responses. If
+   * set to a non-positive value then the entire $docs array will be sent in
+   * one HTTP request. Defaults to 0.
    *
    * @return mixed
    */
-  public function bulk($docs, $allOrNothing = false) {
+  public function bulk($docs, $allOrNothing = false, $batchSize = 0) {
     if(!$this->db) {
       throw new SagException('No database specified');
     }
@@ -470,16 +475,34 @@ class Sag {
       throw new SagException('bulk() expects a boolean for its second argument');
     }
 
+    if(!is_int($batchSize) && !empty($batchSize)) {
+      throw new SagException('bulk() expects an int or false value for its third argument');
+    }
+
+    $bulkURL = "/{$this->db}/_bulk_docs";
     $data = new stdClass();
 
-    //Only send all_or_nothing if it's non-default (true), saving bandwidth.
+    //Only send all_or_nothing if it's non-default (true)
     if($allOrNothing) {
       $data->all_or_nothing = $allOrNothing;
     }
 
-    $data->docs = $docs;
+    if($batchSize > 0) {
+      $responses = array();
+      $batches = array_chunk($docs, $batchSize);
 
-    return $this->procPacket("POST", "/{$this->db}/_bulk_docs", json_encode($data));
+      foreach($batches as $batch) {
+        $data->docs = $batch;
+        $resp = $this->procPacket('POST', $bulkURL, json_encode($data));
+        $responses[] = $resp;
+        unset($resp);
+      }
+
+      return $responses;
+    }
+
+    $data->docs = $docs;
+    return $this->procPacket('POST', $bulkURL, json_encode($data));
   }
 
   /**

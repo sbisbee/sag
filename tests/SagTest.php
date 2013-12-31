@@ -374,6 +374,33 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
+  public function test_bulkBatch() {
+    $batchSize = 2;
+    $docs = array(new stdClass(), new stdClass(), new stdClass());
+
+    $result = $this->couch->bulk($docs, false, $batchSize);
+    $this->assertTrue(is_array($result), 'Proper return type');
+    $this->assertEquals($batchSize, sizeof($result), 'Proper # batches');
+  }
+
+  public function test_bulkBatchNonPositive() {
+    $batchSizes = array(0, -1, false);
+
+    foreach($batchSizes as $batchSize) {
+      $docs = array(new stdClass(), new stdClass(), new stdClass());
+      $result = $this->couch->bulk($docs, false, $batchSize);
+
+      $this->assertFalse(is_array($result));
+      $this->assertTrue(is_object($result));
+    }
+  }
+
+  public function test_bulkBatchBadInput() {
+    $this->setExpectedException('SagException');
+
+    $this->couch->bulk(array(), false, new stdClass());
+  }
+
   public function test_replication()
   {
     $newDB = ($GLOBALS['dbReplication']) ? $GLOBALS['dbReplication'] : 'sag_tests_replication';
