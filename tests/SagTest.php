@@ -374,6 +374,14 @@ class SagTest extends PHPUnit_Framework_TestCase
     }
   }
 
+  public function test_bulkEmptyArray() {
+    $result = $this->couch->bulk(array());
+
+    $this->assertEquals(201, $result->status);
+    $this->assertTrue(is_array($result->body));
+    $this->assertTrue(empty($result->body));
+  }
+
   public function test_bulkBatch() {
     $batchSize = 2;
     $docs = array(new stdClass(), new stdClass(), new stdClass());
