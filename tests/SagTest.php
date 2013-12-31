@@ -445,14 +445,18 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($this->couch->compact()->body->ok);
   }
 
-  public function test_attachments()
-  {
+  public function test_deprecatedSetAttachment() {
+    $this->setExpectedException('PHPUnit_Framework_Error');
+    $this->couch->setAttachment();
+  }
+
+  public function test_attachments() {
     $docID = 'howdy';
     $name = 'lyrics';
     $data = 'Somebody once told me';
     $ct = 'text/plain';
 
-    $res = $this->couch->setAttachment($name, $data, $ct, $docID);
+    $res = $this->couch->putAttachment($name, $data, $ct, $docID);
 
     // Make sure the new doc was created.
     $this->assertEquals('201', $res->headers->_HTTP->status);
@@ -482,7 +486,7 @@ class SagTest extends PHPUnit_Framework_TestCase
 
     // Try to update the attachment, forcing the ?rev URL param to be sent.
     $data = 'the world was gonna roll me.';
-    $res = $this->couch->setAttachment($name, $data, $ct, $docID, $res->body->_rev);
+    $res = $this->couch->putAttachment($name, $data, $ct, $docID, $res->body->_rev);
 
     // Make sure the new doc was updated.
     $this->assertEquals('201', $res->headers->_HTTP->status);

@@ -1,6 +1,14 @@
 Sag Changes
 ===========
 
+Version 1.0.0
+-------------
+
+Breaking Changes
+
+  * setAttachment() has been deprecated by putAttachment(). The new function
+    takes the same arguments and behaves the same way. (closes #58)
+
 Version 0.9.0
 -------------
 

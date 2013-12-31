@@ -801,7 +801,7 @@ class Sag {
    *
    * @return mixed
    */
-  public function setAttachment($name, $data, $contentType, $docID, $rev = null) {
+  public function putAttachment($name, $data, $contentType, $docID, $rev = null) {
     if(empty($docID)) {
       throw new SagException('You need to provide a document ID.');
     }
@@ -823,6 +823,13 @@ class Sag {
     }
 
     return $this->procPacket('PUT', "/{$this->db}/{$docID}/{$name}".(($rev) ? "?rev=".urlencode($rev) : ""), $data, array("Content-Type" => $contentType));
+  }
+
+  /**
+   * Deprecated function. Please uset putAttachment() instead.
+   */
+  public function setAttachment() {
+    trigger_error('setAttachment() is deprecated. Please use putAttachment() instead.', E_USER_DEPRECATED);
   }
 
   /**
