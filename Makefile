@@ -22,11 +22,12 @@ FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE \
 VERSION := $(shell cat "${PREFIX}/VERSION")
 
 # Main binaries
-PHPDOC := phpdoc
+PHPDOC := ./vendor/bin/phpdoc.php
 PHPUNIT := phpunit
 GPG := gpg
 MD5SUM := md5sum
 SHA1SUM := sha1sum
+COMPOSER := composer.phar
 
 # Distribution locations
 DIST_DIR := ${PREFIX}/sag-${VERSION}
@@ -54,14 +55,18 @@ TESTS_PHPUNIT_OPTS_SSL_CURL := ${TESTS_PHPUNIT_OPTS_BASE} --configuration=${TEST
 
 # PHPDocs related tools and files
 DOCS_DIR := ${PREFIX}/docs
-PHPDOC_OPTS := -d ${SRC_DIR} -t ${DOCS_DIR} --title "Sag Documentation" --defaultpackagename "Core" --template "abstract"
+PHPDOC_OPTS := -d ${DIST_DIR}/src -t ${DOCS_DIR} --title "Sag Documentation" --defaultpackagename "Core" --template "abstract"
 
 all: dist
 
+# Dev utilities from composer
+vendor:
+	${COMPOSER} install
+
 # Build the distribution
 dist: ${DIST_FILE} ${DIST_FILE_SHA1} ${DIST_FILE_MD5}
-  
-${DIST_FILE}: ${SRC_DIR} ${EXAMPLES_DIR} ${FILES}
+
+${DIST_DIR}: ${SRC_DIR} ${EXAMPLES_DIR} ${FILES}
 	test -d ${DIST_DIR} || mkdir -p ${DIST_DIR}
 
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
@@ -69,6 +74,7 @@ ${DIST_FILE}: ${SRC_DIR} ${EXAMPLES_DIR} ${FILES}
 	find "${DIST_DIR}" -name "*.php" -exec sed -i -e "s/%VERSION%/${VERSION}/g" {} \;
 	sed -i -e "s/%VERSION%/${VERSION}/g" "${DIST_DIR}/README"
 
+${DIST_FILE}: ${DIST_DIR}
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
 
@@ -129,9 +135,10 @@ checkCoverageCURL_SSL:
 	${PHPUNIT} ${TESTS_PHPUNIT_OPTS_SSL_CURL} --coverage-html="${TESTS_COVERAGE_DIR}" ${TESTS_DIR}
 
 # Generate documentation with PHPDocumentation
-docs:
+docs: vendor ${DIST_DIR}
 	rm -rf ${DOCS_DIR}
 	${PHPDOC} ${PHPDOC_OPTS}
+	rm -rf ${DIST_DIR}
 
 # Sign the distribution
 sign: dist ${DIST_FILE_SIG}
