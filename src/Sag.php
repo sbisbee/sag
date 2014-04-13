@@ -580,10 +580,12 @@ class Sag {
    * you're trying to get.
    * @param bool $descending Whether to sort the results in descending order or
    * not.
+   * @param int $skip Skip this number of records before starting to return the
+   * results. Defaults to 0.
    *
    * @return mixed
    */
-  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null, $descending = false) {
+  public function getAllDocs($incDocs = false, $limit = null, $startKey = null, $endKey = null, $keys = null, $descending = false, $skip = 0) {
     if(!$this->db) {
       throw new SagException('No database specified.');
     }
@@ -628,6 +630,14 @@ class Sag {
       }
 
       $qry[] = "descending=true";
+    }
+    
+    if (isset($skip)) {
+        if(!is_int($skip) || $skip < 0 ) {
+            throw new SagException('getAllDocs() expects a positive integer for skip.');
+        }
+        
+        $qry[] = 'skip='.urlencode($skip);
     }
 
     $qry = '?'.implode('&', $qry);
