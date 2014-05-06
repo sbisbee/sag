@@ -68,14 +68,6 @@ class SagUserUtilsTest extends PHPUnit_Framework_TestCase {
     }
   }
     
-  public function test_makeSalt() {
-    $uUtils = new SagUserUtils($this->couch);
-    $salt = $uUtils->makeSalt();
-
-    $this->assertTrue(is_string($salt), 'Got a string back');
-    $this->assertEquals(32, strlen($salt), 'Proper UUID length');
-  }
-
   public function test_getNonExistingUser() {
     $uUtils = new SagUserUtils($this->couch);
 

@@ -163,17 +163,6 @@ class SagUserUtils {
   }
 
   /**
-   * Generates a salt that will be used when setting users' passwords. By
-   * default it requests a uuid from the CouchDB server you specified.
-   *
-   * @return string A randomly generated string of characters that will be used
-   * to salt users' passwords.
-   */
-  public function makeSalt() {
-    return $this->sag->generateIDs(1)->body->uuids[0];   
-  }
-
-  /**
    * Deletes the provided user record.
 
    * @param string $id The user's _id.
