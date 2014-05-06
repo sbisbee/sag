@@ -267,12 +267,12 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(isset($resDefaults->body->rows[0]->value));
     $this->assertFalse(isset($resDefaults->body->rows[0]->doc));
 
-    $resDescending = $this->couch->getAllDocs(true, null, '{}', '1', null, true);
+    $resDescending = $this->couch->getAllDocs(true, null, '{}', '1', null, true, 0);
     $this->assertEquals('1', end($resDescending->body->rows)->id);
 
     try {
       // should throw
-      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass());
+      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass(), "''");
       $this->assertTrue(false);
     }
     catch(SagException $e) {
@@ -296,6 +296,10 @@ class SagTest extends PHPUnit_Framework_TestCase
               '1',
               $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
     );
+    
+    $resSkipFirst = $this->couch->getAllDocs(false, 1, null, null, null, false, 1);
+    $this->assertTrue(is_array($resSkipFirst->body->rows));
+    $this->assertEquals('1', $resSkipFirst->body->offset)
   }
 
   public function test_deleteDoc()
