@@ -34,15 +34,11 @@ class SagUserUtils {
    */
   public function __construct($sag) {
     if(!($sag instanceof Sag)) {
-      throw new SagException('Tried to call setSag() with a non-Sag implementation.');
+      throw new SagException('Must pass an instance of Sag.');
     }
 
-    //Use the database if they pre-selected it, else default to Couch's default.
-    $db = $sag->currentDatabase();
-
-    if(empty($db)) {
-      $sag->setDatabase('_users');
-    }
+    //Force it in case the user hasn't set it properly.
+    $sag->setDatabase('_users');
 
     $this->sag = $sag;
   }
@@ -98,17 +94,14 @@ class SagUserUtils {
       $name = $id;
     }
 
-    $id = self::$USER_ID_PREFIX.$id;
-
-    $salt = self::makeSalt();
+    $id = self::$USER_ID_PREFIX . $id;
 
     return $this->sag->put($id, array(
       '_id' => $id,
       'type' => 'user',
       'name' => $name,
       'roles' => $roles,
-      'password_sha' => sha1($password . $salt),
-      'salt' => $salt
+      'password' => $password
     ));
   }
 
@@ -126,42 +119,47 @@ class SagUserUtils {
    * return value.
    */
   public function getUser($id, $hasPrepend = false) {
-    return $this->sag->get((($hasPrepend) ? '' : self::$USER_ID_PREFIX) . $id);
+    $ref = (($hasPrepend) ? '' : self::$USER_ID_PREFIX) . $id;
+    return $this->sag->get($ref)->body;
   }
 
   /**
    * Takes a user document and new password, generates a salt, and updates the
-   * password for that user document. You can optionally have the function send
-   * the updated document to the server as well.
+   * password for that user document. Always results in a server call to update
+   * the user doc.
    *
    * @param object $doc The user document. Expected to look like what
    * SagUserUtils->getUser() returns.
    *
    * @param string $newPassword The new password for the user.
    *
-   * @param bool $upload Whether to PUT the document to the server after
-   * updating it. Defaults to false.
-   *
-   * @return object If you set $upload to false, then just the updated document
-   * is returned. If you set $upload to true, then the result of Sag->put() is
-   * returned, so you get the updated document and HTTP information.
+   * @return object The result of the subsequent Sag->put().
    */
-  public function changePassword($doc, $newPassword, $upload = false) {
+  public function changePassword($doc, $newPassword) {
     if(empty($doc->_id)) {
       throw new SagException('This does not look like a document: there is no _id.');
     }
 
-    if(empty($doc->salt) || empty($doc->password_sha)) {
+    if(empty($doc->_rev)) {
+      throw new SagException('This doc does not have a _rev - not sure what is going on.');
+    }
+
+    if($doc->type !== 'user') {
       throw new SagException('This does not look like a user or it is an admin. Change admin passwords via the server config.');
     }
 
-    if(empty($newPassword)) {
-      throw new SagException('Empty password are not allowed.');
+    if(!is_string($newPassword) || empty($newPassword)) {
+      throw new SagException('Empty or non-string passwords are not allowed.');
     }
 
-    $doc->password_sha = sha1($newPassword + self::makeSalt());
+    unset($doc->iterations,
+      $doc->derived_key,
+      $doc->password_scheme,
+      $doc->salt);
 
-    return ($upload) ? $this->sag->put($doc->_id, $doc) : $doc;
+    $doc->password = $newPassword;
+
+    return $this->sag->put($doc->_id, $doc);
   }
 
   /**
@@ -173,6 +171,23 @@ class SagUserUtils {
    */
   public function makeSalt() {
     return $this->sag->generateIDs(1)->body->uuids[0];   
+  }
+
+  /**
+   * Deletes the provided user record.
+
+   * @param string $id The user's _id.
+   *
+   * @param bool $hasPrepend Specify whether the $id you are providing has
+   * 'org.couchdb.user:' prepended to it. If it doesn't (set to false, which is
+   * the default) then the string will be prepended for you.
+   *
+   * @return object The server's response, as you would expect from the
+   * Sag->delete() function.
+   */
+  public function deleteUser($id, $hasPrepend = false) {
+    $user = $this->getUser($id, $hasPrepend);
+    return $this->sag->delete($user->_id, $user->_rev);
   }
 }
 ?>

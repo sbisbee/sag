@@ -9,11 +9,22 @@ Breaking Changes
   * setAttachment() has been deprecated by putAttachment(). The new function
     takes the same arguments and behaves the same way. (closes #58)
 
+  * SagUserUtils now forces the database name to be '_users', which means you
+    need to be careful if you're reusing the same Sag object between databases.
+
+  * Removed the $upload parameter from SagUserUtils->changePassword(), which
+    means that all calls to this function will result in a PUT to the server.
+
 New Features
 
   * You can now provide a chunk size to break your bulk docs write into
     batches, resulting in more than one HTTP request. See the documentation for
     `bulk()`. Closes #67.
+
+Fixed Bugs
+
+  * Per the documentation, SagUserUtils->getUser() now only returns the
+    response's body instead of the entire response.
 
 Version 0.9.0
 -------------
