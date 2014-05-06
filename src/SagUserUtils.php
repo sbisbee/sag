@@ -159,7 +159,9 @@ class SagUserUtils {
       throw new SagException('Empty password are not allowed.');
     }
 
-    $doc->password_sha = sha1($newPassword + self::makeSalt());
+    $salt = self::makeSalt();
+    $doc->salt = $salt;
+    $doc->password_sha = sha1($newPassword . $salt);
 
     return ($upload) ? $this->sag->put($doc->_id, $doc) : $doc;
   }
