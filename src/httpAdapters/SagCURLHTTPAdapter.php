@@ -85,7 +85,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       }
       else {
         $opts[CURLOPT_SSL_VERIFYPEER] = true;
-        $opts[CURLOPT_SSL_VERIFYHOST] = true;
+        $opts[CURLOPT_SSL_VERIFYHOST] = 2;
         $opts[CURLOPT_CAINFO] = $this->sslCertPath;
       }
     }
