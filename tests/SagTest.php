@@ -259,20 +259,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertEquals($this->couch->get('/1')->body->foo, 'foo');
   }
 
-  public function test_getAllDocs()
-  {
+  public function test_getAllDocs() {
     $resDefaults = $this->couch->getAllDocs();
     $this->assertTrue(is_array($resDefaults->body->rows));
     $this->assertTrue(isset($resDefaults->body->rows[0]));
     $this->assertTrue(isset($resDefaults->body->rows[0]->value));
     $this->assertFalse(isset($resDefaults->body->rows[0]->doc));
 
-    $resDescending = $this->couch->getAllDocs(true, null, '{}', '1', null, true);
+    $resDescending = $this->couch->getAllDocs(true, null, '{}', '1', null, true, 0);
     $this->assertEquals('1', end($resDescending->body->rows)->id);
 
     try {
       // should throw
-      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass());
+      $this->couch->getAllDocs(true, null, '[]', '""', null, new stdClass(), "'");
       $this->assertTrue(false);
     }
     catch(SagException $e) {
@@ -283,19 +282,19 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(is_array($resAllWithDocs->body->rows));
     $this->assertTrue(isset($resAllWithDocs->body->rows[0]->value));
     $this->assertTrue(isset($resAllWithDocs->body->rows[0]->doc));
-    $this->assertEquals(
-              sizeof($resDefaults->body->rows), 
-              sizeof($resAllWithDocs->body->rows)
-    );
+    $this->assertEquals(sizeof($resDefaults->body->rows),
+      sizeof($resAllWithDocs->body->rows));
 
     $resLimitZero = $this->couch->getAllDocs(false, 0);
     $this->assertTrue(is_array($resLimitZero->body->rows));
     $this->assertTrue(empty($resLimitZero->body->rows)); 
 
-    $this->assertEquals(
-              '1',
-              $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id
-    );
+    $this->assertEquals('1',
+      $this->couch->getAllDocs(true, null, null, null, array("1"))->body->rows[0]->id);
+
+    $resSkipFirst = $this->couch->getAllDocs(false, 1, null, null, null, false, 1);
+    $this->assertTrue(is_array($resSkipFirst->body->rows));
+    $this->assertEquals(1, $resSkipFirst->body->offset);
   }
 
   public function test_deleteDoc()

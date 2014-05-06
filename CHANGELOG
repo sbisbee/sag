@@ -14,6 +14,9 @@ New Features
   * Support for PHP's strict mode. Strict mode is now turned on by default in
     PHP as of v5.4.
 
+  * Added $skip to Sag->getAllDocs(), which was introduced in CouchDB 1.6.0.
+    (closes #80 #81)
+
 Fixed Bugs
 
   * Fixed response parsing bug in the cURL HTTP adapter for when HTTP bodies

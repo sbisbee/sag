@@ -18,15 +18,15 @@ combinations of:
 
   - PHP 5.4.x
 
-  - CouchDB 1.5.x
+  - CouchDB 1.6.x
 
   - Cloudant
 
 Lower versions of CouchDB and PHP will likely work with Sag, but they are not
 officially supported, so your mileage may vary.
 
-If you are running pre-1.2.x CouchDB or pre-5.3 PHP, then you probably want to
-look into updating your environment.
+If you are running pre-1.5.1 CouchDB (important security fix) or pre-5.3 PHP,
+then you probably want to look into updating your environment.
 
 Contents
 --------
