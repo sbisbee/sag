@@ -16,7 +16,7 @@ SRC_DIR := ${PREFIX}/src
 TESTS_DIR := ${PREFIX}/tests
 EXAMPLES_DIR := ${PREFIX}/examples
 FILES := ${PREFIX}/CHANGELOG ${PREFIX}/LICENSE ${PREFIX}/NOTICE \
-          ${PREFIX}/README ${PREFIX}/VERSION ${PREFIX}/Makefile
+          ${PREFIX}/README.md ${PREFIX}/VERSION ${PREFIX}/Makefile
 
 # Grab the version we're building
 VERSION := $(shell cat "${PREFIX}/VERSION")
@@ -67,7 +67,7 @@ ${DIST_FILE}: ${SRC_DIR} ${EXAMPLES_DIR} ${FILES}
 	cp -r ${SRC_DIR} ${TESTS_DIR} ${EXAMPLES_DIR} ${FILES} ${DIST_DIR}
 
 	find "${DIST_DIR}" -name "*.php" -exec sed -i -e "s/%VERSION%/${VERSION}/g" {} \;
-	sed -i -e "s/%VERSION%/${VERSION}/g" "${DIST_DIR}/README"
+	sed -i -e "s/%VERSION%/${VERSION}/g" "${DIST_DIR}/README.md"
 
 	tar -zcvvf ${DIST_FILE} ${DIST_DIR}
 	rm -rf ${DIST_DIR}
