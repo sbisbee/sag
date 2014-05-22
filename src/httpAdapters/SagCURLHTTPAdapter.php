@@ -90,6 +90,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       }
     }
 
+    curl_reset($this->ch);
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);
