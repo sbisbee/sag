@@ -135,7 +135,7 @@ class SagUserUtils {
    * the updated document to the server as well.
    *
    * @param object $doc The user document. Expected to look like what
-   * SagUserUtils->getUser() returns.
+   * SagUserUtils->getUser()->body returns.
    *
    * @param string $newPassword The new password for the user.
    *
@@ -159,7 +159,10 @@ class SagUserUtils {
       throw new SagException('Empty password are not allowed.');
     }
 
-    $doc->password_sha = sha1($newPassword + self::makeSalt());
+    $salt = self::makeSalt();
+
+    $doc->password_sha = sha1($newPassword . $salt);
+    $doc->salt = $salt;
 
     return ($upload) ? $this->sag->put($doc->_id, $doc) : $doc;
   }
