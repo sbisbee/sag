@@ -277,8 +277,8 @@ class Sag {
 
           return $prevResponse;
         }
-      
-        $this->cache->remove($url); 
+
+        $this->cache->remove($url);
       }
 
       unset($prevResponse);
@@ -378,6 +378,7 @@ class Sag {
     }
 
     $toSend = (is_string($data)) ? $data : json_encode($data);
+    $id = urlencode($id);
 
     $url = "/{$this->db}/$id";
     $response = $this->procPacket('PUT', $url, $toSend);
@@ -435,7 +436,11 @@ class Sag {
     }
 
     if(is_string($path) && !empty($path)) {
-      $path = ((substr($path, 0, 1) != '/') ? '/' : '').$path;
+      if ($path[0] === '/') {
+        $path = '/'.urlencode(substr($path, 1));
+      } else {
+        $path = '/'.urlencode($path);
+      }
     }
     else if(isset($path)) {
       throw new SagException('post() needs a string for a path.');
@@ -446,7 +451,7 @@ class Sag {
 
   /**
    * Bulk pushes documents to the database.
-   * 
+   *
    * This function does not leverage the caching mechanism you specify with
    * setCache().
    *
@@ -516,7 +521,8 @@ class Sag {
       "Destination" => "$dstID".(($dstRev) ? "?rev=$dstRev" : "")
     );
 
-    $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers); 
+    $srcID = urlencode($srcID);
+    $response = $this->procPacket('COPY', "/{$this->db}/$srcID", null, $headers);
 
     return $response;
   }
@@ -867,7 +873,7 @@ class Sag {
 
   /*
    * Pass an implementation of the SagCache, such as SagFileCache, that will be
-   * used when retrieving objects. It is taken and stored as a reference. 
+   * used when retrieving objects. It is taken and stored as a reference.
    *
    * @param SagCache An implementation of SagCache (ex., SagFileCache).
    * @return Sag Returns $this.
@@ -883,7 +889,7 @@ class Sag {
   }
 
   /**
-   * Returns the cache object that's currently being used. 
+   * Returns the cache object that's currently being used.
    *
    * @return SagCache
    */
@@ -1084,9 +1090,6 @@ class Sag {
     if(strtolower($headers['Expect']) === '100-continue') {
       throw new SagException('Sag does not support HTTP/1.1\'s Continue.');
     }
-
-    // Do some string replacing for HTTP sanity.
-    $url = str_replace(array(" ", "\""), array('%20', '%22'), $url);
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
