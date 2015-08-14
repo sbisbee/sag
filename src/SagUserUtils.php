@@ -135,7 +135,7 @@ class SagUserUtils {
    * the updated document to the server as well.
    *
    * @param object $doc The user document. Expected to look like what
-   * SagUserUtils->getUser() returns.
+   * SagUserUtils->getUser()->body returns.
    *
    * @param string $newPassword The new password for the user.
    *
@@ -151,15 +151,24 @@ class SagUserUtils {
       throw new SagException('This does not look like a document: there is no _id.');
     }
 
-    if(empty($doc->salt) || empty($doc->password_sha)) {
-      throw new SagException('This does not look like a user or it is an admin. Change admin passwords via the server config.');
-    }
-
     if(empty($newPassword)) {
       throw new SagException('Empty password are not allowed.');
     }
 
-    $doc->password_sha = sha1($newPassword + self::makeSalt());
+    if(empty($doc->salt) || empty($doc->password_sha)) {
+      if( empty($doc->iterations) ) {
+        throw new SagException('This does not look like a user or it is an admin. Change admin passwords via the server config.');
+      } else {
+        /* This is CouchDB 1.3.0+; it automatically takes a plaintext password and converts it to PBKDF2 */
+        $doc->password = $newPassword;
+      }
+    } else {
+
+      $salt = self::makeSalt();
+
+      $doc->password_sha = sha1($newPassword . $salt);
+      $doc->salt = $salt;
+    }
 
     return ($upload) ? $this->sag->put($doc->_id, $doc) : $doc;
   }
