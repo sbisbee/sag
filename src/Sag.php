@@ -613,7 +613,7 @@ class Sag {
         throw new SagException('getAllDocs() expected a string for endkey.');
       }
 
-      $qry[] = 'endkey='.$endKey;
+      $qry[] = 'endkey='.urlencode($endKey);
     }
 
     if(isset($limit)) {
