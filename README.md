@@ -17,7 +17,7 @@ Compatability
 Each Sag release is tested with an automated testing suite against all the
 combinations of:
 
-  - PHP 5.4.x
+  - PHP 5.5.x
 
   - CouchDB 1.6.x
 
