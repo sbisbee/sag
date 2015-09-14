@@ -14,6 +14,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
   private $followLocation; //whether cURL is allowed to follow redirects
 
+  private $curlinfoLogger = false;
+
   public function __construct($host, $port) {
     if(!extension_loaded('curl')) {
       throw new SagException('Sag cannot use cURL on this system: the PHP cURL extension is not installed.');
@@ -34,6 +36,11 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
   public function __destruct()
   {
     curl_close($this->ch);
+  }
+
+  public function setCurlinfoLogger($logger)
+  {
+    $this->curlinfoLogger = $logger;
   }
 
   public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
@@ -104,6 +111,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);
+    if ($this->curlinfoLogger) {
+        $fn = $this->curlinfoLogger;
+        $fn(curl_getinfo($this->ch));
+    }
 
     if($chResponse !== false) {
       // prepare the response object
