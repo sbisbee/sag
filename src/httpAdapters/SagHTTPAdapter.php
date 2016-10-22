@@ -65,7 +65,12 @@ abstract class SagHTTPAdapter {
       !empty($response->headers->{'content-type'}) &&
       $response->headers->{'content-type'} == 'application/json'
     ) {
-      $json = json_decode($response->body);
+      if(defined(JSON_BIGINT_AS_STRING)) {
+        $json = json_decode($response->body, false, 512, JSON_BIGINT_AS_STRING);
+      }
+      else {
+        $json = json_decode($response->body);
+      }
 
       if(isset($json)) {
         if(!empty($json->error)) {
