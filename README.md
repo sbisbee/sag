@@ -1,6 +1,10 @@
 Sag
 ===
 
+Note: I have not maintained this project for years since I no longer use
+CouchDB or PHP. I assume it still works with CouchDB, but haven't been active
+in the community for a while and won't be testing or responding to tickets.
+
 Version %VERSION%
 
 http://www.saggingcouch.com
