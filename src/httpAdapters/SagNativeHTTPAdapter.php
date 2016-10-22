@@ -128,7 +128,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     // Read in the response.
     while(
       !$chunkParsingDone &&
-      !feof($sock) && 
+      !feof($sock) &&
       (
         $isHeader ||
         (
@@ -169,7 +169,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
         $line = fgets($sock);
       }
 
-      if(!$line && !$sockInfo['feof'] && !$sockInfo['timed_out']) {
+      if(!$line && !$sockInfo['eof'] && !$sockInfo['timed_out']) {
         throw new SagException('Unexpectedly failed to retrieve a line from the socket before the end of the file.');
       }
 
