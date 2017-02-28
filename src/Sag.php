@@ -637,6 +637,14 @@ class Sag {
 
       $qry[] = "descending=true";
     }
+    
+    if (isset($skip)) {
+        if(!is_int($skip) || $skip < 0 ) {
+            throw new SagException('getAllDocs() expects a positive integer for skip.');
+        }
+        
+        $qry[] = 'skip='.urlencode($skip);
+    }
 
     if(isset($skip)) {
       if(!is_int($skip) || $skip < 0) {
