@@ -1063,6 +1063,10 @@ class Sag {
     return $this->pathPrefix;
   }
 
+  public function getHTTPAdapter() {
+    return $this->httpAdapter;
+  }
+
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
     /*

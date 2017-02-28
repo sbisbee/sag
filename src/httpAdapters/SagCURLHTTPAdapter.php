@@ -2,7 +2,7 @@
 /**
  * Uses the PHP cURL bindings for HTTP communication with CouchDB. This gives
  * you more advanced features, like SSL supports, with the cost of an
- * additional dependency that your shared hosting environment might now have. 
+ * additional dependency that your shared hosting environment might now have.
  *
  * @version %VERSION%
  * @package HTTP
@@ -13,6 +13,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
   private $ch;
 
   private $followLocation; //whether cURL is allowed to follow redirects
+
+  private $curlinfoLogger = false;
 
   public function __construct($host, $port) {
     if(!extension_loaded('curl')) {
@@ -31,7 +33,23 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     $this->ch = curl_init();
   }
 
+  public function __destruct()
+  {
+    curl_close($this->ch);
+  }
+
+  public function setCurlinfoLogger($logger)
+  {
+    $this->curlinfoLogger = $logger;
+  }
+
   public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
+
+    // destroy and recreate curl handle because otherwise weird things
+    // happen if you make multiple requests with the same connection
+    curl_close($this->ch);
+    $this->ch = curl_init();
+
     // the base cURL options
     $opts = array(
       CURLOPT_URL => "{$this->proto}://{$this->host}:{$this->port}{$url}",
@@ -94,6 +112,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     curl_setopt_array($this->ch, $opts);
 
     $chResponse = curl_exec($this->ch);
+    if ($this->curlinfoLogger) {
+        $fn = $this->curlinfoLogger;
+        $fn(curl_getinfo($this->ch));
+    }
 
     if($chResponse !== false) {
       // prepare the response object
