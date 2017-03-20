@@ -909,4 +909,34 @@ class SagTest extends PHPUnit_Framework_TestCase
       $this->assertTrue(true);
     }
   }
+
+  public function test_putInvalidatesCache()
+  {
+    $cache = new SagFileCache('/tmp/sag');
+    $this->couch->setCache($cache);
+
+    $doc = new StdClass();
+    $doc->foo = 'bar';
+
+    // put document and fetch it to trigger cache
+    $this->couch->put('1', $doc);
+    $newDoc = $this->couch->get('/1');
+
+    // change property and put again
+    $newDoc->foo = 'bar2';
+    $this->couch->put('1', $newDoc);
+
+    $cached = $this->couch->getCache()->get('/1');
+
+    // cache should not exist
+    $this->assertNull($cached);
+
+    // fetch again to cache
+    $this->couch->get('/1');
+
+    $cached = $this->couch->getCache()->get('/1');
+
+    // cache should not exist
+    $this->assertEquals($cached->foo, $newDoc->foo);
+  }
 }
