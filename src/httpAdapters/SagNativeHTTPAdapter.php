@@ -205,7 +205,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           else {
             $line = explode(':', $line, 2);
             $line[0] = strtolower($line[0]);
-            $response->headers->$line[0] = $line[1] = ltrim($line[1]);
+            $response->headers->{$line[0]} = $line[1] = ltrim($line[1]);
 
             switch($line[0]) {
               case 'set-cookie':
