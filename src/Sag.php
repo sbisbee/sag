@@ -732,15 +732,16 @@ class Sag {
    * @param mixed $filterQueryParams An object or associative array of
    * parameters to be passed to the filter function via query_params. Only used
    * if $filter is set.
+   * @param array $doc_ids Array of document IDs to be synchronized
    *
    * @return mixed
    */
-  public function replicate($src, $target, $continuous = false, $createTarget = null, $filter = null, $filterQueryParams = null) {
-    if(empty($src) || !is_string($src)) {
+  public function replicate($src, $target, $continuous = false, $createTarget = null, $filter = null, $filterQueryParams = null, $doc_ids = null) {
+    if(empty($src) || (!is_string($src) && !is_object($src))) {
       throw new SagException('replicate() is missing a source to replicate from.');
     }
 
-    if(empty($target) || !is_string($target)) {
+    if(empty($target) || (!is_string($target)) && !is_object($target)) {
       throw new SagException('replicate() is missing a target to replicate to.');
     }
 
@@ -760,6 +761,10 @@ class Sag {
       if(isset($filterQueryParams) && !is_object($filterQueryParams) && !is_array($filterQueryParams)) {
         throw new SagException('filterQueryParams needs to be an object or an array');
       }
+    }
+
+    if (isset($doc_ids) && !is_array($doc_ids)) {
+      throw new SagException('Doc IDs needs to be an array.');
     }
 
     $data = new stdClass();
@@ -784,6 +789,10 @@ class Sag {
       if($filterQueryParams) {
         $data->query_params = $filterQueryParams;
       }
+    }
+
+    if ($doc_ids) {
+    	$data->doc_ids = $doc_ids;
     }
 
     return $this->procPacket('POST', '/_replicate', json_encode($data));
