@@ -38,6 +38,7 @@ abstract class SagHTTPAdapter {
     if(
       $method != 'HEAD' &&
       isset($response->headers->{'content-length'}) &&
+      ! isset($response->headers->{'content-encoding'}) &&
       strlen($response->body) != $response->headers->{'content-length'}
     ) {
       throw new SagException('Unexpected end of packet.');

@@ -41,8 +41,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_NOBODY => false,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => $method,
-      CURLOPT_ENCODING => ''
+      CURLOPT_CUSTOMREQUEST => $method
     );
 
     // cURL wants the headers as an array of strings, not an assoc array
@@ -57,6 +56,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     // send data through cURL's poorly named opt
     if($data) {
       $opts[CURLOPT_POSTFIELDS] = $data;
+    }
+
+    if($method == 'GET') {
+      $opts[CURLOPT_ENCODING] = "";
     }
 
     // special considerations for HEAD requests
