@@ -21,10 +21,17 @@ require_once('httpAdapters/SagCURLHTTPAdapter.php');
 /**
  * The Sag class provides the core functionality for talking to CouchDB.
  *
- * @version %VERSION%
+ * @version 0.9.1
  * @package Core
  */
 class Sag {
+    
+  /**
+   * @var string Used by login() to use HTTP Basic Authentication.
+   * @static
+   */
+  public static $VERSION = "0.9.1";
+    
   /**
    * @var string Used by login() to use HTTP Basic Authentication.
    * @static
@@ -379,6 +386,7 @@ class Sag {
 
     $toSend = (is_string($data)) ? $data : json_encode($data);
     $id = urlencode($id);
+    $id = str_replace("%2F", "/", $id);  /** Url Encoding a / confuses Couch **/
 
     $url = "/{$this->db}/$id";
     $response = $this->procPacket('PUT', $url, $toSend);
@@ -714,6 +722,41 @@ class Sag {
   }
 
   /**
+   * Uses CouchDB to generate IDs with custom prefix ad separator.
+   * 
+   * @param int $num The number of IDs to generate (>= 0). Defaults to 10.
+   * @param string $prefix The prefix for the ID
+   * @param string $separator the separatore between prefix and ID
+   * @return array
+   */
+  public function generateIDsCustom($num = 10, $prefix = "", $separator = ":") {
+        $ids = array();
+
+        $docs = $this->generateIDs($num);
+        if ($docs->status == 200) {
+            if (isset($docs->body->uuids) && is_array($docs->body->uuids)) {
+                foreach ($docs->body->uuids as $uuid) {
+                    $ids[] = $prefix . $separator . $uuid;
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Uses CouchDB to generate only one ID with custom prefix ad separator.
+     * 
+     * @param string $prefix The prefix for the ID
+     * @param string $separator the separatore between prefix and ID
+     * @return string
+     */
+    public function generateIDCustom($prefix, $separator = ":") {
+        $ids = $this->generateIDsCustom(1, $prefix, $separator);
+        return $ids[0];
+    }
+
+    /**
    * Creates a database with the specified name.
    *
    * @param string $name The name of the database you want to create.
@@ -1128,7 +1171,7 @@ class Sag {
 
     // Build the request packet.
     $headers["Host"] = "{$this->host}:{$this->port}";
-    $headers["User-Agent"] = "Sag/%VERSION%";
+    $headers["User-Agent"] = "Sag/" . self::$VERSION;
 
     /*
      * This prevents some unRESTful requests, such as inline attachments in
