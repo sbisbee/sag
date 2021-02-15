@@ -448,6 +448,32 @@ class Sag {
 
     return $this->procPacket('POST', "/{$this->db}{$path}", $data);
   }
+  
+  /** 
+   * Makes a request to the _changes feed.
+   *
+   * @param array $parameters The feed parameters
+   * @param mixed $request The request available in the filter function
+   *
+   * @return mixed
+   */
+  public function changes($parameters = array(), $request = null) {
+    if(!$this->db) {
+      throw new SagException('No database specified');
+    }
+
+    if(!is_null($request) && (!is_string($request) && !is_object($request) && !is_array($request))) {
+      throw new SagException('changes() needs an object for request.');
+    }
+
+    if(!is_string($request)) {
+      $request = json_encode($request);
+    }
+    
+    $queryString = (count($parameters) > 0 ? "?" : "").http_build_query($parameters);
+
+    return $this->procPacket('POST', "/{$this->db}/_changes{$queryString}", $request);
+  }
 
   /**
    * Bulk pushes documents to the database.
