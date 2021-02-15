@@ -9,23 +9,19 @@ Sag to incorporate new CouchDB functionality.
 
 This is a *fork* of the original SAG Library that was hosted on saggincouch.com.
 
-Compatability
+Compatibility
 -------------
 
 Each Sag release is tested with an automated testing suite against all the
 combinations of:
 
-  - PHP 5.5.x
+  - PHP 7.x
 
-  - CouchDB 1.6.x
-
-  - Cloudant
+  - CouchDB 3.x
 
 Lower versions of CouchDB and PHP will likely work with Sag, but they are not
 officially supported, so your mileage may vary.
 
-If you are running pre-1.5.1 CouchDB (important security fix) or pre-5.3 PHP,
-then you probably want to look into updating your environment.
 
 Error Handling
 --------------
