@@ -1141,6 +1141,15 @@ class Sag {
     return $this->pathPrefix;
   }
 
+  public function find($data) {
+    if (!is_string($data)) $data = json_encode($data);
+    return $this->procPacket ('POST', '/'.$this->db.'/_find', $data);
+  }
+  
+  public function setAdmins($data) {
+    return $this->procPacket ('PUT', '/'.$this->db.'/_security', $data);
+  }
+  
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
     /*
