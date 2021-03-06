@@ -1166,7 +1166,7 @@ class Sag {
    * Interface to /db/_security
    *
    * @param mixed $data 
-   *     $json = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": ["Administrator"], "roles": ["guests"] } }';
+   *     $data = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": ["Administrator"], "roles": ["guests"] } }';
    *
    * @return Sag Returns $this->procPacket() results.
    */
