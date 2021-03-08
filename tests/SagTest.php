@@ -92,6 +92,43 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($result->body->ok);
     $this->assertEquals($result->body->id, '1');
   }
+  
+  public function test_find()
+  {
+    $docs = array (
+        array (
+            'one' => 'abc',
+            'two' => 'def'
+        ),
+        array (
+            'one' => 'ghi',
+            'two' => 'jkl'
+        )
+    );
+    
+    foreach ($docs as $idx => $doc) {
+        $this->assertTrue($this->couch->post($doc)->body->ok);
+    }
+    
+    $findCommand = array (
+        'selector' => array ( 'one' => 'abc' ),
+        'fields' => array ( 'one', 'two' )
+    );
+    $call = $this->couch->find ($findCommand);
+    $this->assertTrue ($call->headers->_HTTP->status===200);
+    $this->assertTrue (sizeof($call->body->docs)===1);
+  }
+  
+  public function test_setAdmins()
+  {
+    $json = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": ["Administrator"], "roles": ["guests"] } }';
+    try { 
+        $call = $this->couch->setAdmins ($json);
+    } catch (Exception $e) {
+        $this->assertTrue(false);
+    }
+    $this->assertTrue(true);    
+  }
 
   public function test_newDocFromArray()
   {

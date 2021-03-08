@@ -1141,6 +1141,40 @@ class Sag {
     return $this->pathPrefix;
   }
 
+  /**
+   * Interface to /db/_find
+   *
+   * @param mixed $data 
+   *     $data = array (
+   *         'selector' => array(
+   *             'shortened' => $newID
+   *         ),
+   *         'fields' => array(
+   *             '_id', 'creator', 'destination', 'shortened'
+   *         )
+   *     );
+   * 
+   *
+   * @return Sag Returns $this->procPacket() results.
+   */
+  public function find($data) {
+    if (!is_string($data)) $data = json_encode($data);
+    return $this->procPacket ('POST', '/'.$this->db.'/_find', $data);
+  }
+  
+  /**
+   * Interface to /db/_security
+   *
+   * @param mixed $data 
+   *     $data = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": ["Administrator"], "roles": ["guests"] } }';
+   *
+   * @return Sag Returns $this->procPacket() results.
+   */
+  public function setAdmins($data) {
+    if (!is_string($data)) $data = json_encode($data);
+    return $this->procPacket ('PUT', '/'.$this->db.'/_security', $data);
+  }
+  
   // The main driver - does all the socket and protocol work.
   private function procPacket($method, $url, $data = null, $headers = array()) {
     /*
