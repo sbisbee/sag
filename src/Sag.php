@@ -1142,6 +1142,26 @@ class Sag {
   }
 
   /**
+   * Interface to /db/_index
+   *
+   * @param mixed $data (see https://docs.couchdb.org/en/stable/api/database/find.html#db-index)
+   *     $data = array (
+   *         'index' => array(
+   *             'fields' => array ('foo')
+   *         ),
+   *         'name' => 'foo-index',
+   *         'type' => 'json'
+   *     );
+   * 
+   *
+   * @return Sag Returns $this->procPacket() results.
+   */
+  public function setIndex($data) {
+    if (!is_string($data)) $data = json_encode($data);
+    return $this->procPacket ('POST', '/'.$this->db.'/_index', $data);
+  }
+
+  /**
    * Interface to /db/_find
    *
    * @param mixed $data 
@@ -1170,7 +1190,7 @@ class Sag {
    *
    * @return Sag Returns $this->procPacket() results.
    */
-  public function setAdmins($data) {
+  public function setSecurity($data) {
     if (!is_string($data)) $data = json_encode($data);
     return $this->procPacket ('PUT', '/'.$this->db.'/_security', $data);
   }
