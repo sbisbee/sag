@@ -12,6 +12,7 @@ require_once('SagHTTPAdapter.php');
 
 class SagNativeHTTPAdapter extends SagHTTPAdapter {
   private $connPool = array();          //Connection pool
+  private $useSSL = FALSE;
 
   /**
    * Closes any sockets that are left open in the connection pool.
@@ -26,14 +27,14 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
    * Native sockets does not support SSL.
    */
   public function useSSL($use) {
-    throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
+    $this->useSSL = $use;
   }
 
   /**
    * Native sockets does not support SSL.
    */
   public function setSSLCert($path) {
-    throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not support SSL.');
+    throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not yet implement SSL checking.');
   }
 
   public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
@@ -80,10 +81,18 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
         try {
           //these calls should throw on error
           if($this->socketOpenTimeout) {
-            $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+            if ($this->useSSL) {
+              $sock = fsockopen("ssl://".$host, $port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+            } else {
+              $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr, $this->socketOpenTimeout);
+            }
           }
           else {
-            $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr);
+            if ($this->useSSL) {
+              $sock = fsockopen("ssl://".$host, $port, $sockErrNo, $sockErrStr);
+            } else {
+              $sock = fsockopen($host, $port, $sockErrNo, $sockErrStr);
+            }
           }
 
           /*
@@ -205,7 +214,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
           else {
             $line = explode(':', $line, 2);
             $line[0] = strtolower($line[0]);
-            $response->headers->$line[0] = $line[1] = ltrim($line[1]);
+            $response->headers->{$line[0]} = $line[1] = ltrim($line[1]);
 
             switch($line[0]) {
               case 'set-cookie':

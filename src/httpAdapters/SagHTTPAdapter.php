@@ -38,6 +38,7 @@ abstract class SagHTTPAdapter {
     if(
       $method != 'HEAD' &&
       isset($response->headers->{'content-length'}) &&
+      ! isset($response->headers->{'content-encoding'}) &&
       strlen($response->body) != $response->headers->{'content-length'}
     ) {
       throw new SagException('Unexpected end of packet.');
@@ -67,7 +68,7 @@ abstract class SagHTTPAdapter {
     ) {
       $json = json_decode($response->body);
 
-      if(isset($json)) {
+      if(isset($json) && $json !== FALSE) {
         if(!empty($json->error)) {
           throw new SagCouchException("{$json->error} ({$json->reason})", $response->headers->_HTTP->status);
         }
