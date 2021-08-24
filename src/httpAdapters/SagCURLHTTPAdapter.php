@@ -96,8 +96,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     curl_reset($this->ch);
     curl_setopt_array($this->ch, $opts);
-
+    //echo 'curl options = '; var_dump ($opts); echo PHP_EOL;
     $chResponse = curl_exec($this->ch);
+    //echo 'curl response = '; var_dump ($chResponse);
 
     if($chResponse !== false) {
       // prepare the response object
