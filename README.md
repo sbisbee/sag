@@ -1,37 +1,27 @@
 Sag
 ===
 
-Note: I have not maintained this project for years since I no longer use
-CouchDB or PHP. I assume it still works with CouchDB, but haven't been active
-in the community for a while and won't be testing or responding to tickets.
-
-Version %VERSION%
-
-http://www.saggingcouch.com
-
 Sag is a PHP library for working with CouchDB. It is designed to not force any
 particular programming method on its users - you just pass PHP objects, and get
 stdClass objects and Exceptions back. This makes it trivial to incorporate Sag
 into your application, build different functionality on top of it, and expand
 Sag to incorporate new CouchDB functionality.
 
-Compatability
+This is a *fork* of the original SAG Library that was hosted on saggincouch.com.
+
+Compatibility
 -------------
 
 Each Sag release is tested with an automated testing suite against all the
 combinations of:
 
-  - PHP 5.5.x
+  - PHP 7.x
 
-  - CouchDB 1.6.x
-
-  - Cloudant
+  - CouchDB 3.x
 
 Lower versions of CouchDB and PHP will likely work with Sag, but they are not
 officially supported, so your mileage may vary.
 
-If you are running pre-1.5.1 CouchDB (important security fix) or pre-5.3 PHP,
-then you probably want to look into updating your environment.
 
 Error Handling
 --------------
@@ -142,8 +132,7 @@ as a stdClass.
 Functions
 ---------
 
-Detailed documentation of the functions and API are available at 
-http://www.saggingcouch.com/documentation.php.
+_to be updated_
 
 License
 -------
@@ -153,8 +142,3 @@ LICENSE for more information.
 
 Copyright information is in the NOTICE file.
 
-More?
------
-
-See http://www.saggingcouch.com for more detailed information, bug reporting,
-planned features, etc.

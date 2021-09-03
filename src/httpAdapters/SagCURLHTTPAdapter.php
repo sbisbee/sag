@@ -58,6 +58,10 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       $opts[CURLOPT_POSTFIELDS] = $data;
     }
 
+    if($method == 'GET') {
+      $opts[CURLOPT_ENCODING] = "";
+    }
+
     // special considerations for HEAD requests
     if($method == 'HEAD') {
       $opts[CURLOPT_NOBODY] = true;
@@ -92,8 +96,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     curl_reset($this->ch);
     curl_setopt_array($this->ch, $opts);
-
+    //echo 'curl options = '; var_dump ($opts); echo PHP_EOL;
     $chResponse = curl_exec($this->ch);
+    //echo 'curl response = '; var_dump ($chResponse);
 
     if($chResponse !== false) {
       // prepare the response object
@@ -122,7 +127,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
         else {
           $line = explode(':', $respHeaders[$i], 2);
           $line[0] = strtolower($line[0]);
-          $response->headers->$line[0] = ltrim($line[1]);
+          $response->headers->{$line[0]} = ltrim($line[1]);
 
           if($line[0] == 'set-cookie') {
             $response->cookies = $this->parseCookieString($line[1]);

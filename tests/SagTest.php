@@ -92,6 +92,70 @@ class SagTest extends PHPUnit_Framework_TestCase
     $this->assertTrue($result->body->ok);
     $this->assertEquals($result->body->id, '1');
   }
+  
+  public function test_setIndex()
+  {
+    $docs = array (
+        array (
+            'one' => 'abc',
+            'two' => 'def'
+        ),
+        array (
+            'one' => 'ghi',
+            'two' => 'jkl'
+        )
+    );
+    
+    foreach ($docs as $idx => $doc) {
+        $this->assertTrue($this->couch->post($doc)->body->ok);
+    }
+    
+    $cmdSetIndex = array (
+        'index' => array ( 'fields' => array ('one') ),
+        'name' => 'one-index',
+        'ddoc' => 'one-index',
+        'type' => 'json'
+    );
+    $call = $this->couch->setIndex ($cmdSetIndex);
+    $this->assertTrue ($call->headers->_HTTP->status===200);
+  }
+
+  public function test_find($index)
+  {
+    $docs = array (
+        array (
+            'one' => 'abc',
+            'two' => 'def'
+        ),
+        array (
+            'one' => 'ghi',
+            'two' => 'jkl'
+        )
+    );
+    
+    foreach ($docs as $idx => $doc) {
+        $this->assertTrue($this->couch->post($doc)->body->ok);
+    }
+    
+    $findCommand = array (
+        'selector' => array ( 'one' => 'abc' ),
+        'fields' => array ( 'one', 'two' )
+    );
+    $call = $this->couch->find ($findCommand);
+    $this->assertTrue ($call->headers->_HTTP->status===200);
+    $this->assertTrue (sizeof($call->body->docs)===1);
+  }
+  
+  public function test_setSecurity()
+  {
+    $json = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": ["Administrator"], "roles": ["guests"] } }';
+    try { 
+        $call = $this->couch->setSecurity ($json);
+    } catch (Exception $e) {
+        $this->assertTrue(false);
+    }
+    $this->assertTrue(true);    
+  }
 
   public function test_newDocFromArray()
   {
